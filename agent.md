@@ -1,34 +1,90 @@
-# Convenciones de código
-- Mantener arquitectura hexagonal en backend: domain / application / ports / adapters.
-- No usar entidades JPA en domain, siempre mapear.
-- DTOs solo en adapters/in.
-- Validar entrada con `jakarta.validation`.
-- Control de estados en los regitros que se guardan por formulario (en BDD booleano activo, en front Activo/Inactivo)
-- Control de eliminación en los regitros que se guardan por formulario (en BDD booleano deleted, en front botón de elimando con confirmación vía popup)
-- Documentar cada método con Javadoc en Java y con Compodoc en Angular.
-- En el frontend usar utilidades de Tailwind para estilos nuevos y centralizar overrides globales en `frontend/src/styles.css`.
-- El paquete de íconos los debe tomar de tailadmin adjunto en la carpeta /libs
-- Cuando el proyecto se declare culminado, eliminar los logs agregados para depuración.
-- Cuando el proyecto se declare culminado, eliminar la configuración temporal de debug (puertos/env vars).
-- En formularios, mostrar validaciones en rojo y mensajes claros (requerido, correo inválido, contraseñas no coinciden).
-- En listas, usar íconos en las acciones y mostrar el nombre de la acción al pasar el mouse (tooltip).
-- Todas las pantallas por defecto tienen que llevar el estilo oscuro de la plantilla tailadmin
+# Guía Operativa del Agente
 
-# Cómo agregar un nuevo módulo (plantilla hexagonal)
-1. **Domain**: crear entidad/enum en `backend/src/main/java/com/ecutrans/domain`.
-2. **Ports**:
-   - `ports/in`: interfaz de caso de uso.
-   - `ports/out`: interfaz de repositorio/servicios externos.
-3. **Application**: servicio en `application/usecase` implementando el puerto.
-4. **Adapters**:
-   - `adapters/in/rest`: controller + DTOs + mapper.
-   - `adapters/out/persistence`: repositorios JPA y mappers.
-5. **Migraciones**: agregar script en `resources/db/migration`.
-6. **Tests**: agregar al menos 1 test unitario por caso de uso.
+Este archivo define cómo implementar **nuevos módulos** en el proyecto.
+Los lineamientos base están en `Inicio.md` y son obligatorios.
 
-# Checklist para PR
-- [ ] Migraciones Flyway actualizadas.
-- [ ] DTOs y validaciones creadas.
-- [ ] Use cases con puertos in/out.
-- [ ] Tests mínimos añadidos.
-- [ ] README actualizado si aplica.
+## Regla de precedencia
+- Si hay conflicto entre este archivo y `Inicio.md`, prevalece `Inicio.md`.
+
+## Convenciones de código
+- Backend en arquitectura hexagonal: `domain / application / ports / adapters`.
+- No usar entidades JPA dentro de `domain`; mapear explícitamente.
+- DTOs solo en `adapters/in`.
+- Validar entradas con `jakarta.validation`.
+- Usar soft delete por defecto (`activo`, `deleted`).
+- Si la política del módulo es “solo eliminación lógica”, no exponer ni usar borrado físico.
+- Documentar API en Swagger/OpenAPI.
+- En frontend usar Tailwind con lineamientos TailAdmin.
+- Centralizar estilos globales y overrides en `frontend/src/styles.css`.
+- Mantener siempre una colección Postman actualizada en `/postman`.
+
+## Lineamientos UI obligatorios para módulos nuevos
+- Tema oscuro por defecto.
+- Toggle dark/light con persistencia.
+- El tema debe aplicar a todas las pantallas/componentes del módulo.
+- Login desacoplado del layout principal (si el módulo toca autenticación).
+- Botones de acción de listas en formato ícono + tooltip en hover/focus.
+- Si un registro permite activación/inhabilitación, incluir en la lista botón de acción directa para activar o inhabilitar.
+- Mostrar solo la acción válida según estado actual (no mostrar acciones contradictorias).
+- Navbar con acciones por ícono (tema, perfil, configuración, versión, cerrar sesión, ocultar sidebar).
+- Mostrar estados de negocio con color:
+  - `ACTIVO` en verde
+  - `INACTIVO` en rojo
+  - `ELIMINADO` en color de advertencia
+- Habilitar/ocultar acciones según estado del registro (no mostrar acciones inválidas).
+- En formularios, cuando falte un campo obligatorio, mostrar mensaje al pie del campo.
+- El mensaje debe incluir nombre del campo y breve descripción de qué debe llenar.
+- Mostrar mensajes específicos para formato inválido (por ejemplo correo).
+- En creación, edición, cambio de estado y login, mostrar popup descriptivo de la acción.
+- Los popups deben implementarse con componentes del template (modal/dialog), no con popups nativos del navegador.
+- Prohibido usar `window.alert`, `window.confirm` o `window.prompt`.
+
+## Plantilla para agregar un nuevo módulo (hexagonal)
+1. **Domain**
+- Crear entidades/enums/reglas en `backend/src/main/java/.../domain`.
+
+2. **Application**
+- Crear casos de uso en `application`.
+- Definir puertos `ports/in` y `ports/out`.
+
+3. **Adapters**
+- `adapters/in/rest`: controllers, DTOs, validaciones, mappers.
+- `adapters/out/persistence`: entidades JPA, repositorios, mappers.
+
+4. **Seguridad**
+- Proteger endpoints por rol.
+- Si aplica, integrar JWT claims y guards en frontend.
+
+5. **Datos y auditoría**
+- Agregar migración Flyway.
+- Registrar auditoría API y auditoría de acciones cuando corresponda.
+
+6. **Frontend del módulo**
+- Crear rutas y páginas.
+- Aplicar lineamientos UI/tema/acciones por estado.
+- Integrar servicios HTTP + interceptor + guards.
+
+7. **Documentación**
+- Actualizar `README.md` con endpoints, variables y reglas del módulo.
+- Actualizar colección Postman en `/postman` con endpoints, payloads y auth vigentes.
+
+8. **Pruebas mínimas**
+- Backend: tests de casos críticos del módulo.
+- Frontend: validar build y flujos esenciales.
+
+## Checklist para PR
+- [ ] Migraciones Flyway incluidas y válidas.
+- [ ] Endpoints documentados en Swagger.
+- [ ] DTOs con validación.
+- [ ] Casos de uso/puertos implementados.
+- [ ] Seguridad por rol aplicada.
+- [ ] Soft delete aplicado (y delete físico deshabilitado cuando aplique).
+- [ ] UI con tema oscuro global + toggle.
+- [ ] Acciones con íconos + tooltips y reglas por estado.
+- [ ] Botones de activar/inhabilitar presentes en listas cuando aplique (solo acción válida según estado).
+- [ ] Formularios con mensajes al pie por campo obligatorio (nombre + breve descripción).
+- [ ] Popups descriptivos implementados para creación, edición, cambio de estado y login.
+- [ ] Popups implementados con estilo del template (sin `window.alert`/`window.confirm`/`window.prompt`).
+- [ ] README actualizado.
+- [ ] Colección Postman actualizada en `/postman`.
+- [ ] Build/test ejecutados correctamente.

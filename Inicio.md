@@ -1,7 +1,15 @@
-Actúa como un arquitecto senior fullstack y como un programador cuidadoso. Construye el proyecto "EcuTrans9000" (app para digitalizar la bitácora de viajes de camiones para registrar información operativa y financiera, autocompletar datos del vehículo, gestionar estados de facturación/pago y calcular totales por placa). Debes ENTREGAR código funcional, iniciando con el MÓDULO 1: GESTIÓN DE USUARIOS (COMPLETO). Los demás módulos (Vehículos, Clientes, Bitácora de viajes, Consulta por placas) solo deben quedar como estructura y rutas placeholder.
+Actúa siempre como arquitecto senior fullstack y programador cuidadoso. Cada vez que se cree un sistema en este repositorio, estos lineamientos aplican por defecto (obligatorios), salvo que se indique explícitamente lo contrario.
 
-STACK Y ARQUITECTURA
-1) Backend:
+ALCANCE DE ESTOS LINEAMIENTOS
+- Aplican para todo sistema nuevo y para todo módulo nuevo dentro de sistemas existentes.
+- `agent.md` debe implementarlos como guía operativa (pasos concretos), sin contradecir este documento.
+- Si aparece un conflicto entre documentos, prevalece `Inicio.md`.
+
+OBJETIVO BASE
+Construir sistemas web empresariales en monorepo, con backend seguro, frontend mantenible y despliegue reproducible.
+
+STACK Y ARQUITECTURA ESTÁNDAR
+1) Backend
 - Java 17 + Spring Boot 3
 - API REST
 - Arquitectura hexagonal (domain / application / ports / adapters)
@@ -10,37 +18,72 @@ STACK Y ARQUITECTURA
 - Flyway para migraciones
 - springdoc-openapi (Swagger UI)
 
-2) Frontend:
-- Angular (usar la versión más reciente estable)
-- Angular Material (UI simple)
-- Auth con JWT (interceptor, guard, almacenamiento seguro)
-- Módulos: auth, users (completo), dashboard (solo para SUPERADMIN/ADMIN), placeholders para otros módulos
+2) Frontend
+- Angular estable
+- Tailwind (estilo base tomado del template TailAdmin cuando aplique)
+- Auth con JWT (interceptor + guards + almacenamiento local seguro)
 
-3) Bases de datos:
-- PostgreSQL: usuarios + auditorías + datos
+3) Base de datos
+- PostgreSQL
 
-4) Docker:
-- docker-compose: postgres + backend + frontend
-- .env.example y variables claras
+4) Infraestructura
+- docker-compose (postgres + backend + frontend)
+- `.env.example` con variables claras
+
+LINEAMIENTOS UI/UX OBLIGATORIOS (TEMPLATE)
+1) Login independiente
+- La pantalla de login debe ser independiente del layout principal de la aplicación.
+- Debe ser responsive, accesible (labels, estados de error, aria cuando corresponda), segura y fácil de mantener.
+- Debe seguir la línea visual propuesta por TailAdmin.
+
+2) Navbar y menú lateral
+- Navbar con botones de acción por íconos (no texto fijo), con tooltip en hover/focus.
+- Navbar debe incluir: cambiar tema, cerrar sesión, perfil, configuración, versión, ocultar menú lateral.
+- El menú lateral debe poder ocultarse/mostrarse desde el navbar.
+
+3) Botones de acción en listas
+- En tablas/listados, las acciones deben mostrarse como íconos.
+- El texto descriptivo de la acción aparece en tooltip al pasar el mouse o al focus.
+- Siempre que un registro permita activar o inhabilitar, la lista debe incluir botón de acción directa para ese cambio de estado.
+- El botón debe mostrarse según el estado actual (mostrar solo la acción válida: activar o inhabilitar).
+
+4) Tema global
+- El tema debe aplicar a todos los componentes/pantallas del sistema.
+- El tema por defecto es oscuro.
+- Debe existir toggle dark/light y persistencia de preferencia (por ejemplo en localStorage).
+- Estados visuales de negocio (por ejemplo ACTIVO/INACTIVO/ELIMINADO) deben mostrarse con códigos de color consistentes.
+- Acciones deben habilitarse/ocultarse según estado del registro (no mostrar acciones inválidas).
+
+5) Validaciones de formularios
+- Cuando un campo obligatorio no sea llenado, debe mostrarse mensaje al pie del campo.
+- El mensaje debe incluir el nombre del campo y una breve descripción de lo que se debe ingresar.
+- Para campos con formato (por ejemplo correo), mostrar mensaje específico de formato inválido al pie.
+
+6) Popups de acciones críticas
+- Toda acción de creación, edición, cambio de estado o login debe mostrar un popup descriptivo.
+- El popup debe indicar claramente la acción que se va a ejecutar y/o su resultado.
+- El popup debe usar el estilo del template (TailAdmin/Tailwind), no popups nativos del navegador.
+- No usar `window.alert`, `window.confirm` ni `window.prompt`.
 
 LINEAMIENTOS DE DATOS
-A) Eliminación lógica (soft delete):
-- Por defecto, NO se elimina físicamente.
-- Soft delete permitido por SUPERADMINISTRADOR y ADMINISTRADOR.
-- Solo SUPERADMINISTRADOR puede eliminar físicamente (en esta etapa: implementar endpoint de borrado físico pero protegido y advertido; NO usarlo por defecto).
+A) Eliminación lógica (soft delete)
+- Por defecto NO se elimina físicamente.
+- Soft delete permitido según rol definido por reglas del módulo.
+- Eliminación física debe estar protegida y ser excepcional.
+- Si la política del sistema define “solo eliminación lógica”, la eliminación física debe quedar deshabilitada también en backend y frontend.
 
-B) Auditoría de consumo API (PostgreSQL):
-Tabla api_audit_log con:
-- fecha_hora (timestamp)
-- endpoint (varchar)
-- request_json (JSONB o TEXT)
-- response_json (JSONB o TEXT)
-- usuario (varchar)
-- rol_usuario (varchar)
-Implementar un filtro/interceptor global que registre request/response (cuidar tamaño: si es muy grande, truncar a un límite configurable).
+B) Auditoría de consumo API (PostgreSQL)
+Tabla `api_audit_log`:
+- fecha_hora
+- endpoint
+- request_json
+- response_json
+- usuario
+- rol_usuario
+Debe existir filtro/interceptor global para request/response con truncamiento configurable de payload.
 
-C) Auditoría de acciones (PostgreSQL) para login y creación/modificación:
-Tabla action_audit_log con:
+C) Auditoría de acciones (PostgreSQL)
+Tabla `action_audit_log`:
 - fecha_hora
 - usuario
 - rol_usuario
@@ -48,64 +91,43 @@ Tabla action_audit_log con:
 - tipo_modificacion (CREACION, EDICION, ELIMINADO_LOGICO, LOGIN, ELIMINADO_FISICO)
 - id_registro
 - nombre_tabla
-Registrar:
-- LOGIN exitoso
-- CREATE/UPDATE/SOFT_DELETE/DELETE físico en usuarios
+Registrar login exitoso y operaciones CRUD relevantes.
 
-MÓDULO 1: GESTIÓN DE USUARIOS (COMPLETO)
+MÓDULO BASE (USUARIOS) - REGLAS POR DEFECTO
 Roles iniciales:
 - SUPERADMINISTRADOR
 - REGISTRADOR
 
-Datos de usuario:
+Usuario base (bootstrap):
+- Username: `admin`
+- Password: `Qwerty12345`
+- Debe asegurarse al iniciar backend (preferiblemente configurable vía variables de entorno).
+
+Campos de usuario:
 - id (UUID)
 - nombres
 - correo (único)
 - username (único)
 - password_hash
-- rol (enum)
-- activo (bool)
-- deleted (bool)
+- rol
+- activo
+- deleted
 - deleted_at
 - deleted_by
 - created_at
 - updated_at
 
-Reglas funcionales:
-1) Registro/creación de usuario:
-- Solo SUPERADMINISTRADOR pueden crear usuarios.
-- Usuario génerico SUPERADMINISTRADOR: admin, Contraseña: Qwerty12345.
-- Validar email y username únicos.
-- Password requiere confirmación (password + confirmPassword) en request.
-- Guardar con BCrypt.
-
-2) Login:
-- Endpoint /auth/login con username/email + password.
-- Retornar JWT + info básica del usuario (id, nombres, username, rol).
-- Registrar action_audit_log tipo LOGIN.
-
-3) Autogestión de perfil:
-- Un usuario puede actualizar SOLO: nombres, correo, username y password.
-- Endpoint /users/me GET y PUT.
-- Para cambio de password exigir password + confirmPassword.
-
-4) Gestión administrativa:
-- Listar usuarios (con paginación y filtros: rol, activo, deleted).
-- Ver detalle por id.
-- Editar usuario (admin puede editar: nombres, correo, username, rol, activo; pero NO ver password).
-- Soft delete: /users/{id}/soft-delete (solo SUPERADMIN)
-- Restore (opcional útil): /users/{id}/restore (solo SUPERADMIN)
-- Delete físico: /users/{id} DELETE (solo SUPERADMINISTRADOR) — implementar pero enfatizar que es excepcional.
-
-5) Panel general:
-- Endpoint /dashboard solo SUPERADMINISTRADOR (puede devolver métricas dummy por ahora).
+Capacidades mínimas:
+- Login: `POST /auth/login`
+- Perfil propio: `GET /users/me`, `PUT /users/me`
+- Gestión admin: crear/listar/ver/editar/soft-delete/restore/delete físico protegido
+- Dashboard protegido por rol administrador
 
 SEGURIDAD Y AUTORIZACIÓN
-- JWT firmado con secret de env var.
-- Roles en claims.
-- Guards en Angular por rol.
-- Endpoints protegidos según reglas.
-- CORS configurado para frontend.
+- JWT firmado con `JWT_SECRET` de entorno.
+- Roles en claims y autorización por endpoint/guard.
+- CORS explícito para frontend.
+- Endpoints sensibles protegidos por rol.
 
 ESTRUCTURA DEL REPO (MONOREPO)
 /backend
@@ -115,58 +137,43 @@ ESTRUCTURA DEL REPO (MONOREPO)
 /README.md
 /agent.md
 
-BACKEND: HEXAGONAL (OBLIGATORIO)
-- domain: entidades + enums + validaciones de dominio
-- application: use cases (CreateUser, UpdateUser, Login, SoftDeleteUser, ListUsers, GetMe, UpdateMe)
-- ports/in: interfaces de casos de uso
-- ports/out: repositorios (UserRepositoryPort, AuditRepositoryPort)
-- adapters/in: controllers REST + DTOs + mappers
-- adapters/out: JPA Postgres (users, auditorías) 
-- config: security, jwt, swagger, cors
-NO mezcles JPA entities directamente en domain: usa modelos de dominio y mappers.
+BACKEND HEXAGONAL (OBLIGATORIO)
+- domain: entidades + enums + reglas de dominio
+- application: casos de uso
+- ports/in y ports/out
+- adapters/in: controllers + DTOs + mappers
+- adapters/out: persistencia JPA + integraciones
+- config: security, jwt, cors, swagger, bootstrap
+No mezclar entidades JPA con modelos de dominio.
 
-FRONTEND ANGULAR (MÓDULO USERS COMPLETO)
-- Pantallas:
-  - Login
-  - Dashboard (solo admin/superadmin)
-  - Users:
-    - listado con tabla (paginación)
-    - crear usuario
-    - editar usuario
-    - ver detalle
-    - soft delete / restore
-  - Perfil:
-    - ver y editar mis datos
-    - cambiar password
-- Interceptor JWT
-- Guard por autenticación y rol
-- Manejo de errores (toasts/snackbar)
-
-DOCUMENTACIÓN
-README.md:
+DOCUMENTACIÓN OBLIGATORIA
+README.md debe incluir:
 - cómo levantar con Docker
-- urls (frontend, swagger)
+- urls (frontend, backend, swagger)
 - variables de entorno
-- endpoints principales del módulo usuarios
-- explicación de soft delete y auditorías
+- endpoints principales
+- reglas de soft delete y auditoría
+- referencia a la colección Postman oficial en `/postman`
 
-agent.md:
+COLECCIÓN POSTMAN (OBLIGATORIA)
+- Mantener una colección Postman actualizada en el directorio `/postman`.
+- Cada cambio de endpoints, payloads, auth o reglas de negocio debe reflejarse en la colección.
+- La colección debe incluir variables mínimas (`baseUrl`, `token`, ids de prueba) y flujo de login.
+- No cerrar tareas de API sin actualizar la colección.
+
+agent.md debe incluir:
 - convenciones de código
-- cómo agregar un nuevo módulo (plantilla hexagonal)
-- checklist para PR
+- plantilla para nuevo módulo hexagonal
+- checklist de PR
 
-REQUISITOS DE CALIDAD
+CRITERIOS DE CALIDAD
 - Código compila y corre.
-- docker compose up levanta todo.
-- Migraciones Flyway crean tablas.
-- Pruebas mínimas: al menos tests unitarios básicos para use cases clave (CreateUser, Login) y/o integración para controller.
-- No dejes endpoints “stub” para usuarios: el módulo de usuarios debe estar completo y funcional.
-- Los demás módulos solo placeholders (sin lógica).
+- `docker compose up --build` funcional.
+- Migraciones Flyway correctas.
+- Pruebas mínimas para casos críticos de auth/usuarios.
+- Evitar stubs en módulo funcional objetivo; placeholders solo en módulos no priorizados.
 
-ENTREGAR:
-- Todos los archivos necesarios, completos (no vacíos).
-- Asegura que las rutas y puertos sean coherentes.
-- Usa buenas prácticas y nombres claros.
-
-NO implementes los demás módulos; solo crea carpetas, rutas y componentes vacíos con “Coming soon”. El ÚNICO módulo funcional en esta etapa es Usuarios (incluye login).
-
+ENTREGABLE
+- Todos los archivos necesarios y completos.
+- Rutas y puertos coherentes.
+- Nombres claros y buenas prácticas.

@@ -865,3 +865,57 @@ pre[class*="language-"] {
 pre[class*="language-"].line-numbers {
   padding-left: 2.8em !important;
 }
+
+.icon-action-btn {
+  position: relative;
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  border: 1px solid #d0d5dd;
+  color: #475467;
+  background: transparent;
+  transition: all 0.15s ease-in-out;
+}
+
+.icon-action-btn:hover {
+  background: #f2f4f7;
+  border-color: #98a2b3;
+}
+
+.dark .icon-action-btn {
+  border-color: #344054;
+  color: #98a2b3;
+}
+
+.dark .icon-action-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: #475467;
+  color: #d0d5dd;
+}
+
+.icon-action-tooltip {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #101828;
+  color: #fff;
+  border-radius: 0.35rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 50;
+}
+
+.icon-action-btn:hover .icon-action-tooltip,
+.icon-action-btn:focus-visible .icon-action-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
