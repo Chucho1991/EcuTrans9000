@@ -20,6 +20,9 @@ Revisar `.env.example` para valores por defecto:
 - `BOOTSTRAP_SUPERADMIN_USERNAME`, `BOOTSTRAP_SUPERADMIN_PASSWORD`
 - `BOOTSTRAP_SUPERADMIN_NOMBRES`, `BOOTSTRAP_SUPERADMIN_CORREO`
 
+Para acceso desde celular por IP, configura `CORS_ALLOWED_ORIGINS` incluyendo tu red local, por ejemplo:
+- `http://192.168.*:4200,http://10.*:4200`
+
 ## Usuario SUPERADMINISTRADOR inicial
 - Username: `admin`
 - Password: `Qwerty12345`
@@ -45,8 +48,12 @@ Revisar `.env.example` para valores por defecto:
 - Importar en Postman y ejecutar primero `Auth > Login` para poblar el token de la colección.
 
 ## Lineamientos UI obligatorios
+- Diseño responsive obligatorio en móvil, tablet y escritorio.
+- Formularios y tablas deben adaptarse a la resolución (sin cortes; con scroll horizontal controlado en tablas cuando sea necesario).
 - Tema oscuro por defecto y toggle dark/light persistente.
 - Botones de acción en listas y navbar como íconos con tooltip.
+- Botón de menú lateral en la esquina superior izquierda del navbar.
+- Campo `nombres` del usuario autenticado visible en la esquina superior derecha con color distintivo.
 - Estados `ACTIVO`, `INACTIVO`, `ELIMINADO` con colores consistentes.
 - Validaciones al pie de cada campo obligatorio con nombre del campo y breve descripción.
 - En creación, edición, cambio de estado y login, usar popup visual del template.
@@ -57,3 +64,7 @@ Revisar `.env.example` para valores por defecto:
 cp .env.example .env
 docker compose up --build
 ```
+
+## Acceso desde celular (misma red WiFi)
+- Abre en el celular: `http://<IP_DE_TU_PC>:4200`
+- El frontend usa automáticamente `http://<IP_DE_TU_PC>:8080` como API.

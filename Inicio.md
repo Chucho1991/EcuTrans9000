@@ -39,6 +39,8 @@ LINEAMIENTOS UI/UX OBLIGATORIOS (TEMPLATE)
 2) Navbar y menú lateral
 - Navbar con botones de acción por íconos (no texto fijo), con tooltip en hover/focus.
 - Navbar debe incluir: cambiar tema, cerrar sesión, perfil, configuración, versión, ocultar menú lateral.
+- El botón de menú lateral debe ubicarse en la esquina superior izquierda del navbar.
+- Debe mostrarse el campo `nombres` del usuario autenticado en la esquina superior derecha con color/estilo distintivo.
 - El menú lateral debe poder ocultarse/mostrarse desde el navbar.
 
 3) Botones de acción en listas
@@ -49,6 +51,8 @@ LINEAMIENTOS UI/UX OBLIGATORIOS (TEMPLATE)
 
 4) Tema global
 - El tema debe aplicar a todos los componentes/pantallas del sistema.
+- La aplicación debe ser responsive en móvil, tablet y escritorio.
+- Formularios y tablas deben adaptarse a la resolución: sin cortes visuales y con scroll horizontal controlado cuando aplique.
 - El tema por defecto es oscuro.
 - Debe existir toggle dark/light y persistencia de preferencia (por ejemplo en localStorage).
 - Estados visuales de negocio (por ejemplo ACTIVO/INACTIVO/ELIMINADO) deben mostrarse con códigos de color consistentes.

@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
-const API_BASE_URL = 'http://localhost:8080';
+import { API_BASE_URL } from '../../../core/config/api.config';
 const TOKEN_KEY = 'ecutrans9000_token';
 const USER_KEY = 'ecutrans9000_user';
 
@@ -74,6 +74,18 @@ export class AuthService {
     }
     try {
       return (JSON.parse(raw) as LoginResponse).username;
+    } catch {
+      return null;
+    }
+  }
+
+  getNombres(): string | null {
+    const raw = localStorage.getItem(USER_KEY);
+    if (!raw) {
+      return null;
+    }
+    try {
+      return (JSON.parse(raw) as LoginResponse).nombres;
     } catch {
       return null;
     }

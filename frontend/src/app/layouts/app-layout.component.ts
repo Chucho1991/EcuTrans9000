@@ -12,7 +12,11 @@ import { ThemeService } from '../core/services/theme.service';
   template: `
     <div class="min-h-screen bg-gray-50 text-gray-800 dark:bg-gray-950 dark:text-gray-100">
       <div class="flex min-h-screen">
-        <aside class="hidden w-72 border-r border-gray-200 bg-white lg:flex lg:flex-col dark:border-gray-800 dark:bg-gray-900" [class.lg:hidden]="sidebarHidden" [class.lg:flex]="!sidebarHidden">
+        <aside
+          class="hidden w-72 border-r border-gray-200 bg-white lg:flex lg:flex-col dark:border-gray-800 dark:bg-gray-900"
+          [class.lg:hidden]="desktopSidebarHidden"
+          [class.lg:flex]="!desktopSidebarHidden"
+        >
           <div class="border-b border-gray-200 px-6 py-5 dark:border-gray-800">
             <h1 class="text-xl font-semibold text-gray-900 dark:text-white">EcuTrans9000</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400">Sistema de trafico</p>
@@ -28,15 +32,47 @@ import { ThemeService } from '../core/services/theme.service';
           </nav>
         </aside>
 
+        <div *ngIf="mobileSidebarOpen" class="fixed inset-0 z-40 bg-gray-950/50 lg:hidden" (click)="closeMobileSidebar()"></div>
+        <aside
+          class="fixed inset-y-0 left-0 z-50 w-72 -translate-x-full border-r border-gray-200 bg-white transition-transform duration-200 lg:hidden dark:border-gray-800 dark:bg-gray-900"
+          [class.translate-x-0]="mobileSidebarOpen"
+          [class.-translate-x-full]="!mobileSidebarOpen"
+          aria-label="Menu lateral movil"
+        >
+          <div class="flex items-center justify-between border-b border-gray-200 px-6 py-5 dark:border-gray-800">
+            <div>
+              <h1 class="text-xl font-semibold text-gray-900 dark:text-white">EcuTrans9000</h1>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Sistema de trafico</p>
+            </div>
+            <button type="button" class="icon-action-btn" aria-label="Cerrar menu lateral" (click)="closeMobileSidebar()">
+              <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <span class="icon-action-tooltip">Cerrar menu</span>
+            </button>
+          </div>
+          <nav class="space-y-1 p-4">
+            <a *ngIf="isSuperadmin()" routerLink="/dashboard" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Dashboard</a>
+            <a *ngIf="isSuperadmin()" routerLink="/users" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Usuarios</a>
+            <a routerLink="/profile" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Mi perfil</a>
+            <a routerLink="/vehiculos" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Vehiculos</a>
+            <a routerLink="/clientes" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Clientes</a>
+            <a routerLink="/bitacora" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Bitacora</a>
+            <a routerLink="/placas" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Consulta por placas</a>
+          </nav>
+        </aside>
+
         <div class="flex min-h-screen flex-1 flex-col">
           <header class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 bg-white px-4 py-4 sm:px-6 dark:border-gray-800 dark:bg-gray-900">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Panel administrativo</p>
             <div class="flex items-center gap-2">
               <button type="button" class="icon-action-btn" aria-label="Ocultar menu lateral" (click)="toggleSidebar()">
                 <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                 <span class="icon-action-tooltip">Menu lateral</span>
               </button>
-
+              <p class="hidden text-sm text-gray-500 dark:text-gray-400 sm:block">Panel administrativo</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="hidden rounded-full border border-brand-300/40 bg-brand-500/15 px-3 py-1 text-xs font-semibold tracking-wide text-brand-600 dark:border-brand-400/30 dark:bg-brand-400/20 dark:text-brand-300 sm:inline-flex">
+                {{ getUsernameLabel() }}
+              </span>
               <button type="button" class="icon-action-btn" [attr.aria-label]="themeService.isDark() ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'" (click)="themeService.toggle()">
                 <svg *ngIf="themeService.isDark()" viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 3v2m0 14v2m9-9h-2M5 12H3m14.36 6.36-1.41-1.41M7.05 7.05 5.64 5.64m12.72 0-1.41 1.41M7.05 16.95l-1.41 1.41M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                 <svg *ngIf="!themeService.isDark()" viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 1 0 9.79 9.79Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -64,7 +100,7 @@ import { ThemeService } from '../core/services/theme.service';
               </button>
             </div>
           </header>
-          <main class="flex-1 p-4 sm:p-6">
+          <main class="flex-1 overflow-x-hidden bg-gray-50 p-4 dark:bg-gray-950 sm:p-6">
             <router-outlet />
           </main>
         </div>
@@ -76,10 +112,15 @@ export class AppLayoutComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   protected readonly themeService = inject(ThemeService);
-  protected sidebarHidden = false;
+  protected desktopSidebarHidden = false;
+  protected mobileSidebarOpen = false;
 
   protected isSuperadmin(): boolean {
     return this.authService.getRole() === 'SUPERADMINISTRADOR';
+  }
+
+  protected getUsernameLabel(): string {
+    return this.authService.getNombres() ?? this.authService.getUsername() ?? 'USUARIO';
   }
 
   logout(): void {
@@ -88,6 +129,14 @@ export class AppLayoutComponent {
   }
 
   protected toggleSidebar(): void {
-    this.sidebarHidden = !this.sidebarHidden;
+    if (window.innerWidth < 1024) {
+      this.mobileSidebarOpen = !this.mobileSidebarOpen;
+      return;
+    }
+    this.desktopSidebarHidden = !this.desktopSidebarHidden;
+  }
+
+  protected closeMobileSidebar(): void {
+    this.mobileSidebarOpen = false;
   }
 }

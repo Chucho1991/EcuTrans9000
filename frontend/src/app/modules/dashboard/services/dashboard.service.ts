@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-const API_BASE_URL = 'http://localhost:8080';
+import { API_BASE_URL } from '../../../core/config/api.config';
 
 export interface DashboardMetrics {
   usuariosActivos: number;

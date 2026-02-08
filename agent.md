@@ -20,6 +20,8 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 
 ## Lineamientos UI obligatorios para módulos nuevos
 - Tema oscuro por defecto.
+- Diseño responsive obligatorio en móvil, tablet y escritorio.
+- Formularios y tablas deben adaptarse al ancho disponible de pantalla.
 - Toggle dark/light con persistencia.
 - El tema debe aplicar a todas las pantallas/componentes del módulo.
 - Login desacoplado del layout principal (si el módulo toca autenticación).
@@ -27,6 +29,8 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - Si un registro permite activación/inhabilitación, incluir en la lista botón de acción directa para activar o inhabilitar.
 - Mostrar solo la acción válida según estado actual (no mostrar acciones contradictorias).
 - Navbar con acciones por ícono (tema, perfil, configuración, versión, cerrar sesión, ocultar sidebar).
+- El botón de menú lateral debe quedar en el extremo superior izquierdo del navbar.
+- Mostrar el campo `nombres` del usuario autenticado en la esquina superior derecha con estilo distintivo.
 - Mostrar estados de negocio con color:
   - `ACTIVO` en verde
   - `INACTIVO` en rojo
