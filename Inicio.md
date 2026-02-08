@@ -48,11 +48,13 @@ LINEAMIENTOS UI/UX OBLIGATORIOS (TEMPLATE)
 - El texto descriptivo de la acción aparece en tooltip al pasar el mouse o al focus.
 - Siempre que un registro permita activar o inhabilitar, la lista debe incluir botón de acción directa para ese cambio de estado.
 - El botón debe mostrarse según el estado actual (mostrar solo la acción válida: activar o inhabilitar).
+- El scroll horizontal en tablas debe habilitarse de forma natural solo en móvil/tablet; en desktop la tabla debe verse ajustada sin scroll horizontal.
 
 4) Tema global
 - El tema debe aplicar a todos los componentes/pantallas del sistema.
 - La aplicación debe ser responsive en móvil, tablet y escritorio.
 - Formularios y tablas deben adaptarse a la resolución: sin cortes visuales y con scroll horizontal controlado cuando aplique.
+- Los formularios deben tener proporciones y distribución de campos según el dispositivo, priorizando legibilidad en equipos externos a PC.
 - El tema por defecto es oscuro.
 - Debe existir toggle dark/light y persistencia de preferencia (por ejemplo en localStorage).
 - Estados visuales de negocio (por ejemplo ACTIVO/INACTIVO/ELIMINADO) deben mostrarse con códigos de color consistentes.

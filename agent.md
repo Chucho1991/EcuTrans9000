@@ -22,6 +22,8 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - Tema oscuro por defecto.
 - Diseño responsive obligatorio en móvil, tablet y escritorio.
 - Formularios y tablas deben adaptarse al ancho disponible de pantalla.
+- El scroll horizontal en tablas debe existir solo para móvil/tablet; en desktop debe evitarse.
+- Los formularios deben ajustarse proporcionalmente al tipo de dispositivo (móvil/tablet/escritorio).
 - Toggle dark/light con persistencia.
 - El tema debe aplicar a todas las pantallas/componentes del módulo.
 - Login desacoplado del layout principal (si el módulo toca autenticación).

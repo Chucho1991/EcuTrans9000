@@ -19,14 +19,14 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <section class="max-w-full space-y-6">
+    <section class="space-y-6">
       <header class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Usuarios</h1>
           <p class="text-sm text-gray-500 dark:text-gray-400">Gestion completa del modulo de usuarios.</p>
         </div>
         <button
-          class="w-full rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600 sm:w-auto"
+          class="basis-full rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600 sm:basis-auto"
           type="button"
           (click)="startCreate()"
         >
@@ -34,8 +34,8 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
         </button>
       </header>
 
-      <article class="w-full rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
-        <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" [formGroup]="filtersForm" (ngSubmit)="loadUsers(0)">
+      <article class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+        <form class="grid gap-3 md:grid-cols-2 lg:grid-cols-4" [formGroup]="filtersForm" (ngSubmit)="loadUsers(0)">
           <select class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="rol">
             <option value="">Rol: todos</option>
             <option value="SUPERADMINISTRADOR">SUPERADMINISTRADOR</option>
@@ -55,9 +55,9 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
         </form>
       </article>
 
-      <article class="w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
-        <div class="w-full overflow-x-auto">
-        <table class="min-w-[760px] w-full text-left text-xs sm:text-sm">
+      <article class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+        <div class="overflow-x-auto lg:overflow-x-visible">
+        <table class="table-auto min-w-[780px] text-left text-xs sm:text-sm lg:min-w-full">
           <thead class="border-b border-gray-200 bg-gray-50 text-gray-600 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300">
             <tr>
               <th class="px-3 py-3 sm:px-4">Username</th>
@@ -72,7 +72,7 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
             <tr class="border-b border-gray-100 dark:border-gray-800" *ngFor="let user of users">
               <td class="px-3 py-3 sm:px-4">{{ user.username }}</td>
               <td class="px-3 py-3 sm:px-4">{{ user.nombres }}</td>
-              <td class="px-3 py-3 sm:px-4">{{ user.correo }}</td>
+              <td class="break-all px-3 py-3 sm:px-4">{{ user.correo }}</td>
               <td class="px-3 py-3 sm:px-4">{{ user.rol }}</td>
               <td class="px-3 py-3 sm:px-4">
                 <span
@@ -154,8 +154,8 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
         </table>
         </div>
         <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
-          <span class="w-full sm:w-auto">Pagina {{ page + 1 }} de {{ totalPages || 1 }}</span>
-          <div class="flex w-full gap-2 sm:w-auto">
+          <span class="basis-full sm:basis-auto">Pagina {{ page + 1 }} de {{ totalPages || 1 }}</span>
+          <div class="flex grow gap-2 sm:grow-0">
             <button class="rounded border border-gray-300 px-3 py-1 disabled:opacity-50 dark:border-gray-700 dark:hover:bg-gray-800" type="button" (click)="loadUsers(page - 1)" [disabled]="page === 0">
               Anterior
             </button>
@@ -166,7 +166,7 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
         </div>
       </article>
 
-      <article class="w-full rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6" *ngIf="selectedUser">
+      <article class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6" *ngIf="selectedUser">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Detalle de usuario</h2>
         <p class="mt-2 text-sm text-gray-600 dark:text-gray-300"><strong>ID:</strong> {{ selectedUser.id }}</p>
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Username:</strong> {{ selectedUser.username }}</p>
@@ -196,19 +196,19 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
         </p>
       </article>
 
-      <article class="w-full rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6" *ngIf="mode !== 'none'">
+      <article class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6" *ngIf="mode !== 'none'">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ mode === 'create' ? 'Crear usuario' : 'Editar usuario' }}</h2>
-        <form class="mt-4 grid gap-4 sm:grid-cols-2" [formGroup]="userForm" (ngSubmit)="submitUser()">
-          <div class="sm:col-span-2">
+        <form class="mt-4 mx-auto grid max-w-5xl gap-4 md:grid-cols-2 xl:grid-cols-3" [formGroup]="userForm" (ngSubmit)="submitUser()">
+          <div class="md:col-span-2 xl:col-span-3">
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nombres</label>
-            <input class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="nombres" />
+            <input class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="nombres" />
             <p class="mt-1 text-xs text-error-600" *ngIf="showError('nombres', 'required')">
               Nombres es obligatorio. Escribe el nombre completo del usuario.
             </p>
           </div>
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Correo</label>
-            <input class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="correo" />
+            <input class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="correo" />
             <p class="mt-1 text-xs text-error-600" *ngIf="showError('correo', 'required')">
               Correo es obligatorio. Ingresa un email válido del usuario.
             </p>
@@ -218,14 +218,14 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
           </div>
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
-            <input class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="username" />
+            <input class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="username" />
             <p class="mt-1 text-xs text-error-600" *ngIf="showError('username', 'required')">
               Username es obligatorio. Define el identificador de inicio de sesión.
             </p>
           </div>
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Rol</label>
-            <select class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="rol">
+            <select class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="rol">
               <option value="SUPERADMINISTRADOR">SUPERADMINISTRADOR</option>
               <option value="REGISTRADOR">REGISTRADOR</option>
             </select>
@@ -235,7 +235,7 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
           </div>
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Activo</label>
-            <select class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="activo">
+            <select class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="activo">
               <option [ngValue]="true">SI</option>
               <option [ngValue]="false">NO</option>
             </select>
@@ -243,14 +243,14 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
           <ng-container *ngIf="mode === 'create'">
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-              <input type="password" class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="password" />
+              <input type="password" class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="password" />
               <p class="mt-1 text-xs text-error-600" *ngIf="showError('password', 'required') && mode === 'create'">
                 Password es obligatorio. Ingresa una contraseña para el nuevo usuario.
               </p>
             </div>
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar password</label>
-              <input type="password" class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="confirmPassword" />
+              <input type="password" class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="confirmPassword" />
               <p class="mt-1 text-xs text-error-600" *ngIf="showError('confirmPassword', 'required') && mode === 'create'">
                 Confirmar password es obligatorio. Repite la contraseña.
               </p>
@@ -259,11 +259,11 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
               </p>
             </div>
           </ng-container>
-          <div class="sm:col-span-2 flex flex-wrap items-center gap-3">
-            <button class="w-full rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600 sm:w-auto" type="submit">
+          <div class="md:col-span-2 xl:col-span-3 flex flex-wrap items-center gap-3">
+            <button class="basis-full rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600 sm:basis-auto" type="submit">
               {{ mode === 'create' ? 'Crear' : 'Guardar cambios' }}
             </button>
-            <button class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 sm:w-auto" type="button" (click)="cancelForm()">Cancelar</button>
+            <button class="basis-full rounded-lg border border-gray-300 px-4 py-2 text-sm dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 sm:basis-auto" type="button" (click)="cancelForm()">Cancelar</button>
           </div>
         </form>
       </article>

@@ -50,6 +50,8 @@ Para acceso desde celular por IP, configura `CORS_ALLOWED_ORIGINS` incluyendo tu
 ## Lineamientos UI obligatorios
 - Diseño responsive obligatorio en móvil, tablet y escritorio.
 - Formularios y tablas deben adaptarse a la resolución (sin cortes; con scroll horizontal controlado en tablas cuando sea necesario).
+- El scroll horizontal de tablas debe aplicarse solo en móvil/tablet; en desktop la tabla debe mostrarse ajustada sin scroll horizontal.
+- Los formularios deben mantener proporciones adecuadas al dispositivo para mejorar legibilidad y uso.
 - Tema oscuro por defecto y toggle dark/light persistente.
 - Botones de acción en listas y navbar como íconos con tooltip.
 - Botón de menú lateral en la esquina superior izquierda del navbar.
