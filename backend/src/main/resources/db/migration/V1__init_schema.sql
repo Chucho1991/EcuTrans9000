@@ -1,0 +1,35 @@
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY,
+  nombres VARCHAR(200) NOT NULL,
+  correo VARCHAR(200) NOT NULL UNIQUE,
+  username VARCHAR(100) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  rol VARCHAR(50) NOT NULL,
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  deleted BOOLEAN NOT NULL DEFAULT FALSE,
+  deleted_at TIMESTAMP NULL,
+  deleted_by VARCHAR(100) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS api_audit_log (
+  id BIGSERIAL PRIMARY KEY,
+  fecha_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  endpoint VARCHAR(300) NOT NULL,
+  request_json TEXT,
+  response_json TEXT,
+  usuario VARCHAR(100),
+  rol_usuario VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS action_audit_log (
+  id BIGSERIAL PRIMARY KEY,
+  fecha_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  usuario VARCHAR(100),
+  rol_usuario VARCHAR(50),
+  modulo_afectado VARCHAR(100),
+  tipo_modificacion VARCHAR(50),
+  id_registro VARCHAR(100),
+  nombre_tabla VARCHAR(100)
+);

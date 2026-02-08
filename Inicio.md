@@ -20,7 +20,7 @@ STACK Y ARQUITECTURA
 - PostgreSQL: usuarios + auditorías + datos
 
 4) Docker:
-- docker-compose: postgres + mongo + backend + frontend
+- docker-compose: postgres + backend + frontend
 - .env.example y variables claras
 
 LINEAMIENTOS DE DATOS
@@ -121,7 +121,7 @@ BACKEND: HEXAGONAL (OBLIGATORIO)
 - ports/in: interfaces de casos de uso
 - ports/out: repositorios (UserRepositoryPort, AuditRepositoryPort)
 - adapters/in: controllers REST + DTOs + mappers
-- adapters/out: JPA Postgres (users, auditorías) + Mongo config repositorio
+- adapters/out: JPA Postgres (users, auditorías) 
 - config: security, jwt, swagger, cors
 NO mezcles JPA entities directamente en domain: usa modelos de dominio y mappers.
 
