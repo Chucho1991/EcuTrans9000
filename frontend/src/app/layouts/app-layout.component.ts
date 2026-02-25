@@ -13,7 +13,7 @@ import { ThemeService } from '../core/services/theme.service';
     <div class="min-h-screen bg-gray-50 text-gray-800 dark:bg-gray-950 dark:text-gray-100">
       <div class="flex min-h-screen">
         <aside
-          class="hidden w-72 border-r border-gray-200 bg-white lg:flex lg:flex-col dark:border-gray-800 dark:bg-gray-900"
+          class="hidden w-64 border-r border-gray-200 bg-white lg:flex lg:flex-col xl:w-72 dark:border-gray-800 dark:bg-gray-900"
           [class.lg:hidden]="desktopSidebarHidden"
           [class.lg:flex]="!desktopSidebarHidden"
         >
@@ -21,7 +21,7 @@ import { ThemeService } from '../core/services/theme.service';
             <h1 class="text-xl font-semibold text-gray-900 dark:text-white">EcuTrans9000</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400">Sistema de trafico</p>
           </div>
-          <nav class="space-y-1 p-4">
+          <nav class="space-y-1 overflow-y-auto p-4">
             <a *ngIf="isSuperadmin()" routerLink="/dashboard" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">Dashboard</a>
             <a *ngIf="isSuperadmin()" routerLink="/users" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">Usuarios</a>
             <a routerLink="/profile" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">Mi perfil</a>
@@ -34,14 +34,14 @@ import { ThemeService } from '../core/services/theme.service';
 
         <div *ngIf="mobileSidebarOpen" class="fixed inset-0 z-40 bg-gray-950/50 lg:hidden" (click)="closeMobileSidebar()"></div>
         <aside
-          class="fixed inset-y-0 left-0 z-50 w-72 -translate-x-full border-r border-gray-200 bg-white transition-transform duration-200 lg:hidden dark:border-gray-800 dark:bg-gray-900"
+          class="fixed inset-y-0 left-0 z-50 w-[88vw] max-w-72 -translate-x-full border-r border-gray-200 bg-white transition-transform duration-200 lg:hidden dark:border-gray-800 dark:bg-gray-900"
           [class.translate-x-0]="mobileSidebarOpen"
           [class.-translate-x-full]="!mobileSidebarOpen"
           aria-label="Menu lateral movil"
         >
-          <div class="flex items-center justify-between border-b border-gray-200 px-6 py-5 dark:border-gray-800">
-            <div>
-              <h1 class="text-xl font-semibold text-gray-900 dark:text-white">EcuTrans9000</h1>
+          <div class="flex items-start justify-between gap-3 border-b border-gray-200 px-4 py-4 dark:border-gray-800 sm:px-6 sm:py-5">
+            <div class="min-w-0 flex-1">
+              <h1 class="break-words text-lg font-semibold leading-tight text-gray-900 dark:text-white sm:text-xl">EcuTrans9000</h1>
               <p class="text-sm text-gray-500 dark:text-gray-400">Sistema de trafico</p>
             </div>
             <button type="button" class="icon-action-btn" aria-label="Cerrar menu lateral" (click)="closeMobileSidebar()">
@@ -61,15 +61,15 @@ import { ThemeService } from '../core/services/theme.service';
         </aside>
 
         <div class="flex min-h-screen flex-1 flex-col">
-          <header class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 bg-white px-4 py-4 sm:px-6 dark:border-gray-800 dark:bg-gray-900">
-            <div class="flex items-center gap-2">
+          <header class="flex w-full flex-wrap items-center gap-2 border-b border-gray-200 bg-white px-3 py-3 sm:px-4 sm:py-4 lg:px-6 dark:border-gray-800 dark:bg-gray-900">
+            <div class="flex min-w-0 items-center gap-2">
               <button type="button" class="icon-action-btn" aria-label="Ocultar menu lateral" (click)="toggleSidebar()">
                 <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                 <span class="icon-action-tooltip">Menu lateral</span>
               </button>
-              <p class="hidden text-sm text-gray-500 dark:text-gray-400 sm:block">Panel administrativo</p>
+              <p class="hidden truncate text-sm text-gray-500 dark:text-gray-400 sm:block">Panel administrativo</p>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="ml-auto flex max-w-full items-center gap-2 overflow-x-auto sm:overflow-x-visible">
               <span class="hidden rounded-full border border-brand-300/40 bg-brand-500/15 px-3 py-1 text-xs font-semibold tracking-wide text-brand-600 dark:border-brand-400/30 dark:bg-brand-400/20 dark:text-brand-300 sm:inline-flex">
                 {{ getUsernameLabel() }}
               </span>
@@ -100,7 +100,7 @@ import { ThemeService } from '../core/services/theme.service';
               </button>
             </div>
           </header>
-          <main class="flex-1 overflow-x-hidden bg-gray-50 p-4 dark:bg-gray-950 sm:p-6">
+          <main class="flex-1 overflow-x-hidden bg-gray-50 px-3 py-4 dark:bg-gray-950 sm:px-4 sm:py-6 lg:px-6">
             <router-outlet />
           </main>
         </div>

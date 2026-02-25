@@ -925,3 +925,9 @@ pre[class*="language-"].line-numbers {
   opacity: 1;
   visibility: visible;
 }
+
+@media (max-width: 1023px) {
+  .icon-action-tooltip {
+    display: none;
+  }
+}
