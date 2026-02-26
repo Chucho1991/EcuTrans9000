@@ -5,6 +5,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * Componente publico de backend para SoftDeleteVehiculoUseCase.
+ */
 @Service
 @RequiredArgsConstructor
 public class SoftDeleteVehiculoUseCase {

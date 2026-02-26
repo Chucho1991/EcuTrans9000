@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Componente publico de backend para ActionAuditLog.
+ */
 @Getter
 @Setter
 @Builder

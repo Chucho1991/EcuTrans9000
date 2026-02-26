@@ -79,6 +79,14 @@ Base path: `/api/vehiculos`
 - Colección oficial: `postman/EcuTrans9000.postman_collection.json`
 - Importar en Postman y ejecutar primero `Auth > Login` para poblar token.
 
+## Validación de documentación
+- Script de validación: `scripts/validate-documentation.ps1`
+- Verifica tres frentes: cobertura básica de Javadocs en tipos públicos, consistencia mínima de colección Postman y temas obligatorios en `README.md`.
+- Ejecución:
+```bash
+./scripts/validate-documentation.ps1
+```
+
 ## Lineamientos UI obligatorios
 - Diseño responsive obligatorio en móvil, tablet y escritorio.
 - Formularios y tablas deben adaptarse a la resolución (sin cortes; con scroll horizontal controlado en tablas cuando sea necesario).

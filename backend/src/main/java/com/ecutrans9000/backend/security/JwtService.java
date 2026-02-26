@@ -11,6 +11,9 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * Componente publico de backend para JwtService.
+ */
 @Service
 public class JwtService {
 

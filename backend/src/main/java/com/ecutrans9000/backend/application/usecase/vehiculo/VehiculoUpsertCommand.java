@@ -4,6 +4,9 @@ import com.ecutrans9000.backend.domain.vehiculo.EstadoVehiculo;
 import com.ecutrans9000.backend.domain.vehiculo.TipoDocumento;
 import java.math.BigDecimal;
 
+/**
+ * Record publico de backend para VehiculoUpsertCommand.
+ */
 public record VehiculoUpsertCommand(
     String placa,
     String choferDefault,

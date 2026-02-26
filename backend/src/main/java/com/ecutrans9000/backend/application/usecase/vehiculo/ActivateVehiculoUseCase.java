@@ -5,6 +5,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * Componente publico de backend para ActivateVehiculoUseCase.
+ */
 @Service
 @RequiredArgsConstructor
 public class ActivateVehiculoUseCase {

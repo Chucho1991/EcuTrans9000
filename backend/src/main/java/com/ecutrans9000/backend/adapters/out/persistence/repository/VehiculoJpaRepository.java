@@ -6,6 +6,9 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+/**
+ * Contrato publico de backend para VehiculoJpaRepository.
+ */
 public interface VehiculoJpaRepository extends JpaRepository<VehiculoJpaEntity, UUID>, JpaSpecificationExecutor<VehiculoJpaEntity> {
 
   boolean existsByPlacaNorm(String placaNorm);

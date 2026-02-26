@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Componente publico de backend para ImportVehiculosCsvUseCase.
+ */
 @Service
 @RequiredArgsConstructor
 public class ImportVehiculosCsvUseCase {

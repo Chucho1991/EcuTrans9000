@@ -5,6 +5,9 @@ import com.ecutrans9000.backend.domain.vehiculo.Vehiculo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * Componente publico de backend para CreateVehiculoUseCase.
+ */
 @Service
 @RequiredArgsConstructor
 public class CreateVehiculoUseCase {

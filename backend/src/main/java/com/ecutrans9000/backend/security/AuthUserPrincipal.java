@@ -9,6 +9,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+/**
+ * Componente publico de backend para AuthUserPrincipal.
+ */
 @Getter
 public class AuthUserPrincipal implements UserDetails {
 

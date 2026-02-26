@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Componente publico de backend para AuthController.
+ */
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Auth")

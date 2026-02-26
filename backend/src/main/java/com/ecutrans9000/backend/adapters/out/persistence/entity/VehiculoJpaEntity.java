@@ -17,6 +17,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Componente publico de backend para VehiculoJpaEntity.
+ */
 @Entity
 @Table(name = "vehiculos")
 @Getter

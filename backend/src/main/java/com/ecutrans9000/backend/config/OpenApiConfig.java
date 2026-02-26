@@ -32,5 +32,8 @@ import org.springframework.context.annotation.Configuration;
     scheme = "bearer",
     bearerFormat = "JWT"
 )
+/**
+ * Componente publico de backend para OpenApiConfig.
+ */
 public class OpenApiConfig {
 }

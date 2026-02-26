@@ -1,5 +1,8 @@
 package com.ecutrans9000.backend.domain.audit;
 
+/**
+ * Enumeracion publica de backend para ActionType.
+ */
 public enum ActionType {
   CREACION,
   EDICION,

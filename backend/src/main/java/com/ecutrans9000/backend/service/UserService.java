@@ -21,6 +21,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Componente publico de backend para UserService.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService {

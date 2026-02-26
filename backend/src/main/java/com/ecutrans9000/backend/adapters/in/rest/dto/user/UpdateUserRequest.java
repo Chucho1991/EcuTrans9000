@@ -14,6 +14,9 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * Payload administrativo para editar datos de un usuario.
+ */
 public class UpdateUserRequest {
   @NotBlank
   @Size(max = 200)

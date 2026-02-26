@@ -5,6 +5,9 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * Componente publico de backend para VehiculoImportResult.
+ */
 @Getter
 @Builder
 public class VehiculoImportResult {

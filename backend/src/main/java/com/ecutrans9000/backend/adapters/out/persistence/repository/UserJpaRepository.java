@@ -6,6 +6,9 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+/**
+ * Contrato publico de backend para UserJpaRepository.
+ */
 public interface UserJpaRepository extends JpaRepository<UserJpaEntity, UUID>, JpaSpecificationExecutor<UserJpaEntity> {
   boolean existsByUsernameIgnoreCase(String username);
   boolean existsByCorreoIgnoreCase(String correo);

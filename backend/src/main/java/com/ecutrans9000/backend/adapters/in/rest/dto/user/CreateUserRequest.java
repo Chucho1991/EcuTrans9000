@@ -14,6 +14,9 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * Payload para crear un usuario desde el módulo administrativo.
+ */
 public class CreateUserRequest {
   @NotBlank
   @Size(max = 200)

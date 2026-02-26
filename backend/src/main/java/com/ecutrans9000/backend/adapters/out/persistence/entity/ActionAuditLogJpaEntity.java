@@ -16,6 +16,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Componente publico de backend para ActionAuditLogJpaEntity.
+ */
 @Entity
 @Table(name = "action_audit_log")
 @Getter

@@ -16,6 +16,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
+/**
+ * Componente publico de backend para ApiAuditFilter.
+ */
 @Component
 @RequiredArgsConstructor
 public class ApiAuditFilter extends OncePerRequestFilter {

@@ -9,6 +9,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/**
+ * Componente publico de backend para UserPrincipalService.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserPrincipalService implements UserDetailsService {

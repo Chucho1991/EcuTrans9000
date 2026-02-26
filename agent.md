@@ -11,6 +11,7 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - No usar entidades JPA dentro de `domain`; mapear explícitamente.
 - DTOs solo en `adapters/in`.
 - Validar entradas con `jakarta.validation`.
+- Todo tipo público del backend debe incluir Javadoc (`/** ... */`) y no se considera cerrada una tarea de backend si faltan Javadocs.
 - Usar soft delete por defecto (`activo`, `deleted`).
 - Si la política del módulo es “solo eliminación lógica”, no exponer ni usar borrado físico.
 - Documentar API en Swagger/OpenAPI.

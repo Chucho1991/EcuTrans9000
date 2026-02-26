@@ -11,6 +11,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/**
+ * Componente publico de backend para ApiExceptionHandler.
+ */
 @RestControllerAdvice
 public class ApiExceptionHandler {
 

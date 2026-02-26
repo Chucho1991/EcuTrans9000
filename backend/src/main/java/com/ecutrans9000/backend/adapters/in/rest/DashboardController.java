@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Componente publico de backend para DashboardController.
+ */
 @RestController
 @RequestMapping("/dashboard")
 @Tag(name = "Dashboard")

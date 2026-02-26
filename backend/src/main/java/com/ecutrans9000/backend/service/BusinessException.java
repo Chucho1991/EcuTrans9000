@@ -2,6 +2,9 @@ package com.ecutrans9000.backend.service;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * Componente publico de backend para BusinessException.
+ */
 public class BusinessException extends RuntimeException {
 
   private final HttpStatus status;

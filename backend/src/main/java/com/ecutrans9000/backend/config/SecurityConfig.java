@@ -22,6 +22,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+/**
+ * Componente publico de backend para SecurityConfig.
+ */
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {

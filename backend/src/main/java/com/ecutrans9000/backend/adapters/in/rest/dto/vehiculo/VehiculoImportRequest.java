@@ -6,6 +6,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/**
+ * Parametriza una importación CSV de vehículos.
+ */
 public class VehiculoImportRequest {
 
   @NotBlank

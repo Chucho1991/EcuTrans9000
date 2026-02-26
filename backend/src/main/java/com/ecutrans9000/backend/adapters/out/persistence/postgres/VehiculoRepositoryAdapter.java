@@ -18,6 +18,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
+/**
+ * Componente publico de backend para VehiculoRepositoryAdapter.
+ */
 @Component
 @RequiredArgsConstructor
 public class VehiculoRepositoryAdapter implements VehiculoRepositoryPort {

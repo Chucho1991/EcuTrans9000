@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Componente publico de backend para UploadVehiculoImageUseCase.
+ */
 @Service
 @RequiredArgsConstructor
 public class UploadVehiculoImageUseCase {

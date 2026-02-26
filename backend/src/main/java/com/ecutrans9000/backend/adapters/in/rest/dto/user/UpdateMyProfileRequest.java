@@ -14,6 +14,9 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * Payload para que un usuario actualice su propio perfil.
+ */
 public class UpdateMyProfileRequest {
   @NotBlank
   @Size(max = 200)

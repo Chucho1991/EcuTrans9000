@@ -10,8 +10,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/system")
 @Tag(name = "System", description = "Endpoints de estado del sistema")
+/**
+ * Expone endpoints técnicos para monitoreo básico del backend.
+ */
 public class SystemController {
 
+  /**
+   * Retorna el estado operativo mínimo del servicio.
+   *
+   * @return mapa con estado y nombre del servicio
+   */
   @GetMapping("/health")
   @Operation(summary = "Estado del servicio")
   public Map<String, String> health() {
