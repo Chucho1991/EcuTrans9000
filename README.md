@@ -1,6 +1,6 @@
 # EcuTrans9000
 
-Aplicacion para digitalizar la bitácora de viajes de camiones para registrar información operativa y financiera, autocompletar datos del vehículo, gestionar estados de facturación/pago y calcular totales por placa
+Aplicación para digitalizar la bitácora de viajes de camiones con gestión operativa y financiera.
 
 ## Servicios
 - Frontend (Angular): http://localhost:4200
@@ -19,6 +19,7 @@ Revisar `.env.example` para valores por defecto:
 - `CORS_ALLOWED_ORIGINS`
 - `BOOTSTRAP_SUPERADMIN_USERNAME`, `BOOTSTRAP_SUPERADMIN_PASSWORD`
 - `BOOTSTRAP_SUPERADMIN_NOMBRES`, `BOOTSTRAP_SUPERADMIN_CORREO`
+- `VEHICULOS_STORAGE_PATH`, `VEHICULOS_MAX_IMAGE_BYTES`, `VEHICULOS_IMPORT_BATCH_SIZE`
 
 Para acceso desde celular por IP, configura `CORS_ALLOWED_ORIGINS` incluyendo tu red local, por ejemplo:
 - `http://192.168.*:4200,http://10.*:4200`
@@ -26,26 +27,57 @@ Para acceso desde celular por IP, configura `CORS_ALLOWED_ORIGINS` incluyendo tu
 ## Usuario SUPERADMINISTRADOR inicial
 - Username: `admin`
 - Password: `Qwerty12345`
-- Se asegura automaticamente al iniciar el backend (configurable por variables `BOOTSTRAP_SUPERADMIN_*`).
+- Se asegura automáticamente al iniciar el backend (configurable por variables `BOOTSTRAP_SUPERADMIN_*`).
 
-## Endpoints principales (Modulo Usuarios)
+## Endpoints principales
+
+### Auth y sistema
 - `POST /auth/login`
 - `GET /dashboard` (solo `SUPERADMINISTRADOR`)
+- `GET /api/system/health`
+
+### Módulo Usuarios
 - `POST /users` (solo `SUPERADMINISTRADOR`)
-- `GET /users` (solo `SUPERADMINISTRADOR`, con filtros `rol`, `activo`, `deleted`)
+- `GET /users` (solo `SUPERADMINISTRADOR`, filtros `rol`, `activo`, `deleted`)
 - `GET /users/{id}` (solo `SUPERADMINISTRADOR`)
 - `PUT /users/{id}` (solo `SUPERADMINISTRADOR`)
 - `POST /users/{id}/soft-delete` (solo `SUPERADMINISTRADOR`)
 - `POST /users/{id}/restore` (solo `SUPERADMINISTRADOR`)
 - `POST /users/{id}/activate` (solo `SUPERADMINISTRADOR`)
 - `POST /users/{id}/deactivate` (solo `SUPERADMINISTRADOR`)
-- `DELETE /users/{id}` (deshabilitado: solo se permite eliminacion logica)
+- `DELETE /users/{id}` (deshabilitado: solo se permite eliminación lógica)
 - `GET /users/me`
 - `PUT /users/me`
 
+### Módulo Vehículos
+Base path: `/api/vehiculos`
+
+- `POST /api/vehiculos`
+- `PUT /api/vehiculos/{id}`
+- `GET /api/vehiculos/{id}`
+- `GET /api/vehiculos?page=&size=&q=&estado=&includeDeleted=`
+- `POST /api/vehiculos/{id}/activate`
+- `POST /api/vehiculos/{id}/deactivate`
+- `POST /api/vehiculos/{id}/soft-delete`
+- `POST /api/vehiculos/{id}/restore`
+- `POST /api/vehiculos/{id}/foto` (multipart/form-data)
+- `POST /api/vehiculos/{id}/documento` (multipart/form-data)
+- `POST /api/vehiculos/{id}/licencia-img` (multipart/form-data)
+- `GET /api/vehiculos/{id}/foto`
+- `GET /api/vehiculos/{id}/documento`
+- `GET /api/vehiculos/{id}/licencia-img`
+- `GET /api/vehiculos/import/template`
+- `POST /api/vehiculos/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
+- `POST /api/vehiculos/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
+
+## Soft delete y auditoría
+- Eliminación por defecto lógica (`deleted`, `deleted_at`), sin borrado físico en módulos funcionales.
+- Auditoría API en `api_audit_log` (endpoint, request, response, usuario, rol).
+- Auditoría de acciones en `action_audit_log` (CREACION, EDICION, ELIMINADO_LOGICO, LOGIN, ELIMINADO_FISICO, IMPORT_CSV).
+
 ## Colección Postman
 - Colección oficial: `postman/EcuTrans9000.postman_collection.json`
-- Importar en Postman y ejecutar primero `Auth > Login` para poblar el token de la colección.
+- Importar en Postman y ejecutar primero `Auth > Login` para poblar token.
 
 ## Lineamientos UI obligatorios
 - Diseño responsive obligatorio en móvil, tablet y escritorio.
@@ -60,12 +92,6 @@ Para acceso desde celular por IP, configura `CORS_ALLOWED_ORIGINS` incluyendo tu
 - Validaciones al pie de cada campo obligatorio con nombre del campo y breve descripción.
 - En creación, edición, cambio de estado y login, usar popup visual del template.
 - No usar popups nativos del navegador (`window.alert`, `window.confirm`, `window.prompt`).
-
-## Estandar de estilos (frontend)
-- Centralizar estilos reutilizables en `frontend/src/styles.css` usando `@utility`.
-- Reutilizar utilidades en templates para evitar clases Tailwind duplicadas.
-- Preferir utilidades compartidas para patrones comunes: títulos de página, subtítulos, tarjetas/paneles, botones primario/secundario, controles de formulario y mensajes de error.
-- Mantener utilidades semánticas y consistentes entre módulos (por ejemplo `panel-card`, `page-title`, `page-subtitle`, `btn-primary-brand`, `form-control`, `form-error`).
 
 ## Levantar con Docker
 ```bash

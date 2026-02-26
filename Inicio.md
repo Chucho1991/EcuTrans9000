@@ -96,10 +96,11 @@ Tabla `action_audit_log`:
 - usuario
 - rol_usuario
 - modulo_afectado
-- tipo_modificacion (CREACION, EDICION, ELIMINADO_LOGICO, LOGIN, ELIMINADO_FISICO)
+- tipo_modificacion (CREACION, EDICION, ELIMINADO_LOGICO, LOGIN, ELIMINADO_FISICO, IMPORT_CSV)
 - id_registro
 - nombre_tabla
 Registrar login exitoso y operaciones CRUD relevantes.
+Registrar también importaciones masivas CSV cuando aplique.
 
 MÓDULO BASE (USUARIOS) - REGLAS POR DEFECTO
 Roles iniciales:
@@ -130,6 +131,13 @@ Capacidades mínimas:
 - Perfil propio: `GET /users/me`, `PUT /users/me`
 - Gestión admin: crear/listar/ver/editar/soft-delete/restore/delete físico protegido
 - Dashboard protegido por rol administrador
+
+MÓDULO A (VEHÍCULOS) - REGLAS POR DEFECTO
+- CRUD completo con placa normalizada (`placa_norm`) única.
+- Activar/Inactivar por endpoint explícito.
+- Eliminación lógica y restauración.
+- Carga de imágenes solo por endpoints multipart del formulario.
+- Importación CSV con `preview` + `import` (modos `INSERT_ONLY` y `UPSERT`, `partialOk`, procesamiento por lotes).
 
 SEGURIDAD Y AUTORIZACIÓN
 - JWT firmado con `JWT_SECRET` de entorno.

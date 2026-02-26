@@ -95,3 +95,8 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - [ ] README actualizado.
 - [ ] Colección Postman actualizada en `/postman`.
 - [ ] Build/test ejecutados correctamente.
+
+## Estado actual del proyecto
+- Módulo `USERS`: implementado con CRUD, soft delete, estados, perfil y auditoría.
+- Módulo `VEHICULOS`: implementado con CRUD, activar/inactivar, soft delete/restore, carga de imágenes por formulario y carga masiva CSV con `preview` e `import`.
+- Swagger/OpenAPI y colección Postman deben mantenerse sincronizados ante cada cambio de endpoint o payload.

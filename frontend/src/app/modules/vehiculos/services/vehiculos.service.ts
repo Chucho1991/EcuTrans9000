@@ -1,0 +1,155 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+
+import { API_BASE_URL } from '../../../core/config/api.config';
+
+export type EstadoVehiculo = 'ACTIVO' | 'INACTIVO';
+export type TipoDocumento = 'CEDULA' | 'RUC' | 'PASAPORTE';
+
+export interface VehiculoResponse {
+  id: string;
+  placa: string;
+  placaNorm: string;
+  choferDefault: string;
+  licencia: string | null;
+  tipoDocumento: TipoDocumento;
+  documentoPersonal: string;
+  tonelajeCategoria: string;
+  m3: number;
+  estado: EstadoVehiculo;
+  fotoPath: string | null;
+  docPath: string | null;
+  licPath: string | null;
+  deleted: boolean;
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VehiculoListResponse {
+  content: VehiculoResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface VehiculoUpsertRequest {
+  placa: string;
+  choferDefault: string;
+  licencia: string;
+  tipoDocumento: TipoDocumento;
+  documentoPersonal: string;
+  tonelajeCategoria: string;
+  m3: number;
+  estado: EstadoVehiculo;
+}
+
+export interface VehiculoImportError {
+  row: number;
+  column: string;
+  message: string;
+}
+
+export interface VehiculoImportResult {
+  totalRows: number;
+  processed: number;
+  inserted: number;
+  updated: number;
+  skipped: number;
+  errorsCount: number;
+  errors: VehiculoImportError[];
+}
+
+@Injectable({ providedIn: 'root' })
+export class VehiculosService {
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${API_BASE_URL}/api/vehiculos`;
+
+  list(params: {
+    page: number;
+    size: number;
+    q?: string;
+    estado?: string;
+    includeDeleted?: boolean;
+  }): Observable<VehiculoListResponse> {
+    let httpParams = new HttpParams()
+      .set('page', params.page)
+      .set('size', params.size);
+
+    if (params.q) {
+      httpParams = httpParams.set('q', params.q);
+    }
+    if (params.estado) {
+      httpParams = httpParams.set('estado', params.estado);
+    }
+    if (params.includeDeleted !== undefined) {
+      httpParams = httpParams.set('includeDeleted', params.includeDeleted);
+    }
+
+    return this.http.get<VehiculoListResponse>(this.baseUrl, { params: httpParams });
+  }
+
+  getById(id: string): Observable<VehiculoResponse> {
+    return this.http.get<VehiculoResponse>(`${this.baseUrl}/${id}`);
+  }
+
+  create(payload: VehiculoUpsertRequest): Observable<VehiculoResponse> {
+    return this.http.post<VehiculoResponse>(this.baseUrl, payload);
+  }
+
+  update(id: string, payload: VehiculoUpsertRequest): Observable<VehiculoResponse> {
+    return this.http.put<VehiculoResponse>(`${this.baseUrl}/${id}`, payload);
+  }
+
+  activate(id: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/${id}/activate`, {});
+  }
+
+  deactivate(id: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/${id}/deactivate`, {});
+  }
+
+  softDelete(id: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/${id}/soft-delete`, {});
+  }
+
+  restore(id: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/${id}/restore`, {});
+  }
+
+  uploadFoto(id: string, file: File): Observable<VehiculoResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<VehiculoResponse>(`${this.baseUrl}/${id}/foto`, formData);
+  }
+
+  uploadDocumento(id: string, file: File): Observable<VehiculoResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<VehiculoResponse>(`${this.baseUrl}/${id}/documento`, formData);
+  }
+
+  uploadLicenciaImg(id: string, file: File): Observable<VehiculoResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<VehiculoResponse>(`${this.baseUrl}/${id}/licencia-img`, formData);
+  }
+
+  downloadTemplate(): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/import/template`, { responseType: 'blob' });
+  }
+
+  previewImport(file: File, mode: 'INSERT_ONLY' | 'UPSERT', partialOk: boolean): Observable<VehiculoImportResult> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<VehiculoImportResult>(`${this.baseUrl}/import/preview?mode=${mode}&partialOk=${partialOk}`, formData);
+  }
+
+  importCsv(file: File, mode: 'INSERT_ONLY' | 'UPSERT', partialOk: boolean): Observable<VehiculoImportResult> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<VehiculoImportResult>(`${this.baseUrl}/import?mode=${mode}&partialOk=${partialOk}`, formData);
+  }
+}
