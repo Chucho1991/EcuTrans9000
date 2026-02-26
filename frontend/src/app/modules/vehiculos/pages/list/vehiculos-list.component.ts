@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 
 import { PopupService } from '../../../../core/services/popup.service';
 import {
@@ -51,6 +52,7 @@ import {
             <thead class="border-b border-gray-200 bg-gray-50 text-gray-600 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300">
               <tr>
                 <th class="px-3 py-3 sm:px-4">Placa</th>
+                <th class="px-3 py-3 sm:px-4">Foto</th>
                 <th class="px-3 py-3 sm:px-4">Chofer</th>
                 <th class="px-3 py-3 sm:px-4">Tonelaje/Categoria</th>
                 <th class="px-3 py-3 sm:px-4">M3</th>
@@ -61,6 +63,17 @@ import {
             <tbody>
               <tr class="border-b border-gray-100 dark:border-gray-800" *ngFor="let vehiculo of vehiculos">
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.placa }}</td>
+                <td class="px-3 py-3 sm:px-4">
+                  <img
+                    *ngIf="fotoPreviewUrls[vehiculo.id]; else sinFoto"
+                    [src]="fotoPreviewUrls[vehiculo.id]"
+                    alt="Foto de vehiculo"
+                    class="h-10 w-16 rounded-md border border-gray-200 object-cover dark:border-gray-700"
+                  />
+                  <ng-template #sinFoto>
+                    <span class="text-xs text-gray-400">Sin foto</span>
+                  </ng-template>
+                </td>
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.choferDefault }}</td>
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.tonelajeCategoria }}</td>
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.m3 }}</td>
@@ -71,17 +84,43 @@ import {
                 </td>
                 <td class="px-3 py-3 sm:px-4">
                   <div class="flex flex-wrap gap-1.5 sm:gap-2">
-                    <button class="icon-action-btn" type="button" aria-label="Ver" (click)="selectDetail(vehiculo)"><span class="icon-action-tooltip">Ver</span>VER</button>
-                    <button class="icon-action-btn" type="button" aria-label="Editar" (click)="startEdit(vehiculo)"><span class="icon-action-tooltip">Editar</span>EDIT</button>
-                    <button *ngIf="!vehiculo.deleted && vehiculo.estado === 'INACTIVO'" class="icon-action-btn text-green-600" type="button" aria-label="Activar" (click)="activate(vehiculo)"><span class="icon-action-tooltip">Activar</span>ON</button>
-                    <button *ngIf="!vehiculo.deleted && vehiculo.estado === 'ACTIVO'" class="icon-action-btn text-red-600" type="button" aria-label="Inactivar" (click)="deactivate(vehiculo)"><span class="icon-action-tooltip">Inactivar</span>OFF</button>
-                    <button *ngIf="!vehiculo.deleted" class="icon-action-btn text-orange-600" type="button" aria-label="Eliminar" (click)="softDelete(vehiculo)"><span class="icon-action-tooltip">Soft delete</span>DEL</button>
-                    <button *ngIf="vehiculo.deleted" class="icon-action-btn text-green-600" type="button" aria-label="Restaurar" (click)="restore(vehiculo)"><span class="icon-action-tooltip">Restaurar</span>RES</button>
+                    <button class="icon-action-btn" type="button" aria-label="Ver" (click)="selectDetail(vehiculo)">
+                      <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+                      <span class="icon-action-tooltip">Ver</span>
+                    </button>
+                    <button class="icon-action-btn" type="button" aria-label="Editar" (click)="startEdit(vehiculo)">
+                      <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="m3 21 3.8-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L3 21Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m13.5 6.5 3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                      <span class="icon-action-tooltip">Editar</span>
+                    </button>
+                    <button *ngIf="!vehiculo.deleted && vehiculo.estado === 'INACTIVO'" class="icon-action-btn text-green-600 hover:text-green-700" type="button" aria-label="Activar" (click)="activate(vehiculo)">
+                      <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                      <span class="icon-action-tooltip">Activar</span>
+                    </button>
+                    <button *ngIf="!vehiculo.deleted && vehiculo.estado === 'ACTIVO'" class="icon-action-btn text-red-600 hover:text-red-700" type="button" aria-label="Inactivar" (click)="deactivate(vehiculo)">
+                      <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                      <span class="icon-action-tooltip">Inactivar</span>
+                    </button>
+                    <button class="icon-action-btn text-blue-light-600 hover:text-blue-light-700" type="button" aria-label="Descargar documento" (click)="downloadDocumento(vehiculo)">
+                      <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <span class="icon-action-tooltip">Documento</span>
+                    </button>
+                    <button class="icon-action-btn text-blue-light-600 hover:text-blue-light-700" type="button" aria-label="Descargar licencia" (click)="downloadLicencia(vehiculo)">
+                      <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M8 3h8l5 5v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                      <span class="icon-action-tooltip">Licencia</span>
+                    </button>
+                    <button *ngIf="!vehiculo.deleted" class="icon-action-btn text-orange-600 hover:text-orange-700" type="button" aria-label="Eliminar" (click)="softDelete(vehiculo)">
+                      <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                      <span class="icon-action-tooltip">Soft delete</span>
+                    </button>
+                    <button *ngIf="vehiculo.deleted" class="icon-action-btn text-green-600 hover:text-green-700" type="button" aria-label="Restaurar" (click)="restore(vehiculo)">
+                      <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 12a9 9 0 1 0 2.6-6.4M3 4v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                      <span class="icon-action-tooltip">Restaurar</span>
+                    </button>
                   </div>
                 </td>
               </tr>
               <tr *ngIf="vehiculos.length === 0">
-                <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400" colspan="6">No hay vehiculos para mostrar.</td>
+                <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400" colspan="7">No hay vehiculos para mostrar.</td>
               </tr>
             </tbody>
           </table>
@@ -97,10 +136,46 @@ import {
 
       <article class="panel-card min-w-0 w-full max-w-full p-4 sm:p-6" *ngIf="selectedVehiculo">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Detalle de vehiculo</h2>
-        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300"><strong>Placa:</strong> {{ selectedVehiculo.placa }}</p>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Chofer:</strong> {{ selectedVehiculo.choferDefault }}</p>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Documento:</strong> {{ selectedVehiculo.tipoDocumento }} {{ selectedVehiculo.documentoPersonal }}</p>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Estado:</strong> {{ selectedVehiculo.estado }}</p>
+        <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div class="md:col-span-1">
+            <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Foto</p>
+            <img
+              *ngIf="selectedFotoUrl; else sinFotoDetalle"
+              [src]="selectedFotoUrl"
+              alt="Foto de vehiculo"
+              class="h-36 w-full rounded-xl border border-gray-200 object-cover dark:border-gray-700"
+            />
+            <ng-template #sinFotoDetalle>
+              <div class="flex h-36 items-center justify-center rounded-xl border border-dashed border-gray-300 text-sm text-gray-400 dark:border-gray-700">
+                Sin foto
+              </div>
+            </ng-template>
+          </div>
+          <div class="md:col-span-2">
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300"><strong>Placa:</strong> {{ selectedVehiculo.placa }}</p>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Chofer:</strong> {{ selectedVehiculo.choferDefault }}</p>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Documento:</strong> {{ selectedVehiculo.tipoDocumento }} {{ selectedVehiculo.documentoPersonal }}</p>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Estado:</strong> {{ selectedVehiculo.estado }}</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button
+                class="btn-outline-neutral inline-flex items-center gap-2 px-3 py-1.5"
+                type="button"
+                (click)="downloadDocumento(selectedVehiculo)"
+              >
+                <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Descargar documento
+              </button>
+              <button
+                class="btn-outline-neutral inline-flex items-center gap-2 px-3 py-1.5"
+                type="button"
+                (click)="downloadLicencia(selectedVehiculo)"
+              >
+                <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M8 3h8l5 5v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                Descargar licencia
+              </button>
+            </div>
+          </div>
+        </div>
       </article>
 
       <article class="panel-card min-w-0 w-full max-w-full p-4 sm:p-6 lg:p-7" *ngIf="mode !== 'none'">
@@ -156,12 +231,12 @@ import {
             <input class="form-control" type="file" accept="image/png,image/jpeg,image/webp" (change)="onFileChange($event, 'foto')" />
           </div>
           <div class="min-w-0 xl:col-span-4">
-            <label class="form-label">Documento (imagen)</label>
-            <input class="form-control" type="file" accept="image/png,image/jpeg,image/webp" (change)="onFileChange($event, 'documento')" />
+            <label class="form-label">Documento (imagen o PDF)</label>
+            <input class="form-control" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" (change)="onFileChange($event, 'documento')" />
           </div>
           <div class="min-w-0 xl:col-span-4">
-            <label class="form-label">Licencia (imagen)</label>
-            <input class="form-control" type="file" accept="image/png,image/jpeg,image/webp" (change)="onFileChange($event, 'licencia')" />
+            <label class="form-label">Licencia (imagen o PDF)</label>
+            <input class="form-control" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" (change)="onFileChange($event, 'licencia')" />
           </div>
 
           <div class="min-w-0 flex w-full flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end md:col-span-2 xl:col-span-12">
@@ -179,7 +254,14 @@ import {
           </div>
 
           <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-            <button class="btn-outline-neutral px-4 py-2" type="button" (click)="downloadTemplate()">Descargar plantilla</button>
+            <button class="btn-outline-neutral inline-flex items-center justify-center gap-2 px-4 py-2" type="button" (click)="downloadTemplate()">
+              <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Descargar plantilla
+            </button>
+            <button class="btn-outline-neutral inline-flex items-center justify-center gap-2 px-4 py-2" type="button" (click)="downloadSampleCsv()">
+              <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M8 3h8l5 5v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              Descargar ejemplo CSV
+            </button>
             <input class="form-control" type="file" accept=".csv,text/csv" (change)="onImportFileChange($event)" />
             <select class="form-control" [(ngModel)]="importMode" [ngModelOptions]="{standalone: true}">
               <option value="INSERT_ONLY">INSERT_ONLY</option>
@@ -192,8 +274,14 @@ import {
           </div>
 
           <div class="mt-4 flex flex-wrap gap-2">
-            <button class="btn-outline-neutral px-4 py-2" type="button" (click)="previewImport()" [disabled]="!importFile">Previsualizar</button>
-            <button class="btn-primary-brand px-4 py-2" type="button" (click)="executeImport()" [disabled]="!importFile">Importar</button>
+            <button class="btn-outline-neutral inline-flex items-center gap-2 px-4 py-2" type="button" (click)="previewImport()" [disabled]="!importFile">
+              <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+              Previsualizar
+            </button>
+            <button class="btn-primary-brand inline-flex items-center gap-2 px-4 py-2" type="button" (click)="executeImport()" [disabled]="!importFile">
+              <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 21V9m0 0 4 4m-4-4-4 4M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Importar
+            </button>
           </div>
 
           <div class="mt-4 rounded-lg border border-gray-200 p-4 text-sm dark:border-gray-800" *ngIf="importPreview">
@@ -213,13 +301,15 @@ import {
     </section>
   `
 })
-export class VehiculosListComponent {
+export class VehiculosListComponent implements OnDestroy {
   private readonly vehiculosService = inject(VehiculosService);
   private readonly fb = inject(FormBuilder);
   private readonly popupService = inject(PopupService);
 
   protected vehiculos: VehiculoResponse[] = [];
+  protected fotoPreviewUrls: Record<string, string> = {};
   protected selectedVehiculo: VehiculoResponse | null = null;
+  protected selectedFotoUrl: string | null = null;
   protected mode: 'none' | 'create' | 'edit' = 'none';
   protected editingId: string | null = null;
   protected page = 0;
@@ -257,6 +347,11 @@ export class VehiculosListComponent {
     this.loadVehiculos(0);
   }
 
+  ngOnDestroy(): void {
+    this.revokeFotoPreviews();
+    this.revokeSelectedFotoPreview();
+  }
+
   protected loadVehiculos(page: number): void {
     const safePage = page < 0 ? 0 : page;
     const filters = this.filtersForm.getRawValue();
@@ -271,15 +366,20 @@ export class VehiculosListComponent {
       })
       .subscribe({
         next: (response) => {
+          this.revokeFotoPreviews();
           this.vehiculos = response.content;
           this.page = response.page;
           this.totalPages = response.totalPages;
+          this.loadFotoPreviews(response.content);
         }
       });
   }
 
   protected selectDetail(vehiculo: VehiculoResponse): void {
-    this.vehiculosService.getById(vehiculo.id).subscribe((detail) => (this.selectedVehiculo = detail));
+    this.vehiculosService.getById(vehiculo.id).subscribe((detail) => {
+      this.selectedVehiculo = detail;
+      this.loadSelectedFoto(detail);
+    });
   }
 
   protected startCreate(): void {
@@ -363,10 +463,11 @@ export class VehiculosListComponent {
 
       this.vehiculosService.create(payload).subscribe({
         next: (saved) => {
-          this.uploadPendingImages(saved.id);
-          void this.popupService.info({ title: 'Vehiculo creado', message: 'Vehiculo creado correctamente.' });
-          this.cancelForm();
-          this.loadVehiculos(this.page);
+          this.uploadPendingImages(saved.id, () => {
+            void this.popupService.info({ title: 'Vehiculo creado', message: 'Vehiculo creado correctamente.' });
+            this.cancelForm();
+            this.loadVehiculos(this.page);
+          });
         },
         error: (error) => {
           void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
@@ -386,10 +487,11 @@ export class VehiculosListComponent {
 
       this.vehiculosService.update(this.editingId, payload).subscribe({
         next: (saved) => {
-          this.uploadPendingImages(saved.id);
-          void this.popupService.info({ title: 'Vehiculo editado', message: 'Vehiculo editado correctamente.' });
-          this.cancelForm();
-          this.loadVehiculos(this.page);
+          this.uploadPendingImages(saved.id, () => {
+            void this.popupService.info({ title: 'Vehiculo editado', message: 'Vehiculo editado correctamente.' });
+            this.cancelForm();
+            this.loadVehiculos(this.page);
+          });
         },
         error: (error) => {
           void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
@@ -430,6 +532,20 @@ export class VehiculosListComponent {
     this.vehiculosService.restore(vehiculo.id).subscribe(() => this.loadVehiculos(this.page));
   }
 
+  protected downloadDocumento(vehiculo: VehiculoResponse): void {
+    this.vehiculosService.getDocumentoBlob(vehiculo.id).subscribe({
+      next: (blob) => this.triggerBlobDownload(blob, `documento_${this.safeFileBase(vehiculo.placa)}`),
+      error: (error) => this.handleDownloadError(error, 'documento')
+    });
+  }
+
+  protected downloadLicencia(vehiculo: VehiculoResponse): void {
+    this.vehiculosService.getLicenciaBlob(vehiculo.id).subscribe({
+      next: (blob) => this.triggerBlobDownload(blob, `licencia_${this.safeFileBase(vehiculo.placa)}`),
+      error: (error) => this.handleDownloadError(error, 'licencia')
+    });
+  }
+
   protected openImportModal(): void {
     this.showImportModal = true;
     this.importPreview = null;
@@ -454,6 +570,21 @@ export class VehiculosListComponent {
       a.click();
       URL.revokeObjectURL(url);
     });
+  }
+
+  protected downloadSampleCsv(): void {
+    const sampleRows = [
+      'placa,chofer_default,licencia,tipo_documento,documento_personal,tonelaje_categoria,m3,estado',
+      'ABC-1234,Juan Perez,LIC-0001,CEDULA,0102030405,PESADO,12.50,ACTIVO',
+      'PBC-5678,Maria Lopez,LIC-0002,RUC,1799999999001,SEMI-PESADO,8.75,INACTIVO'
+    ];
+    const blob = new Blob([sampleRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vehiculos_ejemplo.csv';
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   protected previewImport(): void {
@@ -489,16 +620,25 @@ export class VehiculosListComponent {
     });
   }
 
-  private uploadPendingImages(vehiculoId: string): void {
+  private uploadPendingImages(vehiculoId: string, onDone: () => void): void {
+    const uploads = [];
     if (this.fotoFile) {
-      this.vehiculosService.uploadFoto(vehiculoId, this.fotoFile).subscribe();
+      uploads.push(this.vehiculosService.uploadFoto(vehiculoId, this.fotoFile));
     }
     if (this.documentoFile) {
-      this.vehiculosService.uploadDocumento(vehiculoId, this.documentoFile).subscribe();
+      uploads.push(this.vehiculosService.uploadDocumento(vehiculoId, this.documentoFile));
     }
     if (this.licenciaFile) {
-      this.vehiculosService.uploadLicenciaImg(vehiculoId, this.licenciaFile).subscribe();
+      uploads.push(this.vehiculosService.uploadLicenciaImg(vehiculoId, this.licenciaFile));
     }
+    if (uploads.length === 0) {
+      onDone();
+      return;
+    }
+    forkJoin(uploads).subscribe({
+      next: () => onDone(),
+      error: () => onDone()
+    });
   }
 
   private resetFormFiles(): void {
@@ -510,5 +650,88 @@ export class VehiculosListComponent {
   private getErrorMessage(error: unknown): string {
     const maybe = error as { error?: { message?: string } };
     return maybe?.error?.message ?? 'Ocurrio un error inesperado.';
+  }
+
+  private loadFotoPreviews(items: VehiculoResponse[]): void {
+    items.filter((v) => !!v.fotoPath).forEach((vehiculo) => {
+      this.vehiculosService.getFotoBlob(vehiculo.id).subscribe({
+        next: (blob) => {
+          this.fotoPreviewUrls[vehiculo.id] = URL.createObjectURL(blob);
+        }
+      });
+    });
+  }
+
+  private revokeFotoPreviews(): void {
+    Object.values(this.fotoPreviewUrls).forEach((url) => URL.revokeObjectURL(url));
+    this.fotoPreviewUrls = {};
+  }
+
+  private loadSelectedFoto(vehiculo: VehiculoResponse): void {
+    this.revokeSelectedFotoPreview();
+    if (!vehiculo.fotoPath) {
+      this.selectedFotoUrl = null;
+      return;
+    }
+    this.vehiculosService.getFotoBlob(vehiculo.id).subscribe({
+      next: (blob) => {
+        this.selectedFotoUrl = URL.createObjectURL(blob);
+      },
+      error: () => {
+        this.selectedFotoUrl = null;
+      }
+    });
+  }
+
+  private revokeSelectedFotoPreview(): void {
+    if (this.selectedFotoUrl) {
+      URL.revokeObjectURL(this.selectedFotoUrl);
+      this.selectedFotoUrl = null;
+    }
+  }
+
+  private triggerBlobDownload(blob: Blob, fileBaseName: string): void {
+    const ext = this.resolveBlobExtension(blob);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${fileBaseName}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  private resolveBlobExtension(blob: Blob): string {
+    const type = (blob.type || '').toLowerCase();
+    if (type.includes('pdf')) {
+      return 'pdf';
+    }
+    if (type.includes('png')) {
+      return 'png';
+    }
+    if (type.includes('webp')) {
+      return 'webp';
+    }
+    if (type.includes('jpeg') || type.includes('jpg')) {
+      return 'jpg';
+    }
+    return 'bin';
+  }
+
+  private safeFileBase(value: string): string {
+    return (value || 'archivo').replace(/[^a-zA-Z0-9_-]/g, '_');
+  }
+
+  private handleDownloadError(error: unknown, tipo: 'documento' | 'licencia'): void {
+    const status = (error as { status?: number })?.status;
+    if (status === 404) {
+      void this.popupService.info({
+        title: `Sin ${tipo}`,
+        message: `Este vehiculo no tiene ${tipo} cargado.`
+      });
+      return;
+    }
+    void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
   }
 }

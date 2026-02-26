@@ -37,8 +37,8 @@ public class ApiAuditFilter extends OncePerRequestFilter {
       filterChain.doFilter(requestWrapper, responseWrapper);
     } finally {
       String endpoint = request.getMethod() + " " + request.getRequestURI();
-      String requestBody = truncate(extractBody(requestWrapper.getContentAsByteArray()));
-      String responseBody = truncate(extractBody(responseWrapper.getContentAsByteArray()));
+      String requestBody = truncate(extractBody(requestWrapper.getContentAsByteArray(), requestWrapper.getContentType()));
+      String responseBody = truncate(extractBody(responseWrapper.getContentAsByteArray(), responseWrapper.getContentType()));
       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
       String username = authentication != null ? authentication.getName() : "ANON";
       String role = authentication != null && authentication.getAuthorities() != null
@@ -49,11 +49,34 @@ public class ApiAuditFilter extends OncePerRequestFilter {
     }
   }
 
-  private String extractBody(byte[] bytes) {
+  private String extractBody(byte[] bytes, String contentType) {
     if (bytes == null || bytes.length == 0) {
       return "";
     }
+    if (isBinaryContentType(contentType) || hasNullByte(bytes)) {
+      return "[BINARY CONTENT OMITTED] size=" + bytes.length + " bytes";
+    }
     return new String(bytes, StandardCharsets.UTF_8);
+  }
+
+  private boolean isBinaryContentType(String contentType) {
+    if (contentType == null || contentType.isBlank()) {
+      return false;
+    }
+    String ct = contentType.toLowerCase();
+    return ct.startsWith("image/")
+        || ct.contains("application/pdf")
+        || ct.contains("application/octet-stream")
+        || ct.contains("multipart/form-data");
+  }
+
+  private boolean hasNullByte(byte[] bytes) {
+    for (byte b : bytes) {
+      if (b == 0x00) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private String truncate(String content) {

@@ -26,8 +26,8 @@ public class AuditService {
       apiAuditLogJpaRepository.save(ApiAuditLogJpaEntity.builder()
           .fechaHora(LocalDateTime.now())
           .endpoint(endpoint)
-          .requestJson(requestJson)
-          .responseJson(responseJson)
+          .requestJson(sanitizeForTextColumn(requestJson))
+          .responseJson(sanitizeForTextColumn(responseJson))
           .usuario(usuario)
           .rolUsuario(rolUsuario)
           .build());
@@ -50,5 +50,13 @@ public class AuditService {
     } catch (Exception ex) {
       log.warn("No se pudo guardar action_audit_log: {}", ex.getMessage());
     }
+  }
+
+  private String sanitizeForTextColumn(String value) {
+    if (value == null) {
+      return null;
+    }
+    // PostgreSQL TEXT no admite byte NUL.
+    return value.replace("\u0000", "");
   }
 }

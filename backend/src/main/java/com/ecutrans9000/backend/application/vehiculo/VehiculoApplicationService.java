@@ -6,8 +6,11 @@ import com.ecutrans9000.backend.application.usecase.vehiculo.VehiculoImportResul
 import com.ecutrans9000.backend.application.usecase.vehiculo.VehiculoUpsertCommand;
 import com.ecutrans9000.backend.domain.audit.ActionType;
 import com.ecutrans9000.backend.domain.vehiculo.EstadoVehiculo;
+import com.ecutrans9000.backend.domain.vehiculo.TipoArchivoVehiculo;
 import com.ecutrans9000.backend.domain.vehiculo.TipoDocumento;
 import com.ecutrans9000.backend.domain.vehiculo.Vehiculo;
+import com.ecutrans9000.backend.domain.vehiculo.VehiculoArchivo;
+import com.ecutrans9000.backend.ports.out.vehiculo.VehiculoArchivoRepositoryPort;
 import com.ecutrans9000.backend.ports.out.vehiculo.VehiculoRepositoryPort;
 import com.ecutrans9000.backend.service.AuditService;
 import com.ecutrans9000.backend.service.BusinessException;
@@ -18,10 +21,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,12 +63,16 @@ public class VehiculoApplicationService {
       "image/png",
       "image/webp"
   );
+  private static final List<String> ALLOWED_DOC_CONTENT_TYPES = List.of(
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf"
+  );
 
   private final VehiculoRepositoryPort vehiculoRepositoryPort;
+  private final VehiculoArchivoRepositoryPort vehiculoArchivoRepositoryPort;
   private final AuditService auditService;
-
-  @Value("${app.vehiculos.storage-path:storage/vehiculos}")
-  private String storagePath;
 
   @Value("${app.vehiculos.max-image-bytes:5242880}")
   private long maxImageBytes;
@@ -178,7 +181,8 @@ public class VehiculoApplicationService {
 
   public Vehiculo uploadFoto(UUID id, MultipartFile file, String actorUsername, String actorRole) {
     Vehiculo vehiculo = getExisting(id);
-    vehiculo.setFotoPath(storeFile(file, id, "foto"));
+    upsertArchivo(file, vehiculo, TipoArchivoVehiculo.FOTO, ALLOWED_IMAGE_CONTENT_TYPES, "Solo JPG/PNG/WEBP");
+    vehiculo.setFotoPath(file.getOriginalFilename());
     Vehiculo saved = vehiculoRepositoryPort.save(vehiculo);
     auditService.saveActionAudit(actorUsername, actorRole, "VEHICULOS", ActionType.EDICION, id.toString(), "vehiculos");
     return saved;
@@ -186,7 +190,8 @@ public class VehiculoApplicationService {
 
   public Vehiculo uploadDocumento(UUID id, MultipartFile file, String actorUsername, String actorRole) {
     Vehiculo vehiculo = getExisting(id);
-    vehiculo.setDocPath(storeFile(file, id, "documento"));
+    upsertArchivo(file, vehiculo, TipoArchivoVehiculo.DOCUMENTO, ALLOWED_DOC_CONTENT_TYPES, "Solo JPG/PNG/WEBP/PDF");
+    vehiculo.setDocPath(file.getOriginalFilename());
     Vehiculo saved = vehiculoRepositoryPort.save(vehiculo);
     auditService.saveActionAudit(actorUsername, actorRole, "VEHICULOS", ActionType.EDICION, id.toString(), "vehiculos");
     return saved;
@@ -194,22 +199,23 @@ public class VehiculoApplicationService {
 
   public Vehiculo uploadLicencia(UUID id, MultipartFile file, String actorUsername, String actorRole) {
     Vehiculo vehiculo = getExisting(id);
-    vehiculo.setLicPath(storeFile(file, id, "licencia"));
+    upsertArchivo(file, vehiculo, TipoArchivoVehiculo.LICENCIA, ALLOWED_DOC_CONTENT_TYPES, "Solo JPG/PNG/WEBP/PDF");
+    vehiculo.setLicPath(file.getOriginalFilename());
     Vehiculo saved = vehiculoRepositoryPort.save(vehiculo);
     auditService.saveActionAudit(actorUsername, actorRole, "VEHICULOS", ActionType.EDICION, id.toString(), "vehiculos");
     return saved;
   }
 
   public Resource getFoto(UUID id) {
-    return readFile(getExisting(id).getFotoPath());
+    return readArchivo(id, TipoArchivoVehiculo.FOTO);
   }
 
   public Resource getDocumento(UUID id) {
-    return readFile(getExisting(id).getDocPath());
+    return readArchivo(id, TipoArchivoVehiculo.DOCUMENTO);
   }
 
   public Resource getLicencia(UUID id) {
-    return readFile(getExisting(id).getLicPath());
+    return readArchivo(id, TipoArchivoVehiculo.LICENCIA);
   }
 
   public String downloadTemplate() {
@@ -498,26 +504,33 @@ public class VehiculoApplicationService {
     return value.trim();
   }
 
-  private String storeFile(MultipartFile file, UUID vehiculoId, String slot) {
-    validateImage(file);
+  private void upsertArchivo(
+      MultipartFile file,
+      Vehiculo vehiculo,
+      TipoArchivoVehiculo tipo,
+      List<String> allowedContentTypes,
+      String allowedHint) {
+    validateFile(file, allowedContentTypes, allowedHint);
     try {
-      Path root = Paths.get(storagePath).toAbsolutePath().normalize();
-      Path folder = root.resolve(vehiculoId.toString());
-      Files.createDirectories(folder);
-
-      String original = file.getOriginalFilename() == null ? "file" : file.getOriginalFilename();
-      String extension = getExtension(original);
-      String safeFileName = slot + "_" + System.currentTimeMillis() + extension;
-      Path target = folder.resolve(safeFileName);
-
-      Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-      return target.toString();
+      Optional<VehiculoArchivo> existing = vehiculoArchivoRepositoryPort.findByVehiculoIdAndTipo(vehiculo.getId(), tipo);
+      VehiculoArchivo archivo = VehiculoArchivo.builder()
+          .id(existing.map(VehiculoArchivo::getId).orElse(UUID.randomUUID()))
+          .vehiculoId(vehiculo.getId())
+          .tipo(tipo)
+          .fileName(file.getOriginalFilename() == null ? tipo.name().toLowerCase(Locale.ROOT) : file.getOriginalFilename())
+          .contentType(file.getContentType() == null ? "application/octet-stream" : file.getContentType())
+          .contenido(file.getBytes())
+          .sizeBytes(file.getSize())
+          .createdAt(existing.map(VehiculoArchivo::getCreatedAt).orElse(LocalDateTime.now()))
+          .updatedAt(LocalDateTime.now())
+          .build();
+      vehiculoArchivoRepositoryPort.save(archivo);
     } catch (IOException ex) {
       throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "No se pudo guardar archivo");
     }
   }
 
-  private void validateImage(MultipartFile file) {
+  private void validateFile(MultipartFile file, List<String> allowedContentTypes, String allowedHint) {
     if (file == null || file.isEmpty()) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "Debe seleccionar un archivo");
     }
@@ -525,33 +538,15 @@ public class VehiculoApplicationService {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "Archivo excede tamano maximo");
     }
     String contentType = file.getContentType() == null ? "" : file.getContentType().toLowerCase(Locale.ROOT);
-    if (!ALLOWED_IMAGE_CONTENT_TYPES.contains(contentType)) {
-      throw new BusinessException(HttpStatus.BAD_REQUEST, "Tipo de archivo no permitido. Solo JPG/PNG/WEBP");
+    if (!allowedContentTypes.contains(contentType)) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "Tipo de archivo no permitido. " + allowedHint);
     }
   }
 
-  private String getExtension(String fileName) {
-    int idx = fileName.lastIndexOf('.');
-    if (idx < 0) {
-      return ".bin";
-    }
-    return fileName.substring(idx).toLowerCase(Locale.ROOT);
-  }
-
-  private Resource readFile(String filePath) {
-    if (filePath == null || filePath.isBlank()) {
-      throw new BusinessException(HttpStatus.NOT_FOUND, "Archivo no encontrado");
-    }
-
-    try {
-      Path path = Paths.get(filePath);
-      if (!Files.exists(path)) {
-        throw new BusinessException(HttpStatus.NOT_FOUND, "Archivo no encontrado");
-      }
-      return new ByteArrayResource(Files.readAllBytes(path));
-    } catch (IOException ex) {
-      throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "No se pudo leer archivo");
-    }
+  private Resource readArchivo(UUID vehiculoId, TipoArchivoVehiculo tipo) {
+    VehiculoArchivo archivo = vehiculoArchivoRepositoryPort.findByVehiculoIdAndTipo(vehiculoId, tipo)
+        .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Archivo no encontrado"));
+    return new ByteArrayResource(archivo.getContenido());
   }
 
   private Vehiculo getExisting(UUID id) {

@@ -19,7 +19,7 @@ Revisar `.env.example` para valores por defecto:
 - `CORS_ALLOWED_ORIGINS`
 - `BOOTSTRAP_SUPERADMIN_USERNAME`, `BOOTSTRAP_SUPERADMIN_PASSWORD`
 - `BOOTSTRAP_SUPERADMIN_NOMBRES`, `BOOTSTRAP_SUPERADMIN_CORREO`
-- `VEHICULOS_STORAGE_PATH`, `VEHICULOS_MAX_IMAGE_BYTES`, `VEHICULOS_IMPORT_BATCH_SIZE`
+- `VEHICULOS_MAX_IMAGE_BYTES`, `VEHICULOS_IMPORT_BATCH_SIZE`
 
 Para acceso desde celular por IP, configura `CORS_ALLOWED_ORIGINS` incluyendo tu red local, por ejemplo:
 - `http://192.168.*:4200,http://10.*:4200`
@@ -61,8 +61,8 @@ Base path: `/api/vehiculos`
 - `POST /api/vehiculos/{id}/soft-delete`
 - `POST /api/vehiculos/{id}/restore`
 - `POST /api/vehiculos/{id}/foto` (multipart/form-data)
-- `POST /api/vehiculos/{id}/documento` (multipart/form-data)
-- `POST /api/vehiculos/{id}/licencia-img` (multipart/form-data)
+- `POST /api/vehiculos/{id}/documento` (multipart/form-data, imagen o PDF)
+- `POST /api/vehiculos/{id}/licencia-img` (multipart/form-data, imagen o PDF)
 - `GET /api/vehiculos/{id}/foto`
 - `GET /api/vehiculos/{id}/documento`
 - `GET /api/vehiculos/{id}/licencia-img`
@@ -74,6 +74,18 @@ Base path: `/api/vehiculos`
 - Eliminación por defecto lógica (`deleted`, `deleted_at`), sin borrado físico en módulos funcionales.
 - Auditoría API en `api_audit_log` (endpoint, request, response, usuario, rol).
 - Auditoría de acciones en `action_audit_log` (CREACION, EDICION, ELIMINADO_LOGICO, LOGIN, ELIMINADO_FISICO, IMPORT_CSV).
+
+## Repositorio de imágenes y archivos
+- El almacenamiento de `foto`, `documento` y `licencia` del módulo vehículos se realiza en PostgreSQL (`vehiculo_archivos`) como contenido binario.
+- El backend mantiene metadatos en `vehiculos` (`foto_path`, `doc_path`, `lic_path`) y el binario en la tabla de archivos.
+
+## Estándar reusable para próximos módulos
+- Mantener arquitectura hexagonal completa (`domain`, `application`, `ports`, `adapters`).
+- Implementar ciclo funcional completo del catálogo cuando aplique: CRUD + activar/inactivar + soft delete/restore.
+- Si el módulo maneja archivos, por defecto almacenar binarios en DB y no en filesystem local del contenedor.
+- Para auditoría API, omitir/sanitizar payload binario antes de persistir en `api_audit_log`.
+- Incluir importación masiva con `preview`, `partialOk` y errores por fila cuando el dominio lo requiera.
+- Mantener coherencia visual: íconos en menú y acciones, tooltips, popups no nativos y estados con color.
 
 ## Colección Postman
 - Colección oficial: `postman/EcuTrans9000.postman_collection.json`

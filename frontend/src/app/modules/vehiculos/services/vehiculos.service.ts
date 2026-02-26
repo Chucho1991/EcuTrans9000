@@ -137,6 +137,18 @@ export class VehiculosService {
     return this.http.post<VehiculoResponse>(`${this.baseUrl}/${id}/licencia-img`, formData);
   }
 
+  getFotoBlob(id: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${id}/foto`, { responseType: 'blob' });
+  }
+
+  getDocumentoBlob(id: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${id}/documento`, { responseType: 'blob' });
+  }
+
+  getLicenciaBlob(id: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${id}/licencia-img`, { responseType: 'blob' });
+  }
+
   downloadTemplate(): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/import/template`, { responseType: 'blob' });
   }

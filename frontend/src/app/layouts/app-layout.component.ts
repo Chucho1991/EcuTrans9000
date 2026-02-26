@@ -22,13 +22,34 @@ import { ThemeService } from '../core/services/theme.service';
             <p class="text-sm text-gray-500 dark:text-gray-400">Sistema de trafico</p>
           </div>
           <nav class="space-y-1 overflow-y-auto p-4">
-            <a *ngIf="isSuperadmin()" routerLink="/dashboard" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">Dashboard</a>
-            <a *ngIf="isSuperadmin()" routerLink="/users" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">Usuarios</a>
-            <a routerLink="/profile" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">Mi perfil</a>
-            <a routerLink="/vehiculos" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">Vehiculos</a>
-            <a routerLink="/clientes" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">Clientes</a>
-            <a routerLink="/bitacora" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">Bitacora</a>
-            <a routerLink="/placas" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">Consulta por placas</a>
+            <a *ngIf="isSuperadmin()" routerLink="/dashboard" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-5H4v5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <span>Dashboard</span>
+            </a>
+            <a *ngIf="isSuperadmin()" routerLink="/users" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8 2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm5 8v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <span>Usuarios</span>
+            </a>
+            <a routerLink="/profile" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M20 21a8 8 0 1 0-16 0M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <span>Mi perfil</span>
+            </a>
+            <a routerLink="/vehiculos" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M3 13h18l-1-4H4l-1 4Zm2 0v5m14-5v5M7 18h.01M17 18h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Vehiculos</span>
+            </a>
+            <a routerLink="/clientes" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M3 20h18M5 20V8l7-4 7 4v12M9 20v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Clientes</span>
+            </a>
+            <a routerLink="/bitacora" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M6 3h12a2 2 0 0 1 2 2v14l-4-2-4 2-4-2-4 2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <span>Bitacora</span>
+            </a>
+            <a routerLink="/placas" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M4 7h16v10H4V7Zm4 3h8m-8 4h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Consulta por placas</span>
+            </a>
           </nav>
         </aside>
 
@@ -50,13 +71,34 @@ import { ThemeService } from '../core/services/theme.service';
             </button>
           </div>
           <nav class="space-y-1 p-4">
-            <a *ngIf="isSuperadmin()" routerLink="/dashboard" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Dashboard</a>
-            <a *ngIf="isSuperadmin()" routerLink="/users" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Usuarios</a>
-            <a routerLink="/profile" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Mi perfil</a>
-            <a routerLink="/vehiculos" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Vehiculos</a>
-            <a routerLink="/clientes" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Clientes</a>
-            <a routerLink="/bitacora" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Bitacora</a>
-            <a routerLink="/placas" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">Consulta por placas</a>
+            <a *ngIf="isSuperadmin()" routerLink="/dashboard" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-5H4v5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <span>Dashboard</span>
+            </a>
+            <a *ngIf="isSuperadmin()" routerLink="/users" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8 2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm5 8v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <span>Usuarios</span>
+            </a>
+            <a routerLink="/profile" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M20 21a8 8 0 1 0-16 0M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <span>Mi perfil</span>
+            </a>
+            <a routerLink="/vehiculos" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M3 13h18l-1-4H4l-1 4Zm2 0v5m14-5v5M7 18h.01M17 18h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Vehiculos</span>
+            </a>
+            <a routerLink="/clientes" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M3 20h18M5 20V8l7-4 7 4v12M9 20v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Clientes</span>
+            </a>
+            <a routerLink="/bitacora" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M6 3h12a2 2 0 0 1 2 2v14l-4-2-4 2-4-2-4 2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <span>Bitacora</span>
+            </a>
+            <a routerLink="/placas" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M4 7h16v10H4V7Zm4 3h8m-8 4h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Consulta por placas</span>
+            </a>
           </nav>
         </aside>
 

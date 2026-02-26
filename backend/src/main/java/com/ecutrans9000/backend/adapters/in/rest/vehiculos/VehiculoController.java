@@ -27,9 +27,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.Map;
 import java.util.UUID;
+import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -166,21 +168,27 @@ public class VehiculoController {
   @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Descargar foto")
   public ResponseEntity<Resource> getFoto(@PathVariable UUID id) {
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(vehiculoApplicationService.getFoto(id));
+    Vehiculo vehiculo = vehiculoApplicationService.getById(id);
+    Resource resource = vehiculoApplicationService.getFoto(id);
+    return buildFileResponse(resource, vehiculo.getFotoPath(), "foto");
   }
 
   @GetMapping("/{id}/documento")
   @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Descargar imagen de documento")
   public ResponseEntity<Resource> getDocumento(@PathVariable UUID id) {
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(vehiculoApplicationService.getDocumento(id));
+    Vehiculo vehiculo = vehiculoApplicationService.getById(id);
+    Resource resource = vehiculoApplicationService.getDocumento(id);
+    return buildFileResponse(resource, vehiculo.getDocPath(), "documento");
   }
 
   @GetMapping("/{id}/licencia-img")
   @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Descargar imagen de licencia")
   public ResponseEntity<Resource> getLicencia(@PathVariable UUID id) {
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(vehiculoApplicationService.getLicencia(id));
+    Vehiculo vehiculo = vehiculoApplicationService.getById(id);
+    Resource resource = vehiculoApplicationService.getLicencia(id);
+    return buildFileResponse(resource, vehiculo.getLicPath(), "licencia");
   }
 
   @GetMapping("/import/template")
@@ -274,5 +282,38 @@ public class VehiculoController {
 
   private String role(Authentication auth) {
     return auth.getAuthorities().stream().findFirst().map(a -> a.getAuthority()).orElse("UNKNOWN");
+  }
+
+  private ResponseEntity<Resource> buildFileResponse(Resource resource, String sourcePath, String fallbackName) {
+    MediaType mediaType = resolveMediaType(sourcePath);
+    String fileName = resolveFileName(sourcePath, fallbackName);
+    return ResponseEntity.ok()
+        .contentType(mediaType)
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+        .body(resource);
+  }
+
+  private MediaType resolveMediaType(String sourcePath) {
+    String lower = sourcePath == null ? "" : sourcePath.toLowerCase();
+    if (lower.endsWith(".pdf")) {
+      return MediaType.APPLICATION_PDF;
+    }
+    if (lower.endsWith(".png")) {
+      return MediaType.IMAGE_PNG;
+    }
+    if (lower.endsWith(".webp")) {
+      return MediaType.valueOf("image/webp");
+    }
+    if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
+      return MediaType.IMAGE_JPEG;
+    }
+    return MediaType.APPLICATION_OCTET_STREAM;
+  }
+
+  private String resolveFileName(String sourcePath, String fallbackName) {
+    if (sourcePath == null || sourcePath.isBlank()) {
+      return fallbackName;
+    }
+    return Path.of(sourcePath).getFileName().toString();
   }
 }

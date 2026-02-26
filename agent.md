@@ -19,6 +19,8 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - Centralizar estilos globales y overrides en `frontend/src/styles.css`.
 - Estandarizar patrones visuales repetidos con utilidades (`@utility`) y reutilizarlas en todos los módulos.
 - Mantener siempre una colección Postman actualizada en `/postman`.
+- Si el módulo requiere almacenamiento de archivos, usar persistencia en DB por defecto (tabla de binarios + metadatos), salvo instrucción explícita contraria.
+- En auditoría de API, no persistir payload binario crudo; registrar marcador/sanitizar contenido para evitar errores de encoding.
 
 ## Lineamientos UI obligatorios para módulos nuevos
 - Tema oscuro por defecto.
@@ -66,6 +68,10 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 5. **Datos y auditoría**
 - Agregar migración Flyway.
 - Registrar auditoría API y auditoría de acciones cuando corresponda.
+- Si hay archivos adjuntos:
+  - definir tabla de archivos (binario + `content_type` + `file_name` + `size` + `created_at/updated_at`);
+  - exponer descarga autenticada;
+  - evitar guardar binarios en `api_audit_log`.
 
 6. **Frontend del módulo**
 - Crear rutas y páginas.
@@ -99,5 +105,5 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 
 ## Estado actual del proyecto
 - Módulo `USERS`: implementado con CRUD, soft delete, estados, perfil y auditoría.
-- Módulo `VEHICULOS`: implementado con CRUD, activar/inactivar, soft delete/restore, carga de imágenes por formulario y carga masiva CSV con `preview` e `import`.
+- Módulo `VEHICULOS`: implementado con CRUD, activar/inactivar, soft delete/restore, carga de imágenes/documentos, almacenamiento de archivos en DB (`vehiculo_archivos`) y carga masiva CSV con `preview` e `import`.
 - Swagger/OpenAPI y colección Postman deben mantenerse sincronizados ante cada cambio de endpoint o payload.
