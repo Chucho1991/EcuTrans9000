@@ -59,6 +59,8 @@ LINEAMIENTOS UI/UX OBLIGATORIOS (TEMPLATE)
 - Debe existir toggle dark/light y persistencia de preferencia (por ejemplo en localStorage).
 - Estados visuales de negocio (por ejemplo ACTIVO/INACTIVO/ELIMINADO) deben mostrarse con códigos de color consistentes.
 - Acciones deben habilitarse/ocultarse según estado del registro (no mostrar acciones inválidas).
+- Los estilos repetidos deben abstraerse en utilidades globales (`@utility`) dentro de `frontend/src/styles.css`.
+- En templates, priorizar utilidades compartidas para títulos, subtítulos, tarjetas, botones, controles de formulario y mensajes de error.
 
 5) Validaciones de formularios
 - Cuando un campo obligatorio no sea llenado, debe mostrarse mensaje al pie del campo.

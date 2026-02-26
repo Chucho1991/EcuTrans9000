@@ -16,6 +16,7 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - Documentar API en Swagger/OpenAPI.
 - En frontend usar Tailwind con lineamientos TailAdmin.
 - Centralizar estilos globales y overrides en `frontend/src/styles.css`.
+- Estandarizar patrones visuales repetidos con utilidades (`@utility`) y reutilizarlas en todos los módulos.
 - Mantener siempre una colección Postman actualizada en `/postman`.
 
 ## Lineamientos UI obligatorios para módulos nuevos

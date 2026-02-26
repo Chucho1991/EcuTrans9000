@@ -61,6 +61,12 @@ Para acceso desde celular por IP, configura `CORS_ALLOWED_ORIGINS` incluyendo tu
 - En creación, edición, cambio de estado y login, usar popup visual del template.
 - No usar popups nativos del navegador (`window.alert`, `window.confirm`, `window.prompt`).
 
+## Estandar de estilos (frontend)
+- Centralizar estilos reutilizables en `frontend/src/styles.css` usando `@utility`.
+- Reutilizar utilidades en templates para evitar clases Tailwind duplicadas.
+- Preferir utilidades compartidas para patrones comunes: títulos de página, subtítulos, tarjetas/paneles, botones primario/secundario, controles de formulario y mensajes de error.
+- Mantener utilidades semánticas y consistentes entre módulos (por ejemplo `panel-card`, `page-title`, `page-subtitle`, `btn-primary-brand`, `form-control`, `form-error`).
+
 ## Levantar con Docker
 ```bash
 cp .env.example .env
