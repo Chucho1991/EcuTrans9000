@@ -21,49 +21,49 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
   template: `
     <section class="mx-auto max-w-3xl space-y-6">
       <header>
-        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Mi perfil</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Actualiza tus datos personales y password.</p>
+        <h1 class="page-title">Mi perfil</h1>
+        <p class="page-subtitle">Actualiza tus datos personales y password.</p>
       </header>
 
-      <article class="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+      <article class="panel-card p-6">
         <form class="grid gap-4 sm:grid-cols-2" [formGroup]="form" (ngSubmit)="save()">
           <div class="sm:col-span-2">
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nombres</label>
-            <input class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="nombres" />
-            <p class="mt-1 text-xs text-error-600" *ngIf="showError('nombres', 'required')">
+            <label class="form-label">Nombres</label>
+            <input class="form-control-sm" formControlName="nombres" />
+            <p class="form-error" *ngIf="showError('nombres', 'required')">
               Nombres es obligatorio. Escribe tu nombre completo.
             </p>
           </div>
           <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Correo</label>
-            <input class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="correo" />
-            <p class="mt-1 text-xs text-error-600" *ngIf="showError('correo', 'required')">
+            <label class="form-label">Correo</label>
+            <input class="form-control-sm" formControlName="correo" />
+            <p class="form-error" *ngIf="showError('correo', 'required')">
               Correo es obligatorio. Ingresa tu correo de contacto.
             </p>
-            <p class="mt-1 text-xs text-error-600" *ngIf="showError('correo', 'email')">
+            <p class="form-error" *ngIf="showError('correo', 'email')">
               Correo inválido. Usa un formato como usuario&#64;dominio.com.
             </p>
           </div>
           <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
-            <input class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="username" />
-            <p class="mt-1 text-xs text-error-600" *ngIf="showError('username', 'required')">
+            <label class="form-label">Username</label>
+            <input class="form-control-sm" formControlName="username" />
+            <p class="form-error" *ngIf="showError('username', 'required')">
               Username es obligatorio. Define tu identificador de acceso.
             </p>
           </div>
           <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nueva password (opcional)</label>
-            <input type="password" class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="password" />
+            <label class="form-label">Nueva password (opcional)</label>
+            <input type="password" class="form-control-sm" formControlName="password" />
           </div>
           <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar password</label>
-            <input type="password" class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="confirmPassword" />
-            <p class="mt-1 text-xs text-error-600" *ngIf="showPasswordMismatch()">
+            <label class="form-label">Confirmar password</label>
+            <input type="password" class="form-control-sm" formControlName="confirmPassword" />
+            <p class="form-error" *ngIf="showPasswordMismatch()">
               Las contraseñas no coinciden. Verifica ambos campos.
             </p>
           </div>
           <div class="sm:col-span-2 flex items-center gap-3">
-            <button class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600" type="submit">Guardar perfil</button>
+            <button class="btn-primary-brand" type="submit">Guardar perfil</button>
             <span class="text-sm text-gray-600 dark:text-gray-300" *ngIf="message">{{ message }}</span>
           </div>
         </form>

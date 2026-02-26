@@ -22,14 +22,14 @@ import { PopupService } from '../services/popup.service';
           <button
             *ngIf="popup.mode === 'confirm'"
             type="button"
-            class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+            class="btn-secondary-brand"
             (click)="popupService.onCancel()"
           >
             {{ popup.cancelText }}
           </button>
           <button
             type="button"
-            class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600"
+            class="btn-primary-brand"
             (click)="popupService.onConfirm()"
           >
             {{ popup.confirmText }}

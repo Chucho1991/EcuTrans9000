@@ -19,14 +19,14 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <section class="space-y-6">
+    <section class="min-w-0 w-full space-y-6">
       <header class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Usuarios</h1>
-          <p class="text-sm text-gray-500 dark:text-gray-400">Gestion completa del modulo de usuarios.</p>
+          <h1 class="page-title">Usuarios</h1>
+          <p class="page-subtitle">Gestion completa del modulo de usuarios.</p>
         </div>
         <button
-          class="basis-full rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600 sm:basis-auto"
+          class="btn-primary-brand basis-full sm:basis-auto"
           type="button"
           (click)="startCreate()"
         >
@@ -34,47 +34,47 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
         </button>
       </header>
 
-      <article class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
-        <form class="grid gap-3 md:grid-cols-2 lg:grid-cols-4" [formGroup]="filtersForm" (ngSubmit)="loadUsers(0)">
-          <select class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="rol">
+      <article class="panel-card min-w-0 w-full max-w-full p-4">
+        <form class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4" [formGroup]="filtersForm" (ngSubmit)="loadUsers(0)">
+          <select class="filter-control" formControlName="rol">
             <option value="">Rol: todos</option>
             <option value="SUPERADMINISTRADOR">SUPERADMINISTRADOR</option>
             <option value="REGISTRADOR">REGISTRADOR</option>
           </select>
-          <select class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="activo">
+          <select class="filter-control" formControlName="activo">
             <option value="">Estado: todos</option>
             <option value="true">Activos</option>
             <option value="false">Inactivos</option>
           </select>
-          <select class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="deleted">
+          <select class="filter-control" formControlName="deleted">
             <option value="">Eliminacion: todos</option>
             <option value="false">No eliminados</option>
             <option value="true">Eliminados</option>
           </select>
-          <button class="h-10 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800" type="submit">Filtrar</button>
+          <button class="btn-outline-neutral h-10 w-full rounded-lg font-medium hover:bg-gray-100" type="submit">Filtrar</button>
         </form>
       </article>
 
-      <article class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
-        <div class="overflow-x-auto lg:overflow-x-visible">
-        <table class="table-auto min-w-[780px] text-left text-xs sm:text-sm lg:min-w-full">
+      <article class="panel-card min-w-0 w-full max-w-full overflow-hidden">
+        <div class="min-w-0 w-full max-w-full overflow-x-auto">
+        <table class="w-full table-auto min-w-[560px] text-left text-xs sm:min-w-[780px] sm:text-sm lg:min-w-full">
           <thead class="border-b border-gray-200 bg-gray-50 text-gray-600 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300">
             <tr>
               <th class="px-3 py-3 sm:px-4">Username</th>
               <th class="px-3 py-3 sm:px-4">Nombres</th>
               <th class="px-3 py-3 sm:px-4">Correo</th>
-              <th class="px-3 py-3 sm:px-4">Rol</th>
-              <th class="px-3 py-3 sm:px-4">Estado</th>
+              <th class="hidden px-3 py-3 sm:table-cell sm:px-4">Rol</th>
+              <th class="hidden px-3 py-3 sm:table-cell sm:px-4">Estado</th>
               <th class="px-3 py-3 sm:px-4">Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr class="border-b border-gray-100 dark:border-gray-800" *ngFor="let user of users">
               <td class="px-3 py-3 sm:px-4">{{ user.username }}</td>
-              <td class="px-3 py-3 sm:px-4">{{ user.nombres }}</td>
+              <td class="break-words px-3 py-3 sm:px-4">{{ user.nombres }}</td>
               <td class="break-all px-3 py-3 sm:px-4">{{ user.correo }}</td>
-              <td class="px-3 py-3 sm:px-4">{{ user.rol }}</td>
-              <td class="px-3 py-3 sm:px-4">
+              <td class="hidden px-3 py-3 sm:table-cell sm:px-4">{{ user.rol }}</td>
+              <td class="hidden px-3 py-3 sm:table-cell sm:px-4">
                 <span
                   *ngIf="user.deleted"
                   class="inline-flex rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:border-orange-900/40 dark:bg-orange-900/20 dark:text-orange-300"
@@ -95,7 +95,7 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
                 </span>
               </td>
               <td class="px-3 py-3 sm:px-4">
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-1.5 sm:gap-2">
                   <button class="icon-action-btn" type="button" aria-label="Ver usuario" (click)="selectDetail(user)">
                     <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
                     <span class="icon-action-tooltip">Ver</span>
@@ -153,20 +153,20 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
           </tbody>
         </table>
         </div>
-        <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
+        <div class="flex flex-wrap items-center justify-between gap-2 overflow-x-auto px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
           <span class="basis-full sm:basis-auto">Pagina {{ page + 1 }} de {{ totalPages || 1 }}</span>
-          <div class="flex grow gap-2 sm:grow-0">
-            <button class="rounded border border-gray-300 px-3 py-1 disabled:opacity-50 dark:border-gray-700 dark:hover:bg-gray-800" type="button" (click)="loadUsers(page - 1)" [disabled]="page === 0">
+          <div class="flex min-w-[220px] w-full gap-2 sm:w-auto sm:grow-0">
+            <button class="btn-outline-neutral flex-1 px-3 py-1 disabled:opacity-50 sm:flex-none" type="button" (click)="loadUsers(page - 1)" [disabled]="page === 0">
               Anterior
             </button>
-            <button class="rounded border border-gray-300 px-3 py-1 disabled:opacity-50 dark:border-gray-700 dark:hover:bg-gray-800" type="button" (click)="loadUsers(page + 1)" [disabled]="page + 1 >= totalPages">
+            <button class="btn-outline-neutral flex-1 px-3 py-1 disabled:opacity-50 sm:flex-none" type="button" (click)="loadUsers(page + 1)" [disabled]="page + 1 >= totalPages">
               Siguiente
             </button>
           </div>
         </div>
       </article>
 
-      <article class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6" *ngIf="selectedUser">
+      <article class="panel-card min-w-0 w-full max-w-full p-4 sm:p-6" *ngIf="selectedUser">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Detalle de usuario</h2>
         <p class="mt-2 text-sm text-gray-600 dark:text-gray-300"><strong>ID:</strong> {{ selectedUser.id }}</p>
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Username:</strong> {{ selectedUser.username }}</p>
@@ -196,74 +196,77 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
         </p>
       </article>
 
-      <article class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6" *ngIf="mode !== 'none'">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ mode === 'create' ? 'Crear usuario' : 'Editar usuario' }}</h2>
-        <form class="mt-4 mx-auto grid max-w-5xl gap-4 md:grid-cols-2 xl:grid-cols-3" [formGroup]="userForm" (ngSubmit)="submitUser()">
-          <div class="md:col-span-2 xl:col-span-3">
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nombres</label>
-            <input class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="nombres" />
-            <p class="mt-1 text-xs text-error-600" *ngIf="showError('nombres', 'required')">
+      <article class="panel-card min-w-0 w-full max-w-full p-4 sm:p-6 lg:p-7" *ngIf="mode !== 'none'">
+        <div class="flex flex-wrap items-start justify-between gap-2">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ mode === 'create' ? 'Crear usuario' : 'Editar usuario' }}</h2>
+          <span class="text-xs text-gray-500 dark:text-gray-400">Completa los campos requeridos</span>
+        </div>
+        <form class="mt-5 min-w-0 w-full grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12" [formGroup]="userForm" (ngSubmit)="submitUser()">
+          <div class="min-w-0 md:col-span-2 xl:col-span-12">
+            <label class="form-label">Nombres</label>
+            <input class="form-control" formControlName="nombres" />
+            <p class="form-error" *ngIf="showError('nombres', 'required')">
               Nombres es obligatorio. Escribe el nombre completo del usuario.
             </p>
           </div>
-          <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Correo</label>
-            <input class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="correo" />
-            <p class="mt-1 text-xs text-error-600" *ngIf="showError('correo', 'required')">
+          <div class="min-w-0 xl:col-span-6">
+            <label class="form-label">Correo</label>
+            <input class="form-control" formControlName="correo" />
+            <p class="form-error" *ngIf="showError('correo', 'required')">
               Correo es obligatorio. Ingresa un email válido del usuario.
             </p>
-            <p class="mt-1 text-xs text-error-600" *ngIf="showError('correo', 'email')">
+            <p class="form-error" *ngIf="showError('correo', 'email')">
               Correo inválido. Usa un formato como usuario&#64;dominio.com.
             </p>
           </div>
-          <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
-            <input class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="username" />
-            <p class="mt-1 text-xs text-error-600" *ngIf="showError('username', 'required')">
+          <div class="min-w-0 xl:col-span-3">
+            <label class="form-label">Username</label>
+            <input class="form-control" formControlName="username" />
+            <p class="form-error" *ngIf="showError('username', 'required')">
               Username es obligatorio. Define el identificador de inicio de sesión.
             </p>
           </div>
-          <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Rol</label>
-            <select class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="rol">
+          <div class="min-w-0 xl:col-span-3">
+            <label class="form-label">Rol</label>
+            <select class="form-control" formControlName="rol">
               <option value="SUPERADMINISTRADOR">SUPERADMINISTRADOR</option>
               <option value="REGISTRADOR">REGISTRADOR</option>
             </select>
-            <p class="mt-1 text-xs text-error-600" *ngIf="showError('rol', 'required')">
+            <p class="form-error" *ngIf="showError('rol', 'required')">
               Rol es obligatorio. Selecciona el nivel de permisos del usuario.
             </p>
           </div>
-          <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Activo</label>
-            <select class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="activo">
+          <div class="min-w-0 xl:col-span-3">
+            <label class="form-label">Activo</label>
+            <select class="form-control" formControlName="activo">
               <option [ngValue]="true">SI</option>
               <option [ngValue]="false">NO</option>
             </select>
           </div>
           <ng-container *ngIf="mode === 'create'">
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-              <input type="password" class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="password" />
-              <p class="mt-1 text-xs text-error-600" *ngIf="showError('password', 'required') && mode === 'create'">
+            <div class="min-w-0 xl:col-span-4">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-control" formControlName="password" />
+              <p class="form-error" *ngIf="showError('password', 'required') && mode === 'create'">
                 Password es obligatorio. Ingresa una contraseña para el nuevo usuario.
               </p>
             </div>
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar password</label>
-              <input type="password" class="h-10 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" formControlName="confirmPassword" />
-              <p class="mt-1 text-xs text-error-600" *ngIf="showError('confirmPassword', 'required') && mode === 'create'">
+            <div class="min-w-0 xl:col-span-5">
+              <label class="form-label">Confirmar password</label>
+              <input type="password" class="form-control" formControlName="confirmPassword" />
+              <p class="form-error" *ngIf="showError('confirmPassword', 'required') && mode === 'create'">
                 Confirmar password es obligatorio. Repite la contraseña.
               </p>
-              <p class="mt-1 text-xs text-error-600" *ngIf="showPasswordMismatch()">
+              <p class="form-error" *ngIf="showPasswordMismatch()">
                 Las contraseñas no coinciden. Verifica ambos campos.
               </p>
             </div>
           </ng-container>
-          <div class="md:col-span-2 xl:col-span-3 flex flex-wrap items-center gap-3">
-            <button class="basis-full rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600 sm:basis-auto" type="submit">
+          <div class="min-w-0 flex w-full flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end md:col-span-2 xl:col-span-12">
+            <button class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 sm:w-auto" type="button" (click)="cancelForm()">Cancelar</button>
+            <button class="w-full rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 sm:w-auto" type="submit">
               {{ mode === 'create' ? 'Crear' : 'Guardar cambios' }}
             </button>
-            <button class="basis-full rounded-lg border border-gray-300 px-4 py-2 text-sm dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 sm:basis-auto" type="button" (click)="cancelForm()">Cancelar</button>
           </div>
         </form>
       </article>

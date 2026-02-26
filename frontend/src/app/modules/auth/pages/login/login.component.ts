@@ -34,11 +34,11 @@ import { PopupService } from '../../../../core/services/popup.service';
                   type="text"
                   autocomplete="username"
                   formControlName="usernameOrEmail"
-                  class="h-11 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
+                  class="auth-input-control"
                   [attr.aria-invalid]="hasError('usernameOrEmail')"
                   aria-describedby="usernameOrEmailError"
                 />
-                <p id="usernameOrEmailError" class="mt-1 text-xs text-error-600" *ngIf="hasError('usernameOrEmail')">
+                <p id="usernameOrEmailError" class="form-error" *ngIf="hasError('usernameOrEmail')">
                   Usuario o correo es obligatorio. Ingresa tu username o email registrado.
                 </p>
               </div>
@@ -49,11 +49,11 @@ import { PopupService } from '../../../../core/services/popup.service';
                   type="password"
                   autocomplete="current-password"
                   formControlName="password"
-                  class="h-11 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
+                  class="auth-input-control"
                   [attr.aria-invalid]="hasError('password')"
                   aria-describedby="passwordError"
                 />
-                <p id="passwordError" class="mt-1 text-xs text-error-600" *ngIf="hasError('password')">
+                <p id="passwordError" class="form-error" *ngIf="hasError('password')">
                   Contrasena es obligatoria. Ingresa tu contrasena de acceso.
                 </p>
               </div>
@@ -62,7 +62,7 @@ import { PopupService } from '../../../../core/services/popup.service';
               </p>
               <button
                 type="submit"
-                class="h-11 w-full rounded-lg bg-brand-500 text-sm font-semibold text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-70"
+                class="btn-primary-brand h-11 w-full disabled:cursor-not-allowed disabled:opacity-70"
                 [disabled]="loading"
               >
                 {{ loading ? 'Ingresando...' : 'Entrar' }}

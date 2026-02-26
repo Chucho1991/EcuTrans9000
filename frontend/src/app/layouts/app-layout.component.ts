@@ -10,8 +10,8 @@ import { ThemeService } from '../core/services/theme.service';
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   template: `
-    <div class="min-h-screen bg-gray-50 text-gray-800 dark:bg-gray-950 dark:text-gray-100">
-      <div class="flex min-h-screen">
+    <div class="min-h-screen overflow-x-hidden bg-gray-50 text-gray-800 dark:bg-gray-950 dark:text-gray-100">
+      <div class="flex min-h-screen w-full overflow-x-hidden">
         <aside
           class="hidden w-64 border-r border-gray-200 bg-white lg:flex lg:flex-col xl:w-72 dark:border-gray-800 dark:bg-gray-900"
           [class.lg:hidden]="desktopSidebarHidden"
@@ -60,8 +60,8 @@ import { ThemeService } from '../core/services/theme.service';
           </nav>
         </aside>
 
-        <div class="flex min-h-screen flex-1 flex-col">
-          <header class="flex w-full flex-wrap items-center gap-2 border-b border-gray-200 bg-white px-3 py-3 sm:px-4 sm:py-4 lg:px-6 dark:border-gray-800 dark:bg-gray-900">
+        <div class="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-hidden">
+          <header class="flex w-full min-w-0 items-center gap-2 border-b border-gray-200 bg-white px-3 py-3 sm:px-4 sm:py-4 lg:px-6 dark:border-gray-800 dark:bg-gray-900">
             <div class="flex min-w-0 items-center gap-2">
               <button type="button" class="icon-action-btn" aria-label="Ocultar menu lateral" (click)="toggleSidebar()">
                 <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -69,7 +69,7 @@ import { ThemeService } from '../core/services/theme.service';
               </button>
               <p class="hidden truncate text-sm text-gray-500 dark:text-gray-400 sm:block">Panel administrativo</p>
             </div>
-            <div class="ml-auto flex max-w-full items-center gap-2 overflow-x-auto sm:overflow-x-visible">
+            <div class="ml-auto flex min-w-0 items-center gap-1 overflow-hidden sm:gap-2">
               <span class="hidden rounded-full border border-brand-300/40 bg-brand-500/15 px-3 py-1 text-xs font-semibold tracking-wide text-brand-600 dark:border-brand-400/30 dark:bg-brand-400/20 dark:text-brand-300 sm:inline-flex">
                 {{ getUsernameLabel() }}
               </span>
@@ -84,12 +84,12 @@ import { ThemeService } from '../core/services/theme.service';
                 <span class="icon-action-tooltip">Perfil</span>
               </a>
 
-              <a routerLink="/settings" class="icon-action-btn" aria-label="Ver configuracion">
+              <a routerLink="/settings" class="icon-action-btn hidden sm:inline-flex" aria-label="Ver configuracion">
                 <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.7 1.7 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.07V21a2 2 0 0 1-4 0v-.09a1.7 1.7 0 0 0-.4-1.07 1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.07-.4H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.16 9a1.7 1.7 0 0 0 .44-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.07V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 .4 1.07 1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.28.3.45.68.6 1 .16.34.4.68 1.07.6H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51.4Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                 <span class="icon-action-tooltip">Configuracion</span>
               </a>
 
-              <a routerLink="/version" class="icon-action-btn" aria-label="Ver version">
+              <a routerLink="/version" class="icon-action-btn hidden sm:inline-flex" aria-label="Ver version">
                 <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 7v6m0 4h.01M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                 <span class="icon-action-tooltip">Version</span>
               </a>
@@ -100,7 +100,7 @@ import { ThemeService } from '../core/services/theme.service';
               </button>
             </div>
           </header>
-          <main class="flex-1 overflow-x-hidden bg-gray-50 px-3 py-4 dark:bg-gray-950 sm:px-4 sm:py-6 lg:px-6">
+          <main class="flex-1 min-w-0 overflow-x-hidden bg-gray-50 px-3 py-4 dark:bg-gray-950 sm:px-4 sm:py-6 lg:px-6">
             <router-outlet />
           </main>
         </div>
