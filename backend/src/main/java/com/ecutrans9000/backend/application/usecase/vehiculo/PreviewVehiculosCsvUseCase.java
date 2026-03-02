@@ -15,6 +15,6 @@ public class PreviewVehiculosCsvUseCase {
   private final VehiculoApplicationService service;
 
   public VehiculoImportResult execute(MultipartFile file, ImportMode mode, boolean partialOk) {
-    return service.previewCsv(file, mode, partialOk);
+    return service.previewExcel(file, mode, partialOk);
   }
 }

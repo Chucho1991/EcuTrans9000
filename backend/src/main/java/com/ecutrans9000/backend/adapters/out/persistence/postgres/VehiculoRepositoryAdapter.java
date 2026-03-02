@@ -7,6 +7,7 @@ import com.ecutrans9000.backend.domain.vehiculo.EstadoVehiculo;
 import com.ecutrans9000.backend.domain.vehiculo.Vehiculo;
 import com.ecutrans9000.backend.ports.out.vehiculo.VehiculoRepositoryPort;
 import jakarta.persistence.criteria.Predicate;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,7 @@ public class VehiculoRepositoryAdapter implements VehiculoRepositoryPort {
         .placaNorm(vehiculo.getPlacaNorm())
         .choferDefault(vehiculo.getChoferDefault())
         .licencia(vehiculo.getLicencia())
+        .fechaCaducidadLicencia(vehiculo.getFechaCaducidadLicencia())
         .tipoDocumento(vehiculo.getTipoDocumento())
         .documentoPersonal(vehiculo.getDocumentoPersonal())
         .tonelajeCategoria(vehiculo.getTonelajeCategoria())
@@ -95,5 +97,10 @@ public class VehiculoRepositoryAdapter implements VehiculoRepositoryPort {
 
     List<Vehiculo> content = results.getContent().stream().map(VehiculoMapper::toDomain).toList();
     return new PageImpl<>(content, results.getPageable(), results.getTotalElements());
+  }
+
+  @Override
+  public int deactivateExpiredLicenses(LocalDate today) {
+    return vehiculoJpaRepository.deactivateExpiredLicenses(EstadoVehiculo.INACTIVO, EstadoVehiculo.ACTIVO, today, LocalDateTime.now());
   }
 }

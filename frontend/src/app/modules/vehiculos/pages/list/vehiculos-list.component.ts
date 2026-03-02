@@ -22,10 +22,10 @@ import {
       <header class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 class="page-title">Vehiculos</h1>
-          <p class="page-subtitle">Catalogo completo con imagenes e importacion CSV.</p>
+          <p class="page-subtitle">Catalogo completo con imagenes e importacion Excel.</p>
         </div>
         <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <button class="btn-outline-neutral px-4 py-2" type="button" (click)="openImportModal()">Importar CSV</button>
+          <button class="btn-outline-neutral px-4 py-2" type="button" (click)="openImportModal()">Importar Excel</button>
           <button class="btn-primary-brand" type="button" (click)="startCreate()">Nuevo vehiculo</button>
         </div>
       </header>
@@ -155,6 +155,7 @@ import {
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-300"><strong>Placa:</strong> {{ selectedVehiculo.placa }}</p>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Chofer:</strong> {{ selectedVehiculo.choferDefault }}</p>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Documento:</strong> {{ selectedVehiculo.tipoDocumento }} {{ selectedVehiculo.documentoPersonal }}</p>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Caducidad licencia:</strong> {{ selectedVehiculo.fechaCaducidadLicencia || 'No registrada' }}</p>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Estado:</strong> {{ selectedVehiculo.estado }}</p>
             <div class="mt-3 flex flex-wrap gap-2">
               <button
@@ -196,6 +197,10 @@ import {
           <div class="min-w-0 xl:col-span-3">
             <label class="form-label">Licencia</label>
             <input class="form-control" formControlName="licencia" />
+          </div>
+          <div class="min-w-0 xl:col-span-3">
+            <label class="form-label">Caducidad licencia</label>
+            <input class="form-control" type="date" formControlName="fechaCaducidadLicencia" />
           </div>
           <div class="min-w-0 xl:col-span-2">
             <label class="form-label">Estado</label>
@@ -249,7 +254,7 @@ import {
       <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/70 p-4" *ngIf="showImportModal">
         <article class="panel-card w-full max-w-3xl p-5 sm:p-6">
           <div class="flex items-start justify-between gap-3">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Importar vehiculos CSV</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Importar vehiculos Excel</h3>
             <button class="btn-outline-neutral px-3 py-1" type="button" (click)="closeImportModal()">Cerrar</button>
           </div>
 
@@ -258,11 +263,11 @@ import {
               <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Descargar plantilla
             </button>
-            <button class="btn-outline-neutral inline-flex items-center justify-center gap-2 px-4 py-2" type="button" (click)="downloadSampleCsv()">
+            <button class="btn-outline-neutral inline-flex items-center justify-center gap-2 px-4 py-2" type="button" (click)="downloadSampleExcel()">
               <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M8 3h8l5 5v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-              Descargar ejemplo CSV
+              Descargar ejemplo Excel
             </button>
-            <input class="form-control" type="file" accept=".csv,text/csv" (change)="onImportFileChange($event)" />
+            <input class="form-control" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="onImportFileChange($event)" />
             <select class="form-control" [(ngModel)]="importMode" [ngModelOptions]="{standalone: true}">
               <option value="INSERT_ONLY">INSERT_ONLY</option>
               <option value="UPSERT">UPSERT</option>
@@ -336,6 +341,7 @@ export class VehiculosListComponent implements OnDestroy {
     placa: ['', [Validators.required]],
     choferDefault: ['', [Validators.required]],
     licencia: [''],
+    fechaCaducidadLicencia: [''],
     tipoDocumento: ['CEDULA', [Validators.required]],
     documentoPersonal: ['', [Validators.required]],
     tonelajeCategoria: ['', [Validators.required]],
@@ -390,6 +396,7 @@ export class VehiculosListComponent implements OnDestroy {
       placa: '',
       choferDefault: '',
       licencia: '',
+      fechaCaducidadLicencia: '',
       tipoDocumento: 'CEDULA',
       documentoPersonal: '',
       tonelajeCategoria: '',
@@ -406,6 +413,7 @@ export class VehiculosListComponent implements OnDestroy {
       placa: vehiculo.placa,
       choferDefault: vehiculo.choferDefault,
       licencia: vehiculo.licencia ?? '',
+      fechaCaducidadLicencia: vehiculo.fechaCaducidadLicencia ?? '',
       tipoDocumento: vehiculo.tipoDocumento,
       documentoPersonal: vehiculo.documentoPersonal,
       tonelajeCategoria: vehiculo.tonelajeCategoria,
@@ -445,6 +453,7 @@ export class VehiculosListComponent implements OnDestroy {
       placa: value.placa ?? '',
       choferDefault: value.choferDefault ?? '',
       licencia: value.licencia ?? '',
+      fechaCaducidadLicencia: value.fechaCaducidadLicencia || null,
       tipoDocumento: (value.tipoDocumento ?? 'CEDULA') as TipoDocumento,
       documentoPersonal: value.documentoPersonal ?? '',
       tonelajeCategoria: value.tonelajeCategoria ?? '',
@@ -563,28 +572,14 @@ export class VehiculosListComponent implements OnDestroy {
 
   protected downloadTemplate(): void {
     this.vehiculosService.downloadTemplate().subscribe((blob) => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'vehiculos_template.csv';
-      a.click();
-      URL.revokeObjectURL(url);
+      this.downloadBlob(blob, 'vehiculos_template.xlsx');
     });
   }
 
-  protected downloadSampleCsv(): void {
-    const sampleRows = [
-      'placa,chofer_default,licencia,tipo_documento,documento_personal,tonelaje_categoria,m3,estado',
-      'ABC-1234,Juan Perez,LIC-0001,CEDULA,0102030405,PESADO,12.50,ACTIVO',
-      'PBC-5678,Maria Lopez,LIC-0002,RUC,1799999999001,SEMI-PESADO,8.75,INACTIVO'
-    ];
-    const blob = new Blob([sampleRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'vehiculos_ejemplo.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+  protected downloadSampleExcel(): void {
+    this.vehiculosService.downloadTemplateExample().subscribe((blob) => {
+      this.downloadBlob(blob, 'vehiculos_ejemplo.xlsx');
+    });
   }
 
   protected previewImport(): void {
@@ -605,7 +600,7 @@ export class VehiculosListComponent implements OnDestroy {
     if (!this.importFile) {
       return;
     }
-    this.vehiculosService.importCsv(this.importFile, this.importMode, this.partialOk).subscribe({
+    this.vehiculosService.importExcel(this.importFile, this.importMode, this.partialOk).subscribe({
       next: (result) => {
         this.importPreview = result;
         void this.popupService.info({
@@ -696,6 +691,17 @@ export class VehiculosListComponent implements OnDestroy {
     const a = document.createElement('a');
     a.href = url;
     a.download = `${fileBaseName}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  private downloadBlob(blob: Blob, fileName: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

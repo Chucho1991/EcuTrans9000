@@ -13,6 +13,7 @@ export interface VehiculoResponse {
   placaNorm: string;
   choferDefault: string;
   licencia: string | null;
+  fechaCaducidadLicencia: string | null;
   tipoDocumento: TipoDocumento;
   documentoPersonal: string;
   tonelajeCategoria: string;
@@ -39,6 +40,7 @@ export interface VehiculoUpsertRequest {
   placa: string;
   choferDefault: string;
   licencia: string;
+  fechaCaducidadLicencia: string | null;
   tipoDocumento: TipoDocumento;
   documentoPersonal: string;
   tonelajeCategoria: string;
@@ -153,13 +155,17 @@ export class VehiculosService {
     return this.http.get(`${this.baseUrl}/import/template`, { responseType: 'blob' });
   }
 
+  downloadTemplateExample(): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/import/template-example`, { responseType: 'blob' });
+  }
+
   previewImport(file: File, mode: 'INSERT_ONLY' | 'UPSERT', partialOk: boolean): Observable<VehiculoImportResult> {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<VehiculoImportResult>(`${this.baseUrl}/import/preview?mode=${mode}&partialOk=${partialOk}`, formData);
   }
 
-  importCsv(file: File, mode: 'INSERT_ONLY' | 'UPSERT', partialOk: boolean): Observable<VehiculoImportResult> {
+  importExcel(file: File, mode: 'INSERT_ONLY' | 'UPSERT', partialOk: boolean): Observable<VehiculoImportResult> {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<VehiculoImportResult>(`${this.baseUrl}/import?mode=${mode}&partialOk=${partialOk}`, formData);

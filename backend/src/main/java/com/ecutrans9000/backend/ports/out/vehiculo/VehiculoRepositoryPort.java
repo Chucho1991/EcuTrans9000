@@ -1,6 +1,7 @@
 package com.ecutrans9000.backend.ports.out.vehiculo;
 
 import com.ecutrans9000.backend.domain.vehiculo.Vehiculo;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -39,4 +40,9 @@ public interface VehiculoRepositoryPort {
    * Búsqueda paginada por texto, estado y bandera de eliminados.
    */
   Page<Vehiculo> search(int page, int size, String q, String estado, Boolean includeDeleted);
+
+  /**
+   * Inactiva vehículos activos con licencia vencida.
+   */
+  int deactivateExpiredLicenses(LocalDate today);
 }

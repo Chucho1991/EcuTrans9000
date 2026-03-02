@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
@@ -193,16 +194,21 @@ public class VehiculoController {
 
   @GetMapping("/import/template")
   @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
-  @Operation(summary = "Descargar plantilla CSV")
-  public ResponseEntity<String> template() {
-    return ResponseEntity.ok()
-        .contentType(MediaType.TEXT_PLAIN)
-        .body(downloadVehiculosCsvTemplateUseCase.execute());
+  @Operation(summary = "Descargar plantilla Excel")
+  public ResponseEntity<Resource> template() {
+    return excelResponse(downloadVehiculosCsvTemplateUseCase.execute(), "vehiculos_template.xlsx");
+  }
+
+  @GetMapping("/import/template-example")
+  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
+  @Operation(summary = "Descargar ejemplo de plantilla Excel")
+  public ResponseEntity<Resource> templateExample() {
+    return excelResponse(downloadVehiculosCsvTemplateUseCase.executeExample(), "vehiculos_ejemplo.xlsx");
   }
 
   @PostMapping(path = "/import/preview", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
-  @Operation(summary = "Previsualizar importacion CSV")
+  @Operation(summary = "Previsualizar importacion Excel")
   public ResponseEntity<VehiculoImportResult> preview(
       @RequestPart("file") MultipartFile file,
       @RequestParam(defaultValue = "INSERT_ONLY") String mode,
@@ -212,7 +218,7 @@ public class VehiculoController {
 
   @PostMapping(path = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
-  @Operation(summary = "Importar CSV")
+  @Operation(summary = "Importar Excel")
   public ResponseEntity<VehiculoImportResult> importCsv(
       @RequestPart("file") MultipartFile file,
       @RequestParam(defaultValue = "INSERT_ONLY") String mode,
@@ -226,6 +232,7 @@ public class VehiculoController {
         request.getPlaca(),
         request.getChoferDefault(),
         request.getLicencia(),
+        request.getFechaCaducidadLicencia(),
         parseTipoDocumento(request.getTipoDocumento()),
         request.getDocumentoPersonal(),
         request.getTonelajeCategoria(),
@@ -241,6 +248,7 @@ public class VehiculoController {
         .placaNorm(vehiculo.getPlacaNorm())
         .choferDefault(vehiculo.getChoferDefault())
         .licencia(vehiculo.getLicencia())
+        .fechaCaducidadLicencia(vehiculo.getFechaCaducidadLicencia())
         .tipoDocumento(vehiculo.getTipoDocumento().name())
         .documentoPersonal(vehiculo.getDocumentoPersonal())
         .tonelajeCategoria(vehiculo.getTonelajeCategoria())
@@ -291,6 +299,13 @@ public class VehiculoController {
         .contentType(mediaType)
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
         .body(resource);
+  }
+
+  private ResponseEntity<Resource> excelResponse(byte[] content, String fileName) {
+    return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+        .body(new ByteArrayResource(content));
   }
 
   private MediaType resolveMediaType(String sourcePath) {

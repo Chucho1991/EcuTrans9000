@@ -1,6 +1,7 @@
 package com.ecutrans9000.backend.adapters.in.rest.dto.vehiculo;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,7 @@ public class VehiculoResponse {
   private String placaNorm;
   private String choferDefault;
   private String licencia;
+  private LocalDate fechaCaducidadLicencia;
   private String tipoDocumento;
   private String documentoPersonal;
   private String tonelajeCategoria;

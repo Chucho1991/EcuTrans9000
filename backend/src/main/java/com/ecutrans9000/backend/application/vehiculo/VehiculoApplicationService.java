@@ -15,21 +15,25 @@ import com.ecutrans9000.backend.ports.out.vehiculo.VehiculoRepositoryPort;
 import com.ecutrans9000.backend.service.AuditService;
 import com.ecutrans9000.backend.service.BusinessException;
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -51,12 +55,14 @@ public class VehiculoApplicationService {
       "placa",
       "chofer_default",
       "licencia",
+      "fecha_caducidad_licencia",
       "tipo_documento",
       "documento_personal",
       "tonelaje_categoria",
       "m3",
       "estado"
   );
+  private static final DataFormatter DATA_FORMATTER = new DataFormatter();
 
   private static final List<String> ALLOWED_IMAGE_CONTENT_TYPES = List.of(
       "image/jpeg",
@@ -92,6 +98,7 @@ public class VehiculoApplicationService {
         .placaNorm(placaNorm)
         .choferDefault(command.choferDefault().trim())
         .licencia(trimNullable(command.licencia()))
+        .fechaCaducidadLicencia(command.fechaCaducidadLicencia())
         .tipoDocumento(command.tipoDocumento())
         .documentoPersonal(command.documentoPersonal().trim())
         .tonelajeCategoria(command.tonelajeCategoria().trim())
@@ -121,6 +128,7 @@ public class VehiculoApplicationService {
     vehiculo.setPlacaNorm(placaNorm);
     vehiculo.setChoferDefault(command.choferDefault().trim());
     vehiculo.setLicencia(trimNullable(command.licencia()));
+    vehiculo.setFechaCaducidadLicencia(command.fechaCaducidadLicencia());
     vehiculo.setTipoDocumento(command.tipoDocumento());
     vehiculo.setDocumentoPersonal(command.documentoPersonal().trim());
     vehiculo.setTonelajeCategoria(command.tonelajeCategoria().trim());
@@ -146,6 +154,7 @@ public class VehiculoApplicationService {
     if (Boolean.TRUE.equals(vehiculo.getDeleted())) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "No se puede activar un vehiculo eliminado");
     }
+    validateLicenseNotExpiredForActivation(vehiculo);
     vehiculo.setEstado(EstadoVehiculo.ACTIVO);
     vehiculoRepositoryPort.save(vehiculo);
     auditService.saveActionAudit(actorUsername, actorRole, "VEHICULOS", ActionType.EDICION, id.toString(), "vehiculos");
@@ -175,6 +184,7 @@ public class VehiculoApplicationService {
     vehiculo.setDeleted(false);
     vehiculo.setDeletedAt(null);
     vehiculo.setEstado(EstadoVehiculo.ACTIVO);
+    applyLicenseExpiryStatus(vehiculo);
     vehiculoRepositoryPort.save(vehiculo);
     auditService.saveActionAudit(actorUsername, actorRole, "VEHICULOS", ActionType.EDICION, id.toString(), "vehiculos");
   }
@@ -218,17 +228,21 @@ public class VehiculoApplicationService {
     return readArchivo(id, TipoArchivoVehiculo.LICENCIA);
   }
 
-  public String downloadTemplate() {
-    return String.join(",", HEADER_COLUMNS) + "\n";
+  public byte[] downloadTemplate() {
+    return buildTemplateWorkbook(false);
   }
 
-  public VehiculoImportResult previewCsv(MultipartFile file, ImportMode mode, boolean partialOk) {
-    return processCsv(file, mode, partialOk, true, "SYSTEM", "SYSTEM");
+  public byte[] downloadExampleTemplate() {
+    return buildTemplateWorkbook(true);
+  }
+
+  public VehiculoImportResult previewExcel(MultipartFile file, ImportMode mode, boolean partialOk) {
+    return processExcel(file, mode, partialOk, true, "SYSTEM", "SYSTEM");
   }
 
   @Transactional
-  public VehiculoImportResult importCsv(MultipartFile file, ImportMode mode, boolean partialOk, String actorUsername, String actorRole) {
-    VehiculoImportResult result = processCsv(file, mode, partialOk, false, actorUsername, actorRole);
+  public VehiculoImportResult importExcel(MultipartFile file, ImportMode mode, boolean partialOk, String actorUsername, String actorRole) {
+    VehiculoImportResult result = processExcel(file, mode, partialOk, false, actorUsername, actorRole);
     if (!partialOk && result.getErrorsCount() > 0) {
       TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
     }
@@ -238,7 +252,43 @@ public class VehiculoApplicationService {
     return result;
   }
 
-  private VehiculoImportResult processCsv(
+  @Transactional
+  public int deactivateExpiredLicenses() {
+    int affected = vehiculoRepositoryPort.deactivateExpiredLicenses(LocalDate.now());
+    if (affected > 0) {
+      auditService.saveActionAudit("SYSTEM", "SYSTEM", "VEHICULOS", ActionType.EDICION, "N/A", "vehiculos");
+    }
+    return affected;
+  }
+
+  private byte[] buildTemplateWorkbook(boolean includeExampleRow) {
+    try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+      XSSFSheet sheet = workbook.createSheet("Vehiculos");
+      Row headerRow = sheet.createRow(0);
+      for (int i = 0; i < HEADER_COLUMNS.size(); i++) {
+        headerRow.createCell(i).setCellValue(HEADER_COLUMNS.get(i));
+        sheet.setColumnWidth(i, 22 * 256);
+      }
+      if (includeExampleRow) {
+        Row row = sheet.createRow(1);
+        row.createCell(0).setCellValue("ABC-1234");
+        row.createCell(1).setCellValue("Juan Perez");
+        row.createCell(2).setCellValue("LIC-0001");
+        row.createCell(3).setCellValue("2026-12-31");
+        row.createCell(4).setCellValue("CEDULA");
+        row.createCell(5).setCellValue("0102030405");
+        row.createCell(6).setCellValue("PESADO");
+        row.createCell(7).setCellValue(12.5d);
+        row.createCell(8).setCellValue("ACTIVO");
+      }
+      workbook.write(outputStream);
+      return outputStream.toByteArray();
+    } catch (IOException ex) {
+      throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "No se pudo generar la plantilla Excel");
+    }
+  }
+
+  private VehiculoImportResult processExcel(
       MultipartFile file,
       ImportMode mode,
       boolean partialOk,
@@ -246,7 +296,7 @@ public class VehiculoApplicationService {
       String actorUsername,
       String actorRole) {
 
-    validateCsvFile(file);
+    validateExcelFile(file);
 
     int totalRows = 0;
     int processed = 0;
@@ -257,35 +307,23 @@ public class VehiculoApplicationService {
     List<Vehiculo> batch = new ArrayList<>();
 
     try (InputStream inputStream = new BufferedInputStream(file.getInputStream());
-         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-
-      String headerLine = reader.readLine();
-      if (headerLine == null || headerLine.isBlank()) {
-        throw new BusinessException(HttpStatus.BAD_REQUEST, "CSV vacio");
+         XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
+      XSSFSheet sheet = workbook.getSheetAt(0);
+      Row headerRow = sheet.getRow(0);
+      if (headerRow == null) {
+        throw new BusinessException(HttpStatus.BAD_REQUEST, "La plantilla Excel no tiene encabezados");
       }
+      validateHeader(readHeader(headerRow));
 
-      char delimiter = detectDelimiter(headerLine);
-      List<String> header = CsvLineParser.parse(headerLine, delimiter).stream()
-          .map(h -> h.toLowerCase(Locale.ROOT).trim())
-          .toList();
-      validateHeader(header);
-
-      String line;
-      int rowNumber = 1;
-      while ((line = reader.readLine()) != null) {
-        rowNumber++;
-        if (line.isBlank()) {
+      for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+        Row row = sheet.getRow(rowIndex);
+        if (row == null || !rowHasContent(row)) {
           continue;
         }
 
         totalRows++;
-        List<String> values = CsvLineParser.parse(line, delimiter);
-        if (values.stream().allMatch(String::isBlank)) {
-          continue;
-        }
-
         try {
-          VehiculoUpsertCommand command = parseCommand(values, rowNumber);
+          VehiculoUpsertCommand command = parseCommand(row, rowIndex + 1);
           String placaNorm = Vehiculo.normalizePlaca(command.placa());
           Optional<Vehiculo> existing = vehiculoRepositoryPort.findByPlacaNorm(placaNorm);
 
@@ -299,6 +337,7 @@ public class VehiculoApplicationService {
             vehiculo.setPlacaNorm(placaNorm);
             vehiculo.setChoferDefault(command.choferDefault().trim());
             vehiculo.setLicencia(trimNullable(command.licencia()));
+            vehiculo.setFechaCaducidadLicencia(command.fechaCaducidadLicencia());
             vehiculo.setTipoDocumento(command.tipoDocumento());
             vehiculo.setDocumentoPersonal(command.documentoPersonal().trim());
             vehiculo.setTonelajeCategoria(command.tonelajeCategoria().trim());
@@ -319,6 +358,7 @@ public class VehiculoApplicationService {
                 .placaNorm(placaNorm)
                 .choferDefault(command.choferDefault().trim())
                 .licencia(trimNullable(command.licencia()))
+                .fechaCaducidadLicencia(command.fechaCaducidadLicencia())
                 .tipoDocumento(command.tipoDocumento())
                 .documentoPersonal(command.documentoPersonal().trim())
                 .tonelajeCategoria(command.tonelajeCategoria().trim())
@@ -339,13 +379,13 @@ public class VehiculoApplicationService {
           }
         } catch (BusinessException ex) {
           skipped++;
-          errors.add(new VehiculoImportError(rowNumber, "row", ex.getMessage()));
+          errors.add(new VehiculoImportError(rowIndex + 1, "row", ex.getMessage()));
           if (!partialOk) {
             break;
           }
         } catch (Exception ex) {
           skipped++;
-          errors.add(new VehiculoImportError(rowNumber, "row", "Error inesperado: " + ex.getMessage()));
+          errors.add(new VehiculoImportError(rowIndex + 1, "row", "Error inesperado: " + ex.getMessage()));
           if (!partialOk) {
             break;
           }
@@ -356,7 +396,7 @@ public class VehiculoApplicationService {
         flushAll(batch);
       }
     } catch (IOException ex) {
-      throw new BusinessException(HttpStatus.BAD_REQUEST, "No se pudo leer el CSV");
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "No se pudo leer el archivo Excel");
     }
 
     return VehiculoImportResult.builder()
@@ -384,19 +424,16 @@ public class VehiculoApplicationService {
     batch.clear();
   }
 
-  private VehiculoUpsertCommand parseCommand(List<String> values, int rowNumber) {
-    if (values.size() < HEADER_COLUMNS.size()) {
-      throw new BusinessException(HttpStatus.BAD_REQUEST, "Fila incompleta en row " + rowNumber);
-    }
-
-    String placa = values.get(0);
-    String choferDefault = values.get(1);
-    String licencia = values.get(2);
-    String tipoDocumento = values.get(3);
-    String documentoPersonal = values.get(4);
-    String tonelajeCategoria = values.get(5);
-    String m3Value = values.get(6);
-    String estado = values.get(7);
+  private VehiculoUpsertCommand parseCommand(Row row, int rowNumber) {
+    String placa = readCellAsString(row.getCell(0));
+    String choferDefault = readCellAsString(row.getCell(1));
+    String licencia = readCellAsString(row.getCell(2));
+    LocalDate fechaCaducidadLicencia = parseOptionalDate(row.getCell(3));
+    String tipoDocumento = readCellAsString(row.getCell(4));
+    String documentoPersonal = readCellAsString(row.getCell(5));
+    String tonelajeCategoria = readCellAsString(row.getCell(6));
+    String m3Value = readCellAsString(row.getCell(7));
+    String estado = readCellAsString(row.getCell(8));
 
     if (placa == null || placa.isBlank()) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "placa es obligatoria");
@@ -425,6 +462,7 @@ public class VehiculoApplicationService {
         placa,
         choferDefault,
         licencia,
+        fechaCaducidadLicencia,
         parseTipoDocumento(tipoDocumento),
         documentoPersonal,
         tonelajeCategoria,
@@ -455,15 +493,16 @@ public class VehiculoApplicationService {
     if (vehiculo.getEstado() == null) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "Estado es obligatorio");
     }
+    applyLicenseExpiryStatus(vehiculo);
   }
 
-  private void validateCsvFile(MultipartFile file) {
+  private void validateExcelFile(MultipartFile file) {
     if (file == null || file.isEmpty()) {
-      throw new BusinessException(HttpStatus.BAD_REQUEST, "Debe adjuntar un archivo CSV");
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "Debe adjuntar un archivo Excel");
     }
     String name = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase(Locale.ROOT);
-    if (!name.endsWith(".csv")) {
-      throw new BusinessException(HttpStatus.BAD_REQUEST, "El archivo debe ser .csv");
+    if (!name.endsWith(".xlsx")) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "El archivo debe ser .xlsx");
     }
   }
 
@@ -473,12 +512,6 @@ public class VehiculoApplicationService {
           HttpStatus.BAD_REQUEST,
           "Encabezados invalidos. Debe usar: " + String.join(",", HEADER_COLUMNS));
     }
-  }
-
-  private char detectDelimiter(String headerLine) {
-    long commaCount = headerLine.chars().filter(ch -> ch == ',').count();
-    long semicolonCount = headerLine.chars().filter(ch -> ch == ';').count();
-    return semicolonCount > commaCount ? ';' : ',';
   }
 
   private TipoDocumento parseTipoDocumento(String value) {
@@ -502,6 +535,63 @@ public class VehiculoApplicationService {
       return null;
     }
     return value.trim();
+  }
+
+  private List<String> readHeader(Row row) {
+    List<String> header = new ArrayList<>();
+    for (int i = 0; i < HEADER_COLUMNS.size(); i++) {
+      header.add(readCellAsString(row.getCell(i)).toLowerCase(Locale.ROOT));
+    }
+    return header;
+  }
+
+  private boolean rowHasContent(Row row) {
+    for (int i = 0; i < HEADER_COLUMNS.size(); i++) {
+      String value = readCellAsString(row.getCell(i));
+      if (value != null && !value.isBlank()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private String readCellAsString(Cell cell) {
+    if (cell == null || cell.getCellType() == CellType.BLANK) {
+      return "";
+    }
+    return DATA_FORMATTER.formatCellValue(cell).trim();
+  }
+
+  private LocalDate parseOptionalDate(Cell cell) {
+    if (cell == null || cell.getCellType() == CellType.BLANK) {
+      return null;
+    }
+    if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+      return cell.getLocalDateTimeCellValue().toLocalDate();
+    }
+    String value = readCellAsString(cell);
+    if (value.isBlank()) {
+      return null;
+    }
+    try {
+      return LocalDate.parse(value);
+    } catch (Exception ex) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "fecha_caducidad_licencia invalida. Use aaaa-mm-dd");
+    }
+  }
+
+  private void applyLicenseExpiryStatus(Vehiculo vehiculo) {
+    LocalDate fechaCaducidadLicencia = vehiculo.getFechaCaducidadLicencia();
+    if (fechaCaducidadLicencia != null && !fechaCaducidadLicencia.isAfter(LocalDate.now())) {
+      vehiculo.setEstado(EstadoVehiculo.INACTIVO);
+    }
+  }
+
+  private void validateLicenseNotExpiredForActivation(Vehiculo vehiculo) {
+    LocalDate fechaCaducidadLicencia = vehiculo.getFechaCaducidadLicencia();
+    if (fechaCaducidadLicencia != null && !fechaCaducidadLicencia.isAfter(LocalDate.now())) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "No se puede activar un vehiculo con licencia caducada");
+    }
   }
 
   private void upsertArchivo(

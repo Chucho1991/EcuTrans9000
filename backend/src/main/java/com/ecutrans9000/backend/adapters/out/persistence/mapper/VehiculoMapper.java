@@ -15,6 +15,7 @@ public final class VehiculoMapper {
         .placaNorm(entity.getPlacaNorm())
         .choferDefault(entity.getChoferDefault())
         .licencia(entity.getLicencia())
+        .fechaCaducidadLicencia(entity.getFechaCaducidadLicencia())
         .tipoDocumento(entity.getTipoDocumento())
         .documentoPersonal(entity.getDocumentoPersonal())
         .tonelajeCategoria(entity.getTonelajeCategoria())

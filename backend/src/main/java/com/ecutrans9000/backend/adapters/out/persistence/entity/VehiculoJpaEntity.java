@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -44,6 +45,9 @@ public class VehiculoJpaEntity {
 
   @Column(name = "licencia", length = 100)
   private String licencia;
+
+  @Column(name = "fecha_caducidad_licencia")
+  private LocalDate fechaCaducidadLicencia;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "tipo_documento", nullable = false, length = 20)

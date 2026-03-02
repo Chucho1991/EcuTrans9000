@@ -13,7 +13,11 @@ public class DownloadVehiculosCsvTemplateUseCase {
 
   private final VehiculoApplicationService service;
 
-  public String execute() {
+  public byte[] execute() {
     return service.downloadTemplate();
+  }
+
+  public byte[] executeExample() {
+    return service.downloadExampleTemplate();
   }
 }

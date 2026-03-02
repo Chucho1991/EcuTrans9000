@@ -4,6 +4,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,6 +28,8 @@ public class VehiculoUpsertRequest {
   private String choferDefault;
 
   private String licencia;
+
+  private LocalDate fechaCaducidadLicencia;
 
   @NotBlank
   private String tipoDocumento;
