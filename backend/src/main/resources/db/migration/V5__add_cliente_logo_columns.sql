@@ -1,0 +1,4 @@
+ALTER TABLE clientes
+  ADD COLUMN IF NOT EXISTS logo_file_name VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS logo_content_type VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS logo_contenido BYTEA;

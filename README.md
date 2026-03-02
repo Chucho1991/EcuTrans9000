@@ -20,6 +20,7 @@ Revisar `.env.example` para valores por defecto:
 - `BOOTSTRAP_SUPERADMIN_USERNAME`, `BOOTSTRAP_SUPERADMIN_PASSWORD`
 - `BOOTSTRAP_SUPERADMIN_NOMBRES`, `BOOTSTRAP_SUPERADMIN_CORREO`
 - `VEHICULOS_MAX_IMAGE_BYTES`, `VEHICULOS_IMPORT_BATCH_SIZE`
+- `CLIENTES_MAX_LOGO_BYTES`, `CLIENTES_IMPORT_BATCH_SIZE`
 
 Para acceso desde celular por IP, configura `CORS_ALLOWED_ORIGINS` incluyendo tu red local, por ejemplo:
 - `http://192.168.*:4200,http://10.*:4200`
@@ -70,14 +71,60 @@ Base path: `/api/vehiculos`
 - `POST /api/vehiculos/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
 - `POST /api/vehiculos/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
 
+### Módulo Clientes
+Base path: `/clientes`
+
+- `POST /clientes`
+- `GET /clientes`
+- `GET /clientes/{id}`
+- `PUT /clientes/{id}`
+- `PATCH /clientes/{id}/toggle-activo`
+- `DELETE /clientes/{id}` (solo `SUPERADMINISTRADOR`, borrado lógico)
+- `PATCH /clientes/{id}/restore` (solo `SUPERADMINISTRADOR`)
+- `DELETE /clientes/{id}/force` (solo `SUPERADMINISTRADOR`, borrado físico)
+- `POST /clientes/{id}/logo` (multipart/form-data, logo JPG/PNG/WEBP almacenado en DB)
+- `GET /clientes/{id}/logo`
+- `GET /clientes/import/template`
+- `POST /clientes/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
+- `POST /clientes/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
+
+Reglas operativas vigentes del módulo:
+- `documento` único en todo el catálogo.
+- Un cliente inactivo o eliminado no puede asociarse a nuevos viajes.
+- El logo de empresa se almacena en PostgreSQL dentro de la tabla `clientes`.
+- La importación masiva es por CSV con encabezados `tipo_documento,documento,nombre,nombre_comercial,descripcion,activo`.
+
+### Módulo Bitácora
+Base path: `/api/bitacora/viajes`
+
+- `POST /api/bitacora/viajes`
+- `PUT /api/bitacora/viajes/{id}`
+- `GET /api/bitacora/viajes/{id}`
+- `GET /api/bitacora/viajes?page=&size=&q=&vehiculoId=&clienteId=&fechaDesde=&fechaHasta=&includeDeleted=`
+- `DELETE /api/bitacora/viajes/{id}` (solo `SUPERADMINISTRADOR`, borrado lógico)
+- `PATCH /api/bitacora/viajes/{id}/restore` (solo `SUPERADMINISTRADOR`)
+- `GET /api/bitacora/viajes/export?q=&vehiculoId=&clienteId=&fechaDesde=&fechaHasta=`
+- `GET /api/bitacora/viajes/import/template`
+- `GET /api/bitacora/viajes/import/template/example`
+- `POST /api/bitacora/viajes/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
+- `POST /api/bitacora/viajes/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
+
+Reglas operativas vigentes del módulo:
+- La importación masiva es por Excel `.xlsx`, no CSV.
+- La plantilla de importación usa `Placa` para vehículo y `Documento cliente` para cliente.
+- La importación genera automáticamente `numeroViaje`.
+- El reporte Excel usa la plantilla corporativa del módulo y el título `BITACORA VIAJES <anio>` toma el año del rango filtrado (`fechaDesde`/`fechaHasta`).
+- En exportación, los checks operativos salen como `✓` para `SI` y `X` para `NO`.
+
 ## Soft delete y auditoría
 - Eliminación por defecto lógica (`deleted`, `deleted_at`), sin borrado físico en módulos funcionales.
 - Auditoría API en `api_audit_log` (endpoint, request, response, usuario, rol).
-- Auditoría de acciones en `action_audit_log` (CREACION, EDICION, ELIMINADO_LOGICO, LOGIN, ELIMINADO_FISICO, IMPORT_CSV).
+- Auditoría de acciones en `action_audit_log` (CREACION, EDICION, CAMBIO_ESTADO, ELIMINADO_LOGICO, RESTAURACION, LOGIN, ELIMINADO_FISICO, IMPORT_CSV).
 
 ## Repositorio de imágenes y archivos
 - El almacenamiento de `foto`, `documento` y `licencia` del módulo vehículos se realiza en PostgreSQL (`vehiculo_archivos`) como contenido binario.
 - El backend mantiene metadatos en `vehiculos` (`foto_path`, `doc_path`, `lic_path`) y el binario en la tabla de archivos.
+- El módulo clientes almacena el logo empresarial directamente en la tabla `clientes` (`logo_file_name`, `logo_content_type`, `logo_contenido`).
 
 ## Estándar reusable para próximos módulos
 - Mantener arquitectura hexagonal completa (`domain`, `application`, `ports`, `adapters`).
@@ -90,6 +137,9 @@ Base path: `/api/vehiculos`
 ## Colección Postman
 - Colección oficial: `postman/EcuTrans9000.postman_collection.json`
 - Importar en Postman y ejecutar primero `Auth > Login` para poblar token.
+- Variables operativas incluidas: `baseUrl`, `token`, `targetUserId`, `targetVehiculoId`, `targetBitacoraId`.
+- Cobertura actual: auth, sistema, usuarios, vehículos y bitácora.
+- Cobertura pendiente por incorporar en la colección: endpoints del módulo clientes y operaciones de logo.
 
 ## Validación de documentación
 - Script de validación: `scripts/validate-documentation.ps1`

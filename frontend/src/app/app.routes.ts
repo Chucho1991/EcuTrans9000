@@ -17,8 +17,8 @@ export const APP_ROUTES: Routes = [
       { path: 'settings', loadComponent: () => import('./modules/system/pages/settings/settings.component').then(m => m.SettingsComponent) },
       { path: 'version', loadComponent: () => import('./modules/system/pages/version/version.component').then(m => m.VersionComponent) },
       { path: 'vehiculos', loadComponent: () => import('./modules/vehiculos/pages/list/vehiculos-list.component').then(m => m.VehiculosListComponent) },
-      { path: 'clientes', loadComponent: () => import('./modules/clientes/pages/clientes-placeholder.component').then(m => m.ClientesPlaceholderComponent) },
-      { path: 'bitacora', loadComponent: () => import('./modules/bitacora/pages/bitacora-placeholder.component').then(m => m.BitacoraPlaceholderComponent) },
+      { path: 'clientes', canActivate: [roleGuard], data: { roles: ['SUPERADMINISTRADOR', 'REGISTRADOR'] }, loadComponent: () => import('./modules/clientes/pages/list/clientes-list.component').then(m => m.ClientesListComponent) },
+      { path: 'bitacora', canActivate: [roleGuard], data: { roles: ['SUPERADMINISTRADOR', 'REGISTRADOR'] }, loadComponent: () => import('./modules/bitacora/pages/bitacora-list.component').then(m => m.BitacoraListComponent) },
       { path: 'placas', loadComponent: () => import('./modules/placas/pages/placas-placeholder.component').then(m => m.PlacasPlaceholderComponent) }
     ]
   },

@@ -36,7 +36,7 @@ function Test-Postman {
   }
 
   $json = Get-Content -Raw $postmanPath | ConvertFrom-Json
-  $requiredVariables = @("baseUrl", "token", "targetUserId", "targetVehiculoId")
+  $requiredVariables = @("baseUrl", "token", "targetUserId", "targetVehiculoId", "targetBitacoraId")
   $existingVariables = @($json.variable | ForEach-Object { $_.key })
   $missingVariables = $requiredVariables | Where-Object { $_ -notin $existingVariables }
 
@@ -50,7 +50,13 @@ function Test-Postman {
     "/api/vehiculos",
     "/api/vehiculos/import/template",
     "/api/vehiculos/import/preview",
-    "/api/vehiculos/import"
+    "/api/vehiculos/import",
+    "/api/bitacora/viajes",
+    "/api/bitacora/viajes/export",
+    "/api/bitacora/viajes/import/template",
+    "/api/bitacora/viajes/import/template/example",
+    "/api/bitacora/viajes/import/preview",
+    "/api/bitacora/viajes/import"
   )
   $missingEndpoints = $requiredEndpoints | Where-Object { $rawContent -notmatch [regex]::Escape($_) }
 
@@ -76,6 +82,7 @@ function Test-Readme {
     "OpenAPI JSON",
     "Variables de entorno",
     "Endpoints principales",
+    "Módulo Clientes",
     "Soft delete y auditoría",
     "Colección Postman"
   )
