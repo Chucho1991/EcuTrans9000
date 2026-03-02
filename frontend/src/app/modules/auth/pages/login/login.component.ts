@@ -16,6 +16,11 @@ import { PopupService } from '../../../../core/services/popup.service';
       <div class="relative mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-10 sm:px-6">
         <div class="grid w-full items-center gap-10 lg:grid-cols-2">
           <div class="hidden rounded-3xl bg-white/80 p-10 shadow-theme-lg backdrop-blur lg:block dark:bg-gray-900/80">
+            <img
+              src="brand/ecutrans-logo.png"
+              alt="Logo de EcuTrans"
+              class="mb-6 h-24 w-auto object-contain"
+            />
             <h1 class="text-title-sm font-semibold text-gray-900 dark:text-white">EcuTrans9000</h1>
             <p class="mt-4 text-theme-xl text-gray-600 dark:text-gray-300">
               Plataforma para gestion de bitacoras, usuarios y operacion de flota.
@@ -23,6 +28,11 @@ import { PopupService } from '../../../../core/services/popup.service';
           </div>
 
           <div class="w-full rounded-3xl border border-gray-200 bg-white p-6 shadow-theme-lg sm:p-8 dark:border-gray-800 dark:bg-gray-900">
+            <img
+              src="brand/ecutrans-logo.png"
+              alt="Logo de EcuTrans"
+              class="mb-5 h-16 w-auto object-contain lg:hidden"
+            />
             <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">Iniciar sesion</h2>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Ingresa con tu username o correo.</p>
 

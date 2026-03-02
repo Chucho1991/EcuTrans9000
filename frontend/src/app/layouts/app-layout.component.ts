@@ -18,8 +18,17 @@ import { ThemeService } from '../core/services/theme.service';
           [class.lg:flex]="!desktopSidebarHidden"
         >
           <div class="border-b border-gray-200 px-6 py-5 dark:border-gray-800">
-            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">EcuTrans9000</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Sistema de trafico</p>
+            <div class="flex items-center gap-3">
+              <img
+                src="brand/ecutrans-logo.png"
+                alt="Logo de EcuTrans"
+                class="h-12 w-12 rounded-xl bg-white object-contain p-1 shadow-sm"
+              />
+              <div class="min-w-0">
+                <h1 class="text-xl font-semibold text-gray-900 dark:text-white">EcuTrans9000</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Sistema de trafico</p>
+              </div>
+            </div>
           </div>
           <nav class="space-y-1 overflow-y-auto p-4">
             <a *ngIf="isSuperadmin()" routerLink="/dashboard" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
@@ -61,9 +70,16 @@ import { ThemeService } from '../core/services/theme.service';
           aria-label="Menu lateral movil"
         >
           <div class="flex items-start justify-between gap-3 border-b border-gray-200 px-4 py-4 dark:border-gray-800 sm:px-6 sm:py-5">
-            <div class="min-w-0 flex-1">
-              <h1 class="break-words text-lg font-semibold leading-tight text-gray-900 dark:text-white sm:text-xl">EcuTrans9000</h1>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Sistema de trafico</p>
+            <div class="flex min-w-0 flex-1 items-center gap-3">
+              <img
+                src="brand/ecutrans-logo.png"
+                alt="Logo de EcuTrans"
+                class="h-11 w-11 rounded-xl bg-white object-contain p-1 shadow-sm"
+              />
+              <div class="min-w-0">
+                <h1 class="break-words text-lg font-semibold leading-tight text-gray-900 dark:text-white sm:text-xl">EcuTrans9000</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Sistema de trafico</p>
+              </div>
             </div>
             <button type="button" class="icon-action-btn" aria-label="Cerrar menu lateral" (click)="closeMobileSidebar()">
               <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
