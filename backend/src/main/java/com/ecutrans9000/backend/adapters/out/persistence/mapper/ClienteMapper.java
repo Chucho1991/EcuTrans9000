@@ -16,6 +16,7 @@ public final class ClienteMapper {
         .documentoNorm(entity.getDocumentoNorm())
         .nombre(entity.getNombre())
         .nombreComercial(entity.getNombreComercial())
+        .direccion(entity.getDireccion())
         .descripcion(entity.getDescripcion())
         .logoFileName(entity.getLogoFileName())
         .logoContentType(entity.getLogoContentType())

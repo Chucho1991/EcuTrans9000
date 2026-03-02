@@ -12,6 +12,6 @@ public class ImportClientesCsvUseCase {
   private final ClienteApplicationService service;
 
   public ClienteImportResult execute(MultipartFile file, ImportMode mode, boolean partialOk, String actorUsername, String actorRole) {
-    return service.importCsv(file, mode, partialOk, actorUsername, actorRole);
+    return service.importExcel(file, mode, partialOk, actorUsername, actorRole);
   }
 }

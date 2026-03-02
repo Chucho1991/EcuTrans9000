@@ -23,7 +23,7 @@ import {
           <p class="page-subtitle">Gestion del catalogo de clientes para Bitacora de Viajes.</p>
         </div>
         <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row" *ngIf="canManage()">
-          <button class="btn-outline-neutral px-4 py-2" type="button" (click)="openImportModal()">Importar CSV</button>
+          <button class="btn-outline-neutral px-4 py-2" type="button" (click)="openImportModal()">Importar Excel</button>
           <button class="btn-primary-brand basis-full sm:basis-auto" type="button" (click)="startCreate()">Nuevo cliente</button>
         </div>
       </header>
@@ -48,7 +48,7 @@ import {
                 <th class="px-3 py-3 sm:px-4">Documento</th>
                 <th class="px-3 py-3 sm:px-4">Logo</th>
                 <th class="px-3 py-3 sm:px-4">Nombre</th>
-                <th class="px-3 py-3 sm:px-4">Nombre Comercial</th>
+                <th class="px-3 py-3 sm:px-4">Direccion</th>
                 <th class="px-3 py-3 sm:px-4">Estado</th>
                 <th class="px-3 py-3 sm:px-4">Acciones</th>
               </tr>
@@ -68,7 +68,7 @@ import {
                   </ng-template>
                 </td>
                 <td class="px-3 py-3 sm:px-4">{{ cliente.nombre }}</td>
-                <td class="px-3 py-3 sm:px-4">{{ cliente.nombreComercial || '-' }}</td>
+                <td class="px-3 py-3 sm:px-4">{{ cliente.direccion || '-' }}</td>
                 <td class="px-3 py-3 sm:px-4">
                   <span *ngIf="cliente.deleted" class="inline-flex rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:border-orange-900/40 dark:bg-orange-900/20 dark:text-orange-300">ELIMINADO</span>
                   <span *ngIf="!cliente.deleted && cliente.activo" class="inline-flex rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-300">ACTIVO</span>
@@ -139,7 +139,7 @@ import {
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Tipo documento:</strong> {{ selectedCliente.tipoDocumento }}</p>
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Documento:</strong> {{ selectedCliente.documento }}</p>
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Nombre:</strong> {{ selectedCliente.nombre }}</p>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Nombre comercial:</strong> {{ selectedCliente.nombreComercial || '-' }}</p>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Direccion:</strong> {{ selectedCliente.direccion || '-' }}</p>
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Descripcion:</strong> {{ selectedCliente.descripcion || '-' }}</p>
       </article>
 
@@ -169,15 +169,15 @@ import {
             <p class="form-error" *ngIf="showError('nombre', 'required')">Nombre es obligatorio.</p>
           </div>
           <div class="min-w-0 xl:col-span-6">
-            <label class="form-label">Nombre Comercial</label>
-            <input class="form-control" formControlName="nombreComercial" />
-          </div>
-          <div class="min-w-0 xl:col-span-6">
             <label class="form-label">Activo</label>
             <select class="form-control" formControlName="activo">
               <option [ngValue]="true">SI</option>
               <option [ngValue]="false">NO</option>
             </select>
+          </div>
+          <div class="min-w-0 xl:col-span-6">
+            <label class="form-label">Direccion</label>
+            <input class="form-control" formControlName="direccion" />
           </div>
           <div class="min-w-0 xl:col-span-6">
             <label class="form-label">Logo Empresa</label>
@@ -197,7 +197,7 @@ import {
       <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/70 p-4" *ngIf="showImportModal">
         <article class="panel-card w-full max-w-3xl p-5 sm:p-6">
           <div class="flex items-start justify-between gap-3">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Importar clientes CSV</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Importar clientes Excel</h3>
             <button class="btn-outline-neutral px-3 py-1" type="button" (click)="closeImportModal()">Cerrar</button>
           </div>
 
@@ -206,11 +206,11 @@ import {
               <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Descargar plantilla
             </button>
-            <button class="btn-outline-neutral inline-flex items-center justify-center gap-2 px-4 py-2" type="button" (click)="downloadSampleCsv()">
+            <button class="btn-outline-neutral inline-flex items-center justify-center gap-2 px-4 py-2" type="button" (click)="downloadExampleTemplate()">
               <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M8 3h8l5 5v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-              Descargar ejemplo CSV
+              Descargar ejemplo Excel
             </button>
-            <input class="form-control" type="file" accept=".csv,text/csv" (change)="onImportFileChange($event)" />
+            <input class="form-control" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="onImportFileChange($event)" />
             <select class="form-control" [(ngModel)]="importMode" [ngModelOptions]="{standalone: true}">
               <option value="INSERT_ONLY">INSERT_ONLY</option>
               <option value="UPSERT">UPSERT</option>
@@ -282,7 +282,7 @@ export class ClientesListComponent implements OnDestroy {
     tipoDocumento: ['CEDULA', [Validators.required]],
     documento: ['', [Validators.required]],
     nombre: ['', [Validators.required]],
-    nombreComercial: [''],
+    direccion: [''],
     descripcion: [''],
     activo: [true, [Validators.required]]
   });
@@ -341,7 +341,7 @@ export class ClientesListComponent implements OnDestroy {
       tipoDocumento: 'CEDULA',
       documento: '',
       nombre: '',
-      nombreComercial: '',
+      direccion: '',
       descripcion: '',
       activo: true
     });
@@ -355,7 +355,7 @@ export class ClientesListComponent implements OnDestroy {
       tipoDocumento: cliente.tipoDocumento,
       documento: cliente.documento,
       nombre: cliente.nombre,
-      nombreComercial: cliente.nombreComercial ?? '',
+      direccion: cliente.direccion ?? '',
       descripcion: cliente.descripcion ?? '',
       activo: cliente.activo
     });
@@ -383,7 +383,7 @@ export class ClientesListComponent implements OnDestroy {
       tipoDocumento: (value.tipoDocumento ?? 'CEDULA') as TipoDocumentoCliente,
       documento: value.documento ?? '',
       nombre: value.nombre ?? '',
-      nombreComercial: value.nombreComercial ?? '',
+      direccion: value.direccion ?? '',
       descripcion: value.descripcion ?? '',
       activo: value.activo ?? true
     };
@@ -519,25 +519,21 @@ export class ClientesListComponent implements OnDestroy {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'clientes_template.csv';
+      a.download = 'clientes_template.xlsx';
       a.click();
       URL.revokeObjectURL(url);
     });
   }
 
-  protected downloadSampleCsv(): void {
-    const sampleRows = [
-      'tipo_documento,documento,nombre,nombre_comercial,descripcion,activo',
-      'RUC,1799999999001,COMERCIAL LOPEZ S.A.,LOPEZ LOGISTICA,Cliente corporativo,true',
-      'CEDULA,1712345678,Juan Perez,,Cliente persona natural,false'
-    ];
-    const blob = new Blob([sampleRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'clientes_ejemplo.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+  protected downloadExampleTemplate(): void {
+    this.clientesService.downloadExampleTemplate().subscribe((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'clientes_template_ejemplo.xlsx';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
   }
 
   protected previewImport(): void {
@@ -558,7 +554,7 @@ export class ClientesListComponent implements OnDestroy {
     if (!this.importFile) {
       return;
     }
-    this.clientesService.importCsv(this.importFile, this.importMode, this.partialOk).subscribe({
+    this.clientesService.importExcel(this.importFile, this.importMode, this.partialOk).subscribe({
       next: (result) => {
         this.importPreview = result;
         void this.popupService.info({

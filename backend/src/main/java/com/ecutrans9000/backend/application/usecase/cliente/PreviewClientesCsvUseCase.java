@@ -12,6 +12,6 @@ public class PreviewClientesCsvUseCase {
   private final ClienteApplicationService service;
 
   public ClienteImportResult execute(MultipartFile file, ImportMode mode, boolean partialOk) {
-    return service.previewCsv(file, mode, partialOk);
+    return service.previewExcel(file, mode, partialOk);
   }
 }

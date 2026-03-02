@@ -44,6 +44,9 @@ public class ClienteJpaEntity {
   @Column(name = "nombre_comercial", length = 200)
   private String nombreComercial;
 
+  @Column(name = "direccion", length = 300)
+  private String direccion;
+
   @Column(name = "descripcion", length = 1000)
   private String descripcion;
 

@@ -33,6 +33,7 @@ public class ClienteRepositoryAdapter implements ClienteRepositoryPort {
         .documentoNorm(cliente.getDocumentoNorm())
         .nombre(cliente.getNombre())
         .nombreComercial(cliente.getNombreComercial())
+        .direccion(cliente.getDireccion())
         .descripcion(cliente.getDescripcion())
         .logoFileName(cliente.getLogoFileName())
         .logoContentType(cliente.getLogoContentType())

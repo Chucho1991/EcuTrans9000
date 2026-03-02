@@ -21,6 +21,7 @@ public class Cliente {
   private String documentoNorm;
   private String nombre;
   private String nombreComercial;
+  private String direccion;
   private String descripcion;
   private String logoFileName;
   private String logoContentType;

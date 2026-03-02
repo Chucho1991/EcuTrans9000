@@ -19,6 +19,7 @@ public class ClienteResponse {
   private String documento;
   private String nombre;
   private String nombreComercial;
+  private String direccion;
   private String descripcion;
   private String logoPath;
   private Boolean activo;

@@ -26,6 +26,8 @@ public class ClienteUpsertRequest {
 
   private String nombreComercial;
 
+  private String direccion;
+
   private String descripcion;
 
   @NotNull

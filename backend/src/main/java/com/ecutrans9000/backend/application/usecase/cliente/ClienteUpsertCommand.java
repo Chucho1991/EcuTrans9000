@@ -7,6 +7,7 @@ public record ClienteUpsertCommand(
     String documento,
     String nombre,
     String nombreComercial,
+    String direccion,
     String descripcion,
     Boolean activo) {
 }

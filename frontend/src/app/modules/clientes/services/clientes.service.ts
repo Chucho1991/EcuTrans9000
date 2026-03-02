@@ -11,7 +11,7 @@ export interface ClienteResponse {
   tipoDocumento: TipoDocumentoCliente;
   documento: string;
   nombre: string;
-  nombreComercial: string | null;
+  direccion: string | null;
   descripcion: string | null;
   logoPath: string | null;
   activo: boolean;
@@ -34,7 +34,7 @@ export interface ClienteUpsertRequest {
   tipoDocumento: TipoDocumentoCliente;
   documento: string;
   nombre: string;
-  nombreComercial: string;
+  direccion: string;
   descripcion: string;
   activo: boolean;
 }
@@ -122,13 +122,17 @@ export class ClientesService {
     return this.http.get(`${this.baseUrl}/import/template`, { responseType: 'blob' });
   }
 
+  downloadExampleTemplate(): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/import/template/example`, { responseType: 'blob' });
+  }
+
   previewImport(file: File, mode: 'INSERT_ONLY' | 'UPSERT', partialOk: boolean): Observable<ClienteImportResult> {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<ClienteImportResult>(`${this.baseUrl}/import/preview?mode=${mode}&partialOk=${partialOk}`, formData);
   }
 
-  importCsv(file: File, mode: 'INSERT_ONLY' | 'UPSERT', partialOk: boolean): Observable<ClienteImportResult> {
+  importExcel(file: File, mode: 'INSERT_ONLY' | 'UPSERT', partialOk: boolean): Observable<ClienteImportResult> {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<ClienteImportResult>(`${this.baseUrl}/import?mode=${mode}&partialOk=${partialOk}`, formData);

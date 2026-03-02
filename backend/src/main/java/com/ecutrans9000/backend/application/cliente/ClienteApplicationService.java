@@ -4,7 +4,6 @@ import com.ecutrans9000.backend.application.usecase.cliente.ClienteImportError;
 import com.ecutrans9000.backend.application.usecase.cliente.ClienteImportResult;
 import com.ecutrans9000.backend.application.usecase.cliente.ClienteUpsertCommand;
 import com.ecutrans9000.backend.application.usecase.cliente.ImportMode;
-import com.ecutrans9000.backend.application.vehiculo.CsvLineParser;
 import com.ecutrans9000.backend.domain.audit.ActionType;
 import com.ecutrans9000.backend.domain.cliente.Cliente;
 import com.ecutrans9000.backend.domain.cliente.TipoDocumentoCliente;
@@ -12,11 +11,9 @@ import com.ecutrans9000.backend.ports.out.cliente.ClienteRepositoryPort;
 import com.ecutrans9000.backend.service.AuditService;
 import com.ecutrans9000.backend.service.BusinessException;
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +21,12 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -42,7 +45,7 @@ public class ClienteApplicationService {
       "tipo_documento",
       "documento",
       "nombre",
-      "nombre_comercial",
+      "direccion",
       "descripcion",
       "activo"
   );
@@ -51,6 +54,7 @@ public class ClienteApplicationService {
       "image/png",
       "image/webp"
   );
+  private static final DataFormatter DATA_FORMATTER = new DataFormatter();
 
   private final ClienteRepositoryPort clienteRepositoryPort;
   private final AuditService auditService;
@@ -74,6 +78,7 @@ public class ClienteApplicationService {
         .documentoNorm(documentoNorm)
         .nombre(command.nombre().trim())
         .nombreComercial(trimNullable(command.nombreComercial()))
+        .direccion(trimNullable(command.direccion()))
         .descripcion(trimNullable(command.descripcion()))
         .activo(command.activo() == null || command.activo())
         .deleted(false)
@@ -101,6 +106,7 @@ public class ClienteApplicationService {
     cliente.setDocumentoNorm(documentoNorm);
     cliente.setNombre(command.nombre().trim());
     cliente.setNombreComercial(trimNullable(command.nombreComercial()));
+    cliente.setDireccion(trimNullable(command.direccion()));
     cliente.setDescripcion(trimNullable(command.descripcion()));
     cliente.setActivo(command.activo() == null || command.activo());
 
@@ -189,17 +195,21 @@ public class ClienteApplicationService {
     return new ByteArrayResource(cliente.getLogoContenido());
   }
 
-  public String downloadTemplate() {
-    return String.join(",", HEADER_COLUMNS) + "\n";
+  public byte[] downloadTemplate() {
+    return buildTemplateWorkbook(false);
   }
 
-  public ClienteImportResult previewCsv(MultipartFile file, ImportMode mode, boolean partialOk) {
-    return processCsv(file, mode, partialOk, true, "SYSTEM", "SYSTEM");
+  public byte[] downloadExampleTemplate() {
+    return buildTemplateWorkbook(true);
+  }
+
+  public ClienteImportResult previewExcel(MultipartFile file, ImportMode mode, boolean partialOk) {
+    return processExcel(file, mode, partialOk, true, "SYSTEM", "SYSTEM");
   }
 
   @Transactional
-  public ClienteImportResult importCsv(MultipartFile file, ImportMode mode, boolean partialOk, String actorUsername, String actorRole) {
-    ClienteImportResult result = processCsv(file, mode, partialOk, false, actorUsername, actorRole);
+  public ClienteImportResult importExcel(MultipartFile file, ImportMode mode, boolean partialOk, String actorUsername, String actorRole) {
+    ClienteImportResult result = processExcel(file, mode, partialOk, false, actorUsername, actorRole);
     if (!partialOk && result.getErrorsCount() > 0) {
       TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
     }
@@ -209,7 +219,31 @@ public class ClienteApplicationService {
     return result;
   }
 
-  private ClienteImportResult processCsv(
+  private byte[] buildTemplateWorkbook(boolean includeExampleRow) {
+    try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+      XSSFSheet sheet = workbook.createSheet("Clientes Import");
+      Row headerRow = sheet.createRow(0);
+      for (int i = 0; i < HEADER_COLUMNS.size(); i++) {
+        headerRow.createCell(i).setCellValue(HEADER_COLUMNS.get(i));
+        sheet.setColumnWidth(i, 22 * 256);
+      }
+      if (includeExampleRow) {
+        Row exampleRow = sheet.createRow(1);
+        exampleRow.createCell(0).setCellValue("RUC");
+        exampleRow.createCell(1).setCellValue("1799999999001");
+        exampleRow.createCell(2).setCellValue("COMERCIAL LOPEZ S.A.");
+        exampleRow.createCell(3).setCellValue("Av. Americas y Naciones Unidas");
+        exampleRow.createCell(4).setCellValue("Cliente corporativo");
+        exampleRow.createCell(5).setCellValue("true");
+      }
+      workbook.write(outputStream);
+      return outputStream.toByteArray();
+    } catch (IOException ex) {
+      throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "No se pudo generar la plantilla Excel");
+    }
+  }
+
+  private ClienteImportResult processExcel(
       MultipartFile file,
       ImportMode mode,
       boolean partialOk,
@@ -217,7 +251,7 @@ public class ClienteApplicationService {
       String actorUsername,
       String actorRole) {
 
-    validateCsvFile(file);
+    validateExcelFile(file);
 
     int totalRows = 0;
     int processed = 0;
@@ -228,35 +262,25 @@ public class ClienteApplicationService {
     List<Cliente> batch = new ArrayList<>();
 
     try (InputStream inputStream = new BufferedInputStream(file.getInputStream());
-         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-
-      String headerLine = reader.readLine();
-      if (headerLine == null || headerLine.isBlank()) {
-        throw new BusinessException(HttpStatus.BAD_REQUEST, "CSV vacio");
+         XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
+      XSSFSheet sheet = workbook.getSheetAt(0);
+      Row headerRow = sheet.getRow(0);
+      if (headerRow == null) {
+        throw new BusinessException(HttpStatus.BAD_REQUEST, "La plantilla Excel no tiene encabezados");
       }
+      validateHeader(readHeader(headerRow));
 
-      char delimiter = detectDelimiter(headerLine);
-      List<String> header = CsvLineParser.parse(headerLine, delimiter).stream()
-          .map(h -> h.toLowerCase(Locale.ROOT).trim())
-          .toList();
-      validateHeader(header);
-
-      String line;
-      int rowNumber = 1;
-      while ((line = reader.readLine()) != null) {
-        rowNumber++;
-        if (line.isBlank()) {
+      for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+        Row row = sheet.getRow(rowIndex);
+        if (row == null || !rowHasContent(row)) {
           continue;
         }
 
+        int rowNumber = rowIndex + 1;
         totalRows++;
-        List<String> values = CsvLineParser.parse(line, delimiter);
-        if (values.stream().allMatch(String::isBlank)) {
-          continue;
-        }
 
         try {
-          ClienteUpsertCommand command = parseCommand(values, rowNumber);
+          ClienteUpsertCommand command = parseCommand(row, rowNumber);
           String documentoNorm = Cliente.normalizeDocumento(command.documento());
 
           Optional<Cliente> existing = clienteRepositoryPort.findByDocumentoNorm(documentoNorm);
@@ -271,6 +295,7 @@ public class ClienteApplicationService {
             cliente.setDocumentoNorm(documentoNorm);
             cliente.setNombre(command.nombre().trim());
             cliente.setNombreComercial(trimNullable(command.nombreComercial()));
+            cliente.setDireccion(trimNullable(command.direccion()));
             cliente.setDescripcion(trimNullable(command.descripcion()));
             cliente.setActivo(command.activo() == null || command.activo());
             validate(cliente);
@@ -289,6 +314,7 @@ public class ClienteApplicationService {
                 .documentoNorm(documentoNorm)
                 .nombre(command.nombre().trim())
                 .nombreComercial(trimNullable(command.nombreComercial()))
+                .direccion(trimNullable(command.direccion()))
                 .descripcion(trimNullable(command.descripcion()))
                 .activo(command.activo() == null || command.activo())
                 .deleted(false)
@@ -325,7 +351,7 @@ public class ClienteApplicationService {
         flushAll(batch);
       }
     } catch (IOException ex) {
-      throw new BusinessException(HttpStatus.BAD_REQUEST, "No se pudo leer el CSV");
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "No se pudo leer el archivo Excel");
     }
 
     return ClienteImportResult.builder()
@@ -339,17 +365,13 @@ public class ClienteApplicationService {
         .build();
   }
 
-  private ClienteUpsertCommand parseCommand(List<String> values, int rowNumber) {
-    if (values.size() < HEADER_COLUMNS.size()) {
-      throw new BusinessException(HttpStatus.BAD_REQUEST, "Fila incompleta en row " + rowNumber);
-    }
-
-    String tipoDocumento = values.get(0);
-    String documento = values.get(1);
-    String nombre = values.get(2);
-    String nombreComercial = values.get(3);
-    String descripcion = values.get(4);
-    String activoValue = values.get(5);
+  private ClienteUpsertCommand parseCommand(Row row, int rowNumber) {
+    String tipoDocumento = readCellAsString(row.getCell(0));
+    String documento = readCellAsString(row.getCell(1));
+    String nombre = readCellAsString(row.getCell(2));
+    String direccion = readCellAsString(row.getCell(3));
+    String descripcion = readCellAsString(row.getCell(4));
+    String activoValue = readCellAsString(row.getCell(5));
 
     if (documento == null || documento.isBlank()) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "documento es obligatorio");
@@ -369,7 +391,8 @@ public class ClienteApplicationService {
         parseTipoDocumento(tipoDocumento),
         documento,
         nombre,
-        nombreComercial,
+        null,
+        direccion,
         descripcion,
         activo
     );
@@ -392,13 +415,13 @@ public class ClienteApplicationService {
     };
   }
 
-  private void validateCsvFile(MultipartFile file) {
+  private void validateExcelFile(MultipartFile file) {
     if (file == null || file.isEmpty()) {
-      throw new BusinessException(HttpStatus.BAD_REQUEST, "Debe adjuntar un archivo CSV");
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "Debe adjuntar un archivo Excel");
     }
     String name = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase(Locale.ROOT);
-    if (!name.endsWith(".csv")) {
-      throw new BusinessException(HttpStatus.BAD_REQUEST, "El archivo debe ser .csv");
+    if (!name.endsWith(".xlsx")) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "El archivo debe ser .xlsx");
     }
   }
 
@@ -406,14 +429,39 @@ public class ClienteApplicationService {
     if (!header.equals(HEADER_COLUMNS)) {
       throw new BusinessException(
           HttpStatus.BAD_REQUEST,
-          "Encabezados invalidos. Debe usar: " + String.join(",", HEADER_COLUMNS));
+            "Encabezados invalidos. Debe usar: " + String.join(",", HEADER_COLUMNS));
     }
   }
 
-  private char detectDelimiter(String headerLine) {
-    long commaCount = headerLine.chars().filter(ch -> ch == ',').count();
-    long semicolonCount = headerLine.chars().filter(ch -> ch == ';').count();
-    return semicolonCount > commaCount ? ';' : ',';
+  private List<String> readHeader(Row row) {
+    List<String> values = new ArrayList<>();
+    for (int i = 0; i < HEADER_COLUMNS.size(); i++) {
+      String value = readCellAsString(row.getCell(i));
+      values.add(value == null ? "" : value.trim().toLowerCase(Locale.ROOT));
+    }
+    return values;
+  }
+
+  private boolean rowHasContent(Row row) {
+    for (int i = 0; i < HEADER_COLUMNS.size(); i++) {
+      Cell cell = row.getCell(i);
+      if (cell == null || cell.getCellType() == CellType.BLANK) {
+        continue;
+      }
+      String value = readCellAsString(cell);
+      if (value != null && !value.isBlank()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private String readCellAsString(Cell cell) {
+    if (cell == null) {
+      return null;
+    }
+    String value = DATA_FORMATTER.formatCellValue(cell);
+    return value == null ? null : value.trim();
   }
 
   private void flushBatchIfNeeded(List<Cliente> batch) {

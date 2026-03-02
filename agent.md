@@ -105,7 +105,7 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 
 ## Estado actual del proyecto
 - Módulo `USERS`: implementado con CRUD, soft delete, estados, perfil y auditoría.
-- Módulo `VEHICULOS`: implementado con CRUD, activar/inactivar, soft delete/restore, carga de imágenes/documentos, almacenamiento de archivos en DB (`vehiculo_archivos`) y carga masiva CSV con `preview` e `import`.
-- Módulo `CLIENTES`: implementado con CRUD, activar/inactivar, soft delete/restore, logo empresarial almacenado en DB dentro de `clientes` y carga masiva CSV con `preview` e `import`.
+- Módulo `VEHICULOS`: implementado con CRUD, activar/inactivar, soft delete/restore, carga de imágenes/documentos, almacenamiento de archivos en DB (`vehiculo_archivos`) y carga masiva Excel con `preview` e `import`.
+- Módulo `CLIENTES`: implementado con CRUD, activar/inactivar, soft delete/restore, logo empresarial almacenado en DB dentro de `clientes`, campo `direccion` y carga masiva Excel con `preview`, `import`, plantilla y ejemplo.
 - Módulo `BITACORA`: implementado con CRUD, soft delete/restore, filtros por rango de fechas, exportación Excel basada en plantilla corporativa e importación Excel con plantilla simple y ejemplo.
 - Swagger/OpenAPI y colección Postman deben mantenerse sincronizados ante cada cambio de endpoint o payload.

@@ -85,6 +85,7 @@ Base path: `/clientes`
 - `POST /clientes/{id}/logo` (multipart/form-data, logo JPG/PNG/WEBP almacenado en DB)
 - `GET /clientes/{id}/logo`
 - `GET /clientes/import/template`
+- `GET /clientes/import/template/example`
 - `POST /clientes/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
 - `POST /clientes/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
 
@@ -92,7 +93,10 @@ Reglas operativas vigentes del módulo:
 - `documento` único en todo el catálogo.
 - Un cliente inactivo o eliminado no puede asociarse a nuevos viajes.
 - El logo de empresa se almacena en PostgreSQL dentro de la tabla `clientes`.
-- La importación masiva es por CSV con encabezados `tipo_documento,documento,nombre,nombre_comercial,descripcion,activo`.
+- El catálogo incluye el campo `direccion`.
+- La importación masiva es por Excel `.xlsx`, no CSV.
+- La plantilla de importación usa los encabezados `tipo_documento,documento,nombre,direccion,descripcion,activo`.
+- Existe descarga de plantilla vacía y plantilla con ejemplo en Excel.
 
 ### Módulo Bitácora
 Base path: `/api/bitacora/viajes`
@@ -139,7 +143,7 @@ Reglas operativas vigentes del módulo:
 - Importar en Postman y ejecutar primero `Auth > Login` para poblar token.
 - Variables operativas incluidas: `baseUrl`, `token`, `targetUserId`, `targetVehiculoId`, `targetBitacoraId`.
 - Cobertura actual: auth, sistema, usuarios, vehículos y bitácora.
-- Cobertura pendiente por incorporar en la colección: endpoints del módulo clientes y operaciones de logo.
+- Cobertura pendiente por incorporar en la colección: endpoints del módulo clientes, sus flujos de importación Excel y operaciones de logo.
 
 ## Validación de documentación
 - Script de validación: `scripts/validate-documentation.ps1`
