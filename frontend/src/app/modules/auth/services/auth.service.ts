@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api.config';
+import { ModuleAccessService } from '../../../core/services/module-access.service';
 const TOKEN_KEY = 'ecutrans9000_token';
 const USER_KEY = 'ecutrans9000_user';
 
@@ -24,10 +25,12 @@ export interface LoginResponse {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly moduleAccessService = inject(ModuleAccessService);
 
   login(payload: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${API_BASE_URL}/auth/login`, payload).pipe(
       tap((response) => {
+        this.moduleAccessService.clearCache();
         localStorage.setItem(TOKEN_KEY, response.token);
         localStorage.setItem(USER_KEY, JSON.stringify(response));
       })
@@ -35,6 +38,7 @@ export class AuthService {
   }
 
   logout(): void {
+    this.moduleAccessService.clearCache();
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
   }

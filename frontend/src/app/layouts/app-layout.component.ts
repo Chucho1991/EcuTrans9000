@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
+import { ModuleAccessService } from '../core/services/module-access.service';
 import { AuthService } from '../modules/auth/services/auth.service';
 import { ThemeService } from '../core/services/theme.service';
 
@@ -43,19 +44,19 @@ import { ThemeService } from '../core/services/theme.service';
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M20 21a8 8 0 1 0-16 0M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
               <span>Mi perfil</span>
             </a>
-            <a routerLink="/vehiculos" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
+            <a *ngIf="hasModuleAccess('VEHICULOS')" routerLink="/vehiculos" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M3 13h18l-1-4H4l-1 4Zm2 0v5m14-5v5M7 18h.01M17 18h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span>Vehiculos</span>
             </a>
-            <a routerLink="/clientes" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
+            <a *ngIf="hasModuleAccess('CLIENTES')" routerLink="/clientes" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M3 20h18M5 20V8l7-4 7 4v12M9 20v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span>Clientes</span>
             </a>
-            <a routerLink="/bitacora" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
+            <a *ngIf="hasModuleAccess('BITACORA')" routerLink="/bitacora" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M6 3h12a2 2 0 0 1 2 2v14l-4-2-4 2-4-2-4 2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
               <span>Bitacora</span>
             </a>
-            <a routerLink="/placas" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
+            <a *ngIf="hasModuleAccess('PLACAS')" routerLink="/placas" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M4 7h16v10H4V7Zm4 3h8m-8 4h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span>Consulta por placas</span>
             </a>
@@ -99,19 +100,19 @@ import { ThemeService } from '../core/services/theme.service';
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M20 21a8 8 0 1 0-16 0M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
               <span>Mi perfil</span>
             </a>
-            <a routerLink="/vehiculos" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
+            <a *ngIf="hasModuleAccess('VEHICULOS')" routerLink="/vehiculos" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M3 13h18l-1-4H4l-1 4Zm2 0v5m14-5v5M7 18h.01M17 18h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span>Vehiculos</span>
             </a>
-            <a routerLink="/clientes" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
+            <a *ngIf="hasModuleAccess('CLIENTES')" routerLink="/clientes" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M3 20h18M5 20V8l7-4 7 4v12M9 20v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span>Clientes</span>
             </a>
-            <a routerLink="/bitacora" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
+            <a *ngIf="hasModuleAccess('BITACORA')" routerLink="/bitacora" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M6 3h12a2 2 0 0 1 2 2v14l-4-2-4 2-4-2-4 2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
               <span>Bitacora</span>
             </a>
-            <a routerLink="/placas" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
+            <a *ngIf="hasModuleAccess('PLACAS')" routerLink="/placas" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M4 7h16v10H4V7Zm4 3h8m-8 4h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span>Consulta por placas</span>
             </a>
@@ -142,7 +143,7 @@ import { ThemeService } from '../core/services/theme.service';
                 <span class="icon-action-tooltip">Perfil</span>
               </a>
 
-              <a routerLink="/settings" class="icon-action-btn hidden sm:inline-flex" aria-label="Ver configuracion">
+              <a *ngIf="isSuperadmin()" routerLink="/settings" class="icon-action-btn hidden sm:inline-flex" aria-label="Ver configuracion">
                 <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.7 1.7 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.07V21a2 2 0 0 1-4 0v-.09a1.7 1.7 0 0 0-.4-1.07 1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.07-.4H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.16 9a1.7 1.7 0 0 0 .44-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.07V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 .4 1.07 1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.28.3.45.68.6 1 .16.34.4.68 1.07.6H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51.4Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                 <span class="icon-action-tooltip">Configuracion</span>
               </a>
@@ -168,10 +169,15 @@ import { ThemeService } from '../core/services/theme.service';
 })
 export class AppLayoutComponent {
   private readonly authService = inject(AuthService);
+  private readonly moduleAccessService = inject(ModuleAccessService);
   private readonly router = inject(Router);
   protected readonly themeService = inject(ThemeService);
   protected desktopSidebarHidden = false;
   protected mobileSidebarOpen = false;
+
+  constructor() {
+    this.moduleAccessService.fetchMyAccess().subscribe();
+  }
 
   protected isSuperadmin(): boolean {
     return this.authService.getRole() === 'SUPERADMINISTRADOR';
@@ -179,6 +185,10 @@ export class AppLayoutComponent {
 
   protected getUsernameLabel(): string {
     return this.authService.getNombres() ?? this.authService.getUsername() ?? 'USUARIO';
+  }
+
+  protected hasModuleAccess(moduleKey: string): boolean {
+    return this.moduleAccessService.hasAccess(moduleKey);
   }
 
   logout(): void {

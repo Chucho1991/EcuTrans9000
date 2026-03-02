@@ -55,6 +55,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/vehiculos")
 @RequiredArgsConstructor
 @Tag(name = "Vehiculos")
+@PreAuthorize("@moduleAccessAuthorizationService.canAccess(authentication, 'VEHICULOS')")
 public class VehiculoController {
 
   private final CreateVehiculoUseCase createVehiculoUseCase;
@@ -87,14 +88,12 @@ public class VehiculoController {
   }
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Detalle de vehiculo")
   public ResponseEntity<VehiculoResponse> getById(@PathVariable UUID id) {
     return ResponseEntity.ok(toResponse(vehiculoApplicationService.getById(id)));
   }
 
   @GetMapping
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Buscar vehiculos")
   public ResponseEntity<VehiculoListResponse> search(
       @RequestParam(defaultValue = "0") int page,
@@ -166,7 +165,6 @@ public class VehiculoController {
   }
 
   @GetMapping("/{id}/foto")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Descargar foto")
   public ResponseEntity<Resource> getFoto(@PathVariable UUID id) {
     Vehiculo vehiculo = vehiculoApplicationService.getById(id);
@@ -175,7 +173,6 @@ public class VehiculoController {
   }
 
   @GetMapping("/{id}/documento")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Descargar imagen de documento")
   public ResponseEntity<Resource> getDocumento(@PathVariable UUID id) {
     Vehiculo vehiculo = vehiculoApplicationService.getById(id);
@@ -184,7 +181,6 @@ public class VehiculoController {
   }
 
   @GetMapping("/{id}/licencia-img")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Descargar imagen de licencia")
   public ResponseEntity<Resource> getLicencia(@PathVariable UUID id) {
     Vehiculo vehiculo = vehiculoApplicationService.getById(id);
@@ -193,14 +189,12 @@ public class VehiculoController {
   }
 
   @GetMapping("/import/template")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Descargar plantilla Excel")
   public ResponseEntity<Resource> template() {
     return excelResponse(downloadVehiculosCsvTemplateUseCase.execute(), "vehiculos_template.xlsx");
   }
 
   @GetMapping("/import/template-example")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Descargar ejemplo de plantilla Excel")
   public ResponseEntity<Resource> templateExample() {
     return excelResponse(downloadVehiculosCsvTemplateUseCase.executeExample(), "vehiculos_ejemplo.xlsx");

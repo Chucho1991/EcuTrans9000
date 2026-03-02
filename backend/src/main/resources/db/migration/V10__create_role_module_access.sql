@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS role_module_access (
+  role_name VARCHAR(50) NOT NULL,
+  module_key VARCHAR(50) NOT NULL,
+  enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (role_name, module_key)
+);
+
+INSERT INTO role_module_access (role_name, module_key, enabled)
+VALUES
+  ('REGISTRADOR', 'VEHICULOS', TRUE),
+  ('REGISTRADOR', 'CLIENTES', TRUE),
+  ('REGISTRADOR', 'BITACORA', TRUE),
+  ('REGISTRADOR', 'PLACAS', TRUE)
+ON CONFLICT (role_name, module_key) DO NOTHING;

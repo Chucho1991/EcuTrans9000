@@ -35,6 +35,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/bitacora/viajes")
 @Tag(name = "Bitacora")
+@PreAuthorize("@moduleAccessAuthorizationService.canAccess(authentication, 'BITACORA')")
 public class ViajeBitacoraController {
 
   private final ViajeBitacoraService viajeBitacoraService;
@@ -48,7 +49,6 @@ public class ViajeBitacoraController {
   }
 
   @GetMapping
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Listar viajes de bitacora")
   public ResponseEntity<ViajeBitacoraListResponse> list(
       @RequestParam(defaultValue = "0") int page,
@@ -70,14 +70,12 @@ public class ViajeBitacoraController {
   }
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Detalle de viaje")
   public ResponseEntity<ViajeBitacoraResponse> getById(@PathVariable UUID id) {
     return ResponseEntity.ok(viajeBitacoraService.getById(id));
   }
 
   @GetMapping("/export")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Exportar viajes a Excel")
   public ResponseEntity<byte[]> export(
       @RequestParam(required = false) String q,
@@ -93,7 +91,6 @@ public class ViajeBitacoraController {
   }
 
   @GetMapping("/import/template")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Descargar plantilla Excel")
   public ResponseEntity<byte[]> template() {
     return ResponseEntity.ok()
@@ -103,7 +100,6 @@ public class ViajeBitacoraController {
   }
 
   @GetMapping("/import/template/example")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Descargar plantilla Excel con ejemplo")
   public ResponseEntity<byte[]> exampleTemplate() {
     return ResponseEntity.ok()
@@ -113,7 +109,6 @@ public class ViajeBitacoraController {
   }
 
   @PostMapping(path = "/import/preview", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Previsualizar importacion Excel")
   public ResponseEntity<ViajeBitacoraImportResult> preview(
       @RequestPart("file") MultipartFile file,
@@ -123,7 +118,6 @@ public class ViajeBitacoraController {
   }
 
   @PostMapping(path = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Importar viajes desde Excel")
   public ResponseEntity<ViajeBitacoraImportResult> importExcel(
       @RequestPart("file") MultipartFile file,
@@ -134,14 +128,12 @@ public class ViajeBitacoraController {
   }
 
   @PostMapping
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Crear viaje")
   public ResponseEntity<ViajeBitacoraResponse> create(@Valid @RequestBody ViajeBitacoraUpsertRequest request) {
     return ResponseEntity.ok(viajeBitacoraService.create(request));
   }
 
   @PutMapping("/{id}")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Editar viaje")
   public ResponseEntity<ViajeBitacoraResponse> update(@PathVariable UUID id, @Valid @RequestBody ViajeBitacoraUpsertRequest request) {
     return ResponseEntity.ok(viajeBitacoraService.update(id, request));

@@ -54,6 +54,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/clientes")
 @RequiredArgsConstructor
 @Tag(name = "Clientes")
+@PreAuthorize("@moduleAccessAuthorizationService.canAccess(authentication, 'CLIENTES')")
 public class ClienteController {
 
   private final CreateClienteUseCase createClienteUseCase;
@@ -78,7 +79,6 @@ public class ClienteController {
   }
 
   @GetMapping
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Listar clientes")
   public ResponseEntity<ClienteListResponse> list(
       @RequestParam(defaultValue = "0") int page,
@@ -96,7 +96,6 @@ public class ClienteController {
   }
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Detalle de cliente")
   public ResponseEntity<ClienteResponse> getById(@PathVariable UUID id) {
     return ResponseEntity.ok(toResponse(getClienteByIdUseCase.execute(id)));
@@ -152,7 +151,6 @@ public class ClienteController {
   }
 
   @GetMapping("/{id}/logo")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Descargar logo de cliente")
   public ResponseEntity<Resource> getLogo(@PathVariable UUID id) {
     Cliente cliente = getClienteByIdUseCase.execute(id);
@@ -161,14 +159,12 @@ public class ClienteController {
   }
 
   @GetMapping("/import/template")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Descargar plantilla Excel")
   public ResponseEntity<Resource> template() {
     return excelResponse(downloadClientesCsvTemplateUseCase.execute(), "clientes_template.xlsx");
   }
 
   @GetMapping("/import/template/example")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Descargar plantilla Excel con ejemplo")
   public ResponseEntity<Resource> templateExample() {
     return excelResponse(downloadClientesCsvTemplateUseCase.executeExample(), "clientes_template_ejemplo.xlsx");

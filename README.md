@@ -35,6 +35,9 @@ Para acceso desde celular por IP, configura `CORS_ALLOWED_ORIGINS` incluyendo tu
 ### Auth y sistema
 - `POST /auth/login`
 - `GET /dashboard` (solo `SUPERADMINISTRADOR`)
+- `GET /settings/module-access/me` (módulos habilitados para el usuario autenticado)
+- `GET /settings/module-access` (solo `SUPERADMINISTRADOR`)
+- `PUT /settings/module-access/{role}` (solo `SUPERADMINISTRADOR`)
 - `GET /api/system/health`
 
 ### Módulo Usuarios
@@ -50,44 +53,59 @@ Para acceso desde celular por IP, configura `CORS_ALLOWED_ORIGINS` incluyendo tu
 - `GET /users/me`
 - `PUT /users/me`
 
+### Módulo Configuración de accesos
+Base path: `/settings/module-access`
+
+- `GET /settings/module-access/me`
+- `GET /settings/module-access` (solo `SUPERADMINISTRADOR`)
+- `PUT /settings/module-access/{role}` (solo `SUPERADMINISTRADOR`)
+
+Reglas operativas vigentes del módulo:
+- La pantalla se abre desde el botón de configuración del navbar y solo es visible para `SUPERADMINISTRADOR`.
+- `SUPERADMINISTRADOR` conserva acceso total al sistema y no es editable desde este módulo.
+- La configuración actual administra el acceso de los roles no privilegiados a los módulos `VEHICULOS`, `CLIENTES`, `BITACORA` y `PLACAS`.
+- Cuando un módulo se desactiva para un rol, se bloquea tanto la navegación en frontend como el acceso backend a sus endpoints.
+- La configuración se persiste en la tabla `role_module_access`.
+
 ### Módulo Vehículos
 Base path: `/api/vehiculos`
 
-- `POST /api/vehiculos`
-- `PUT /api/vehiculos/{id}`
-- `GET /api/vehiculos/{id}`
-- `GET /api/vehiculos?page=&size=&q=&estado=&includeDeleted=`
-- `POST /api/vehiculos/{id}/activate`
-- `POST /api/vehiculos/{id}/deactivate`
-- `POST /api/vehiculos/{id}/soft-delete`
-- `POST /api/vehiculos/{id}/restore`
-- `POST /api/vehiculos/{id}/foto` (multipart/form-data)
-- `POST /api/vehiculos/{id}/documento` (multipart/form-data, imagen o PDF)
-- `POST /api/vehiculos/{id}/licencia-img` (multipart/form-data, imagen o PDF)
-- `GET /api/vehiculos/{id}/foto`
-- `GET /api/vehiculos/{id}/documento`
-- `GET /api/vehiculos/{id}/licencia-img`
-- `GET /api/vehiculos/import/template`
-- `POST /api/vehiculos/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
-- `POST /api/vehiculos/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
+- `POST /api/vehiculos` (solo `SUPERADMINISTRADOR`)
+- `PUT /api/vehiculos/{id}` (solo `SUPERADMINISTRADOR`)
+- `GET /api/vehiculos/{id}` (requiere módulo `VEHICULOS`)
+- `GET /api/vehiculos?page=&size=&q=&estado=&includeDeleted=` (requiere módulo `VEHICULOS`)
+- `POST /api/vehiculos/{id}/activate` (solo `SUPERADMINISTRADOR`)
+- `POST /api/vehiculos/{id}/deactivate` (solo `SUPERADMINISTRADOR`)
+- `POST /api/vehiculos/{id}/soft-delete` (solo `SUPERADMINISTRADOR`)
+- `POST /api/vehiculos/{id}/restore` (solo `SUPERADMINISTRADOR`)
+- `POST /api/vehiculos/{id}/foto` (solo `SUPERADMINISTRADOR`, multipart/form-data)
+- `POST /api/vehiculos/{id}/documento` (solo `SUPERADMINISTRADOR`, multipart/form-data, imagen o PDF)
+- `POST /api/vehiculos/{id}/licencia-img` (solo `SUPERADMINISTRADOR`, multipart/form-data, imagen o PDF)
+- `GET /api/vehiculos/{id}/foto` (requiere módulo `VEHICULOS`)
+- `GET /api/vehiculos/{id}/documento` (requiere módulo `VEHICULOS`)
+- `GET /api/vehiculos/{id}/licencia-img` (requiere módulo `VEHICULOS`)
+- `GET /api/vehiculos/import/template` (requiere módulo `VEHICULOS`)
+- `GET /api/vehiculos/import/template-example` (requiere módulo `VEHICULOS`)
+- `POST /api/vehiculos/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false` (solo `SUPERADMINISTRADOR`)
+- `POST /api/vehiculos/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false` (solo `SUPERADMINISTRADOR`)
 
 ### Módulo Clientes
 Base path: `/clientes`
 
-- `POST /clientes`
-- `GET /clientes`
-- `GET /clientes/{id}`
-- `PUT /clientes/{id}`
-- `PATCH /clientes/{id}/toggle-activo`
+- `POST /clientes` (solo `SUPERADMINISTRADOR`)
+- `GET /clientes` (requiere módulo `CLIENTES`)
+- `GET /clientes/{id}` (requiere módulo `CLIENTES`)
+- `PUT /clientes/{id}` (solo `SUPERADMINISTRADOR`)
+- `PATCH /clientes/{id}/toggle-activo` (solo `SUPERADMINISTRADOR`)
 - `DELETE /clientes/{id}` (solo `SUPERADMINISTRADOR`, borrado lógico)
 - `PATCH /clientes/{id}/restore` (solo `SUPERADMINISTRADOR`)
 - `DELETE /clientes/{id}/force` (solo `SUPERADMINISTRADOR`, borrado físico)
 - `POST /clientes/{id}/logo` (multipart/form-data, logo JPG/PNG/WEBP almacenado en DB)
-- `GET /clientes/{id}/logo`
-- `GET /clientes/import/template`
-- `GET /clientes/import/template/example`
-- `POST /clientes/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
-- `POST /clientes/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
+- `GET /clientes/{id}/logo` (requiere módulo `CLIENTES`)
+- `GET /clientes/import/template` (requiere módulo `CLIENTES`)
+- `GET /clientes/import/template/example` (requiere módulo `CLIENTES`)
+- `POST /clientes/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false` (solo `SUPERADMINISTRADOR`)
+- `POST /clientes/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false` (solo `SUPERADMINISTRADOR`)
 
 Reglas operativas vigentes del módulo:
 - `documento` único en todo el catálogo.
@@ -101,17 +119,17 @@ Reglas operativas vigentes del módulo:
 ### Módulo Bitácora
 Base path: `/api/bitacora/viajes`
 
-- `POST /api/bitacora/viajes`
-- `PUT /api/bitacora/viajes/{id}`
-- `GET /api/bitacora/viajes/{id}`
-- `GET /api/bitacora/viajes?page=&size=&q=&vehiculoId=&clienteId=&fechaDesde=&fechaHasta=&includeDeleted=`
+- `POST /api/bitacora/viajes` (requiere módulo `BITACORA`)
+- `PUT /api/bitacora/viajes/{id}` (requiere módulo `BITACORA`)
+- `GET /api/bitacora/viajes/{id}` (requiere módulo `BITACORA`)
+- `GET /api/bitacora/viajes?page=&size=&q=&vehiculoId=&clienteId=&fechaDesde=&fechaHasta=&includeDeleted=` (requiere módulo `BITACORA`)
 - `DELETE /api/bitacora/viajes/{id}` (solo `SUPERADMINISTRADOR`, borrado lógico)
 - `PATCH /api/bitacora/viajes/{id}/restore` (solo `SUPERADMINISTRADOR`)
-- `GET /api/bitacora/viajes/export?q=&vehiculoId=&clienteId=&fechaDesde=&fechaHasta=`
-- `GET /api/bitacora/viajes/import/template`
-- `GET /api/bitacora/viajes/import/template/example`
-- `POST /api/bitacora/viajes/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
-- `POST /api/bitacora/viajes/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false`
+- `GET /api/bitacora/viajes/export?q=&vehiculoId=&clienteId=&fechaDesde=&fechaHasta=` (requiere módulo `BITACORA`)
+- `GET /api/bitacora/viajes/import/template` (requiere módulo `BITACORA`)
+- `GET /api/bitacora/viajes/import/template/example` (requiere módulo `BITACORA`)
+- `POST /api/bitacora/viajes/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false` (requiere módulo `BITACORA`)
+- `POST /api/bitacora/viajes/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false` (requiere módulo `BITACORA`)
 
 Reglas operativas vigentes del módulo:
 - La importación masiva es por Excel `.xlsx`, no CSV.
@@ -123,8 +141,8 @@ Reglas operativas vigentes del módulo:
 ### Módulo Consulta por placas
 Base path: `/api/placas`
 
-- `GET /api/placas/consulta?placa=&fechaDesde=&fechaHasta=`
-- `GET /api/placas/consulta/export?placa=&fechaDesde=&fechaHasta=`
+- `GET /api/placas/consulta?placa=&fechaDesde=&fechaHasta=` (requiere módulo `PLACAS`)
+- `GET /api/placas/consulta/export?placa=&fechaDesde=&fechaHasta=` (requiere módulo `PLACAS`)
 
 Reglas operativas vigentes del módulo:
 - La consulta toma los registros del módulo `Bitácora`.
@@ -141,6 +159,7 @@ Reglas operativas vigentes del módulo:
 - Eliminación por defecto lógica (`deleted`, `deleted_at`), sin borrado físico en módulos funcionales.
 - Auditoría API en `api_audit_log` (endpoint, request, response, usuario, rol).
 - Auditoría de acciones en `action_audit_log` (CREACION, EDICION, CAMBIO_ESTADO, ELIMINADO_LOGICO, RESTAURACION, LOGIN, ELIMINADO_FISICO, IMPORT_CSV).
+- Configuración de accesos por rol persistida en `role_module_access` con trazabilidad de cambios en `action_audit_log`.
 
 ## Repositorio de imágenes y archivos
 - El almacenamiento de `foto`, `documento` y `licencia` del módulo vehículos se realiza en PostgreSQL (`vehiculo_archivos`) como contenido binario.
@@ -159,7 +178,7 @@ Reglas operativas vigentes del módulo:
 - Colección oficial: `postman/EcuTrans9000.postman_collection.json`
 - Importar en Postman y ejecutar primero `Auth > Login` para poblar token.
 - Variables operativas incluidas: `baseUrl`, `token`, `targetUserId`, `targetVehiculoId`, `targetClienteId`, `targetBitacoraId`.
-- Cobertura actual: auth, sistema, usuarios, vehículos, clientes, bitácora y consulta por placas.
+- Cobertura actual: auth, sistema, usuarios, configuración de accesos, vehículos, clientes, bitácora y consulta por placas.
 
 ## Validación de documentación
 - Script de validación: `scripts/validate-documentation.ps1`

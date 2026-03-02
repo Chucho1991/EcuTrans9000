@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/placas")
 @Tag(name = "Consulta por placas")
+@PreAuthorize("@moduleAccessAuthorizationService.canAccess(authentication, 'PLACAS')")
 public class ConsultaPlacasController {
 
   private final ConsultaPlacasService consultaPlacasService;
@@ -30,7 +31,6 @@ public class ConsultaPlacasController {
   }
 
   @GetMapping("/consulta")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Consultar bitacora por placa")
   public ResponseEntity<ConsultaPlacaResponse> consultar(
       @RequestParam(required = false) String placa,
@@ -40,7 +40,6 @@ public class ConsultaPlacasController {
   }
 
   @GetMapping("/consulta/export")
-  @PreAuthorize("hasAnyRole('SUPERADMINISTRADOR','REGISTRADOR')")
   @Operation(summary = "Exportar consulta por placa a Excel")
   public ResponseEntity<byte[]> exportar(
       @RequestParam(required = false) String placa,
