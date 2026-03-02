@@ -19,7 +19,7 @@ export const APP_ROUTES: Routes = [
       { path: 'vehiculos', loadComponent: () => import('./modules/vehiculos/pages/list/vehiculos-list.component').then(m => m.VehiculosListComponent) },
       { path: 'clientes', canActivate: [roleGuard], data: { roles: ['SUPERADMINISTRADOR', 'REGISTRADOR'] }, loadComponent: () => import('./modules/clientes/pages/list/clientes-list.component').then(m => m.ClientesListComponent) },
       { path: 'bitacora', canActivate: [roleGuard], data: { roles: ['SUPERADMINISTRADOR', 'REGISTRADOR'] }, loadComponent: () => import('./modules/bitacora/pages/bitacora-list.component').then(m => m.BitacoraListComponent) },
-      { path: 'placas', loadComponent: () => import('./modules/placas/pages/placas-placeholder.component').then(m => m.PlacasPlaceholderComponent) }
+      { path: 'placas', canActivate: [roleGuard], data: { roles: ['SUPERADMINISTRADOR', 'REGISTRADOR'] }, loadComponent: () => import('./modules/placas/pages/placas-placeholder.component').then(m => m.PlacasPlaceholderComponent) }
     ]
   },
   { path: '**', redirectTo: 'auth/login' }

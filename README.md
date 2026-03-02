@@ -120,6 +120,23 @@ Reglas operativas vigentes del módulo:
 - El reporte Excel usa la plantilla corporativa del módulo y el título `BITACORA VIAJES <anio>` toma el año del rango filtrado (`fechaDesde`/`fechaHasta`).
 - En exportación, los checks operativos salen como `✓` para `SI` y `X` para `NO`.
 
+### Módulo Consulta por placas
+Base path: `/api/placas`
+
+- `GET /api/placas/consulta?placa=&fechaDesde=&fechaHasta=`
+- `GET /api/placas/consulta/export?placa=&fechaDesde=&fechaHasta=`
+
+Reglas operativas vigentes del módulo:
+- La consulta toma los registros del módulo `Bitácora`.
+- La pantalla inicia con lista vacía y solo consulta al usar el filtro.
+- El filtro principal es `placa`; adicionalmente acepta rango `fechaDesde` y `fechaHasta`.
+- El resumen financiero calcula automáticamente:
+  - `Valor Factura` como suma de `valor`,
+  - `Retención 1%` sobre el total facturado,
+  - `Comisión administrativa 6%` sobre el total facturado,
+  - `Pago Total = Valor Factura - Retención 1% - Comisión 6% - Anticipos`.
+- La exportación Excel genera un reporte financiero por placa con estilo corporativo y logo institucional.
+
 ## Soft delete y auditoría
 - Eliminación por defecto lógica (`deleted`, `deleted_at`), sin borrado físico en módulos funcionales.
 - Auditoría API en `api_audit_log` (endpoint, request, response, usuario, rol).
@@ -141,9 +158,8 @@ Reglas operativas vigentes del módulo:
 ## Colección Postman
 - Colección oficial: `postman/EcuTrans9000.postman_collection.json`
 - Importar en Postman y ejecutar primero `Auth > Login` para poblar token.
-- Variables operativas incluidas: `baseUrl`, `token`, `targetUserId`, `targetVehiculoId`, `targetBitacoraId`.
-- Cobertura actual: auth, sistema, usuarios, vehículos y bitácora.
-- Cobertura pendiente por incorporar en la colección: endpoints del módulo clientes, sus flujos de importación Excel y operaciones de logo.
+- Variables operativas incluidas: `baseUrl`, `token`, `targetUserId`, `targetVehiculoId`, `targetClienteId`, `targetBitacoraId`.
+- Cobertura actual: auth, sistema, usuarios, vehículos, clientes, bitácora y consulta por placas.
 
 ## Validación de documentación
 - Script de validación: `scripts/validate-documentation.ps1`
