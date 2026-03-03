@@ -34,13 +34,15 @@ public class UserService {
 
   public UserResponse createUser(CreateUserRequest request, String actorUsername, String actorRole) {
     validatePasswordConfirmation(request.getPassword(), request.getConfirmPassword());
-    validateUniqueOnCreate(request.getUsername(), request.getCorreo());
+    String username = normalize(request.getUsername());
+    String correo = normalizeEmail(request.getCorreo());
+    validateUniqueOnCreate(username, correo);
 
     UserJpaEntity entity = UserJpaEntity.builder()
         .id(UUID.randomUUID())
-        .nombres(request.getNombres().trim())
-        .correo(request.getCorreo().trim().toLowerCase())
-        .username(request.getUsername().trim())
+        .nombres(normalize(request.getNombres()))
+        .correo(correo)
+        .username(username)
         .passwordHash(passwordEncoder.encode(request.getPassword()))
         .rol(parseRole(request.getRol()))
         .activo(request.getActivo() == null || request.getActivo())
@@ -83,10 +85,12 @@ public class UserService {
 
   public UserResponse updateUser(UUID id, UpdateUserRequest request, String actorUsername, String actorRole) {
     UserJpaEntity user = getExisting(id);
-    validateUniqueOnUpdate(id, request.getUsername(), request.getCorreo());
-    user.setNombres(request.getNombres().trim());
-    user.setCorreo(request.getCorreo().trim().toLowerCase());
-    user.setUsername(request.getUsername().trim());
+    String username = normalize(request.getUsername());
+    String correo = normalizeEmail(request.getCorreo());
+    validateUniqueOnUpdate(id, username, correo);
+    user.setNombres(normalize(request.getNombres()));
+    user.setCorreo(correo);
+    user.setUsername(username);
     user.setRol(parseRole(request.getRol()));
     user.setActivo(request.getActivo() == null || request.getActivo());
     user.setUpdatedAt(LocalDateTime.now());
@@ -96,46 +100,46 @@ public class UserService {
   }
 
   public UserResponse getMe(String username) {
-    UserJpaEntity user = userJpaRepository.findByUsernameIgnoreCase(username)
-        .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-    return toResponse(user);
+    return toResponse(getByUsername(username));
   }
 
   public UserResponse updateMe(String username, UpdateMyProfileRequest request) {
-    UserJpaEntity user = userJpaRepository.findByUsernameIgnoreCase(username)
-        .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-    validateUniqueOnUpdate(user.getId(), request.getUsername(), request.getCorreo());
-    user.setNombres(request.getNombres().trim());
-    user.setCorreo(request.getCorreo().trim().toLowerCase());
-    user.setUsername(request.getUsername().trim());
+    UserJpaEntity user = getByUsername(username);
+    String updatedUsername = normalize(request.getUsername());
+    String updatedCorreo = normalizeEmail(request.getCorreo());
+    validateUniqueOnUpdate(user.getId(), updatedUsername, updatedCorreo);
+    user.setNombres(normalize(request.getNombres()));
+    user.setCorreo(updatedCorreo);
+    user.setUsername(updatedUsername);
     if (request.getPassword() != null && !request.getPassword().isBlank()) {
       validatePasswordConfirmation(request.getPassword(), request.getConfirmPassword());
       user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
     }
-    user.setUpdatedAt(LocalDateTime.now());
-    UserJpaEntity saved = userJpaRepository.save(user);
+    UserJpaEntity saved = saveUpdatedUser(user);
     auditService.saveActionAudit(saved.getUsername(), saved.getRol().name(), "USERS", ActionType.EDICION, saved.getId().toString(), "users");
     return toResponse(saved);
   }
 
   public void softDelete(UUID id, String actorUsername, String actorRole) {
     UserJpaEntity user = getExisting(id);
+    LocalDateTime now = LocalDateTime.now();
     user.setDeleted(true);
     user.setActivo(false);
-    user.setDeletedAt(LocalDateTime.now());
+    user.setDeletedAt(now);
     user.setDeletedBy(actorUsername);
-    user.setUpdatedAt(LocalDateTime.now());
+    user.setUpdatedAt(now);
     userJpaRepository.save(user);
     auditService.saveActionAudit(actorUsername, actorRole, "USERS", ActionType.ELIMINADO_LOGICO, user.getId().toString(), "users");
   }
 
   public void restore(UUID id, String actorUsername, String actorRole) {
     UserJpaEntity user = getExisting(id);
+    LocalDateTime now = LocalDateTime.now();
     user.setDeleted(false);
     user.setActivo(true);
     user.setDeletedAt(null);
     user.setDeletedBy(null);
-    user.setUpdatedAt(LocalDateTime.now());
+    user.setUpdatedAt(now);
     userJpaRepository.save(user);
     auditService.saveActionAudit(actorUsername, actorRole, "USERS", ActionType.EDICION, user.getId().toString(), "users");
   }
@@ -146,8 +150,7 @@ public class UserService {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "No se puede activar un usuario eliminado. Debe restaurarse primero.");
     }
     user.setActivo(true);
-    user.setUpdatedAt(LocalDateTime.now());
-    userJpaRepository.save(user);
+    saveUpdatedUser(user);
     auditService.saveActionAudit(actorUsername, actorRole, "USERS", ActionType.EDICION, user.getId().toString(), "users");
   }
 
@@ -157,8 +160,7 @@ public class UserService {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "El usuario ya esta eliminado logicamente.");
     }
     user.setActivo(false);
-    user.setUpdatedAt(LocalDateTime.now());
-    userJpaRepository.save(user);
+    saveUpdatedUser(user);
     auditService.saveActionAudit(actorUsername, actorRole, "USERS", ActionType.EDICION, user.getId().toString(), "users");
   }
 
@@ -169,19 +171,19 @@ public class UserService {
   }
 
   private void validateUniqueOnCreate(String username, String correo) {
-    if (userJpaRepository.existsByUsernameIgnoreCase(username.trim())) {
+    if (userJpaRepository.existsByUsernameIgnoreCase(username)) {
       throw new BusinessException(HttpStatus.CONFLICT, "Username ya existe");
     }
-    if (userJpaRepository.existsByCorreoIgnoreCase(correo.trim())) {
+    if (userJpaRepository.existsByCorreoIgnoreCase(correo)) {
       throw new BusinessException(HttpStatus.CONFLICT, "Correo ya existe");
     }
   }
 
   private void validateUniqueOnUpdate(UUID id, String username, String correo) {
-    if (userJpaRepository.existsByUsernameIgnoreCaseAndIdNot(username.trim(), id)) {
+    if (userJpaRepository.existsByUsernameIgnoreCaseAndIdNot(username, id)) {
       throw new BusinessException(HttpStatus.CONFLICT, "Username ya existe");
     }
-    if (userJpaRepository.existsByCorreoIgnoreCaseAndIdNot(correo.trim(), id)) {
+    if (userJpaRepository.existsByCorreoIgnoreCaseAndIdNot(correo, id)) {
       throw new BusinessException(HttpStatus.CONFLICT, "Correo ya existe");
     }
   }
@@ -203,6 +205,24 @@ public class UserService {
   private UserJpaEntity getExisting(UUID id) {
     return userJpaRepository.findById(id)
         .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+  }
+
+  private UserJpaEntity getByUsername(String username) {
+    return userJpaRepository.findByUsernameIgnoreCase(username)
+        .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+  }
+
+  private UserJpaEntity saveUpdatedUser(UserJpaEntity user) {
+    user.setUpdatedAt(LocalDateTime.now());
+    return userJpaRepository.save(user);
+  }
+
+  private String normalize(String value) {
+    return value.trim();
+  }
+
+  private String normalizeEmail(String value) {
+    return normalize(value).toLowerCase();
   }
 
   private UserResponse toResponse(UserJpaEntity entity) {

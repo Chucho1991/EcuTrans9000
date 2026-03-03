@@ -1,213 +1,96 @@
 # EcuTrans9000
 
-Aplicación para digitalizar la bitácora de viajes de camiones con gestión operativa y financiera.
+Plataforma para digitalizar la operación de transporte: control de usuarios, bitácora de viajes, catálogo de vehículos/clientes y consulta financiera por placa.
 
 ## Servicios
-- Frontend (Angular): http://localhost:4200
-- Backend API: http://localhost:8080
-- Swagger UI: http://localhost:8080/swagger-ui.html
-- OpenAPI JSON: http://localhost:8080/api-docs
+- Frontend (Angular): `http://localhost:4200`
+- Backend API (Spring Boot): `http://localhost:8080`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/api-docs`
 
 ## Requisitos
 - Docker + Docker Compose
 
 ## Variables de entorno
-Revisar `.env.example` para valores por defecto:
-- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_URL`
-- `JWT_SECRET`, `JWT_EXPIRATION_MINUTES`
-- `AUDIT_MAX_PAYLOAD_SIZE`
-- `CORS_ALLOWED_ORIGINS`
-- `BOOTSTRAP_SUPERADMIN_USERNAME`, `BOOTSTRAP_SUPERADMIN_PASSWORD`
-- `BOOTSTRAP_SUPERADMIN_NOMBRES`, `BOOTSTRAP_SUPERADMIN_CORREO`
-- `VEHICULOS_MAX_IMAGE_BYTES`, `VEHICULOS_IMPORT_BATCH_SIZE`
-- `CLIENTES_MAX_LOGO_BYTES`, `CLIENTES_IMPORT_BATCH_SIZE`
+Tomar como base `.env.example`.
 
-Para acceso desde celular por IP, configura `CORS_ALLOWED_ORIGINS` incluyendo tu red local, por ejemplo:
-- `http://192.168.*:4200,http://10.*:4200`
+Variables clave:
+- Base de datos: `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_URL`
+- Seguridad: `JWT_SECRET`, `JWT_EXPIRATION_MINUTES`, `CORS_ALLOWED_ORIGINS`
+- Auditoría: `AUDIT_MAX_PAYLOAD_SIZE`
+- Bootstrap administrador: `BOOTSTRAP_SUPERADMIN_*`
+- Límites de archivos/importación: `VEHICULOS_*`, `CLIENTES_*`
 
-## Usuario SUPERADMINISTRADOR inicial
+## Inicio rápido
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+## Usuario inicial
+El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - Username: `admin`
 - Password: `Qwerty12345`
-- Se asegura automáticamente al iniciar el backend (configurable por variables `BOOTSTRAP_SUPERADMIN_*`).
 
 ## Endpoints principales
 
 ### Auth y sistema
 - `POST /auth/login`
 - `GET /dashboard` (solo `SUPERADMINISTRADOR`)
-- `GET /settings/module-access/me` (módulos habilitados para el usuario autenticado)
-- `GET /settings/module-access` (solo `SUPERADMINISTRADOR`)
-- `PUT /settings/module-access/{role}` (solo `SUPERADMINISTRADOR`)
 - `GET /api/system/health`
 
-### Módulo Usuarios
-- `POST /users` (solo `SUPERADMINISTRADOR`)
-- `GET /users` (solo `SUPERADMINISTRADOR`, filtros `rol`, `activo`, `deleted`)
-- `GET /users/{id}` (solo `SUPERADMINISTRADOR`)
-- `PUT /users/{id}` (solo `SUPERADMINISTRADOR`)
-- `POST /users/{id}/soft-delete` (solo `SUPERADMINISTRADOR`)
-- `POST /users/{id}/restore` (solo `SUPERADMINISTRADOR`)
-- `POST /users/{id}/activate` (solo `SUPERADMINISTRADOR`)
-- `POST /users/{id}/deactivate` (solo `SUPERADMINISTRADOR`)
-- `DELETE /users/{id}` (deshabilitado: solo se permite eliminación lógica)
-- `GET /users/me`
-- `PUT /users/me`
+### Usuarios (`/users`)
+- CRUD administrativo (sin hard delete)
+- Estados: activar, desactivar, soft-delete, restore
+- Perfil autenticado: `GET /users/me`, `PUT /users/me`
 
-### Módulo Configuración de accesos
-Base path: `/settings/module-access`
-
+### Configuración de accesos por rol (`/settings/module-access`)
 - `GET /settings/module-access/me`
 - `GET /settings/module-access` (solo `SUPERADMINISTRADOR`)
 - `PUT /settings/module-access/{role}` (solo `SUPERADMINISTRADOR`)
 
-Reglas operativas vigentes del módulo:
-- La pantalla se abre desde el botón de configuración del navbar y solo es visible para `SUPERADMINISTRADOR`.
-- `SUPERADMINISTRADOR` conserva acceso total al sistema y no es editable desde este módulo.
-- La configuración actual administra el acceso de los roles no privilegiados a los módulos `DASHBOARD`, `VEHICULOS`, `CLIENTES`, `BITACORA` y `PLACAS`.
-- Cuando un módulo se desactiva para un rol, se bloquea tanto la navegación en frontend como el acceso backend a sus endpoints.
-- La configuración se persiste en la tabla `role_module_access`.
+### Módulo Vehículos (`/api/vehiculos`)
+- CRUD operativo + estados
+- Carga/lectura de foto, documento y licencia
+- Importación masiva (`preview` y `import`) y plantillas
 
-### Módulo Vehículos
-Base path: `/api/vehiculos`
+### Módulo Clientes (`/clientes`)
+- CRUD operativo + estados
+- Logo empresarial en base de datos
+- Importación masiva (`preview` y `import`) y plantillas
 
-- `POST /api/vehiculos` (solo `SUPERADMINISTRADOR`)
-- `PUT /api/vehiculos/{id}` (solo `SUPERADMINISTRADOR`)
-- `GET /api/vehiculos/{id}` (requiere módulo `VEHICULOS`)
-- `GET /api/vehiculos?page=&size=&q=&estado=&includeDeleted=` (requiere módulo `VEHICULOS`)
-- `POST /api/vehiculos/{id}/activate` (solo `SUPERADMINISTRADOR`)
-- `POST /api/vehiculos/{id}/deactivate` (solo `SUPERADMINISTRADOR`)
-- `POST /api/vehiculos/{id}/soft-delete` (solo `SUPERADMINISTRADOR`)
-- `POST /api/vehiculos/{id}/restore` (solo `SUPERADMINISTRADOR`)
-- `POST /api/vehiculos/{id}/foto` (solo `SUPERADMINISTRADOR`, multipart/form-data)
-- `POST /api/vehiculos/{id}/documento` (solo `SUPERADMINISTRADOR`, multipart/form-data, imagen o PDF)
-- `POST /api/vehiculos/{id}/licencia-img` (solo `SUPERADMINISTRADOR`, multipart/form-data, imagen o PDF)
-- `GET /api/vehiculos/{id}/foto` (requiere módulo `VEHICULOS`)
-- `GET /api/vehiculos/{id}/documento` (requiere módulo `VEHICULOS`)
-- `GET /api/vehiculos/{id}/licencia-img` (requiere módulo `VEHICULOS`)
-- `GET /api/vehiculos/import/template` (requiere módulo `VEHICULOS`)
-- `GET /api/vehiculos/import/template-example` (requiere módulo `VEHICULOS`)
-- `POST /api/vehiculos/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false` (solo `SUPERADMINISTRADOR`)
-- `POST /api/vehiculos/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false` (solo `SUPERADMINISTRADOR`)
+### Módulo Bitácora (`/api/bitacora/viajes`)
+- CRUD operativo + borrado lógico/restauración
+- Exportación Excel
+- Importación masiva con plantilla
 
-### Módulo Clientes
-Base path: `/clientes`
-
-- `POST /clientes` (solo `SUPERADMINISTRADOR`)
-- `GET /clientes` (requiere módulo `CLIENTES`)
-- `GET /clientes/{id}` (requiere módulo `CLIENTES`)
-- `PUT /clientes/{id}` (solo `SUPERADMINISTRADOR`)
-- `PATCH /clientes/{id}/toggle-activo` (solo `SUPERADMINISTRADOR`)
-- `DELETE /clientes/{id}` (solo `SUPERADMINISTRADOR`, borrado lógico)
-- `PATCH /clientes/{id}/restore` (solo `SUPERADMINISTRADOR`)
-- `DELETE /clientes/{id}/force` (solo `SUPERADMINISTRADOR`, borrado físico)
-- `POST /clientes/{id}/logo` (multipart/form-data, logo JPG/PNG/WEBP almacenado en DB)
-- `GET /clientes/{id}/logo` (requiere módulo `CLIENTES`)
-- `GET /clientes/import/template` (requiere módulo `CLIENTES`)
-- `GET /clientes/import/template/example` (requiere módulo `CLIENTES`)
-- `POST /clientes/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false` (solo `SUPERADMINISTRADOR`)
-- `POST /clientes/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false` (solo `SUPERADMINISTRADOR`)
-
-Reglas operativas vigentes del módulo:
-- `documento` único en todo el catálogo.
-- Un cliente inactivo o eliminado no puede asociarse a nuevos viajes.
-- El logo de empresa se almacena en PostgreSQL dentro de la tabla `clientes`.
-- El catálogo incluye el campo `direccion`.
-- La importación masiva es por Excel `.xlsx`, no CSV.
-- La plantilla de importación usa los encabezados `tipo_documento,documento,nombre,direccion,descripcion,activo`.
-- Existe descarga de plantilla vacía y plantilla con ejemplo en Excel.
-
-### Módulo Bitácora
-Base path: `/api/bitacora/viajes`
-
-- `POST /api/bitacora/viajes` (requiere módulo `BITACORA`)
-- `PUT /api/bitacora/viajes/{id}` (requiere módulo `BITACORA`)
-- `GET /api/bitacora/viajes/{id}` (requiere módulo `BITACORA`)
-- `GET /api/bitacora/viajes?page=&size=&q=&vehiculoId=&clienteId=&fechaDesde=&fechaHasta=&includeDeleted=` (requiere módulo `BITACORA`)
-- `DELETE /api/bitacora/viajes/{id}` (solo `SUPERADMINISTRADOR`, borrado lógico)
-- `PATCH /api/bitacora/viajes/{id}/restore` (solo `SUPERADMINISTRADOR`)
-- `GET /api/bitacora/viajes/export?q=&vehiculoId=&clienteId=&fechaDesde=&fechaHasta=` (requiere módulo `BITACORA`)
-- `GET /api/bitacora/viajes/import/template` (requiere módulo `BITACORA`)
-- `GET /api/bitacora/viajes/import/template/example` (requiere módulo `BITACORA`)
-- `POST /api/bitacora/viajes/import/preview?mode=INSERT_ONLY|UPSERT&partialOk=true|false` (requiere módulo `BITACORA`)
-- `POST /api/bitacora/viajes/import?mode=INSERT_ONLY|UPSERT&partialOk=true|false` (requiere módulo `BITACORA`)
-
-Reglas operativas vigentes del módulo:
-- La importación masiva es por Excel `.xlsx`, no CSV.
-- La plantilla de importación usa `Placa` para vehículo y `Documento cliente` para cliente.
-- La importación genera automáticamente `numeroViaje`.
-- El reporte Excel usa la plantilla corporativa del módulo y el título `BITACORA VIAJES <anio>` toma el año del rango filtrado (`fechaDesde`/`fechaHasta`).
-- En exportación, los checks operativos salen como `✓` para `SI` y `X` para `NO`.
-
-### Módulo Consulta por placas
-Base path: `/api/placas`
-
-- `GET /api/placas/consulta?placa=&fechaDesde=&fechaHasta=` (requiere módulo `PLACAS`)
-- `GET /api/placas/consulta/export?placa=&fechaDesde=&fechaHasta=` (requiere módulo `PLACAS`)
-
-Reglas operativas vigentes del módulo:
-- La consulta toma los registros del módulo `Bitácora`.
-- La pantalla inicia con lista vacía y solo consulta al usar el filtro.
-- El filtro principal es `placa`; adicionalmente acepta rango `fechaDesde` y `fechaHasta`.
-- El resumen financiero calcula automáticamente:
-  - `Valor Factura` como suma de `valor`,
-  - `Retención 1%` sobre el total facturado,
-  - `Comisión administrativa 6%` sobre el total facturado,
-  - `Pago Total = Valor Factura - Retención 1% - Comisión 6% - Anticipos`.
-- La exportación Excel genera un reporte financiero por placa con estilo corporativo y logo institucional.
+### Módulo Placas (`/api/placas`)
+- Consulta por placa y rango de fechas
+- Exportación financiera por placa
 
 ## Soft delete y auditoría
-- Eliminación por defecto lógica (`deleted`, `deleted_at`), sin borrado físico en módulos funcionales.
-- Auditoría API en `api_audit_log` (endpoint, request, response, usuario, rol).
-- Auditoría de acciones en `action_audit_log` (CREACION, EDICION, CAMBIO_ESTADO, ELIMINADO_LOGICO, RESTAURACION, LOGIN, ELIMINADO_FISICO, IMPORT_CSV).
-- Configuración de accesos por rol persistida en `role_module_access` con trazabilidad de cambios en `action_audit_log`.
-
-## Repositorio de imágenes y archivos
-- El almacenamiento de `foto`, `documento` y `licencia` del módulo vehículos se realiza en PostgreSQL (`vehiculo_archivos`) como contenido binario.
-- El backend mantiene metadatos en `vehiculos` (`foto_path`, `doc_path`, `lic_path`) y el binario en la tabla de archivos.
-- El módulo clientes almacena el logo empresarial directamente en la tabla `clientes` (`logo_file_name`, `logo_content_type`, `logo_contenido`).
-
-## Estándar reusable para próximos módulos
-- Mantener arquitectura hexagonal completa (`domain`, `application`, `ports`, `adapters`).
-- Implementar ciclo funcional completo del catálogo cuando aplique: CRUD + activar/inactivar + soft delete/restore.
-- Si el módulo maneja archivos, por defecto almacenar binarios en DB y no en filesystem local del contenedor.
-- Para auditoría API, omitir/sanitizar payload binario antes de persistir en `api_audit_log`.
-- Incluir importación masiva con `preview`, `partialOk` y errores por fila cuando el dominio lo requiera.
-- Mantener coherencia visual: íconos en menú y acciones, tooltips, popups no nativos y estados con color.
+- Soft delete por defecto en módulos funcionales.
+- Auditoría API en `api_audit_log`.
+- Auditoría de acciones (creación, edición, estado, login, restauración, etc.) en `action_audit_log`.
 
 ## Colección Postman
-- Colección oficial: `postman/EcuTrans9000.postman_collection.json`
-- Importar en Postman y ejecutar primero `Auth > Login` para poblar token.
-- Variables operativas incluidas: `baseUrl`, `token`, `targetUserId`, `targetVehiculoId`, `targetClienteId`, `targetBitacoraId`.
-- Cobertura actual: auth, sistema, usuarios, configuración de accesos, vehículos, clientes, bitácora y consulta por placas.
+- Archivo oficial: `postman/EcuTrans9000.postman_collection.json`
+- Ejecutar primero `Auth > Login` para poblar token.
+- Variables incluidas: `baseUrl`, `token`, `targetUserId`, `targetVehiculoId`, `targetClienteId`, `targetBitacoraId`.
 
 ## Validación de documentación
-- Script de validación: `scripts/validate-documentation.ps1`
-- Verifica tres frentes: cobertura básica de Javadocs en tipos públicos, consistencia mínima de colección Postman y temas obligatorios en `README.md`.
-- Ejecución:
+Script:
 ```bash
 ./scripts/validate-documentation.ps1
 ```
+Valida Javadocs públicos, cobertura base de Postman y secciones obligatorias del README.
 
-## Lineamientos UI obligatorios
-- Diseño responsive obligatorio en móvil, tablet y escritorio.
-- Formularios y tablas deben adaptarse a la resolución (sin cortes; con scroll horizontal controlado en tablas cuando sea necesario).
-- El scroll horizontal de tablas debe aplicarse solo en móvil/tablet; en desktop la tabla debe mostrarse ajustada sin scroll horizontal.
-- Los formularios deben mantener proporciones adecuadas al dispositivo para mejorar legibilidad y uso.
-- Tema oscuro por defecto y toggle dark/light persistente.
-- Botones de acción en listas y navbar como íconos con tooltip.
-- Botón de menú lateral en la esquina superior izquierda del navbar.
-- Campo `nombres` del usuario autenticado visible en la esquina superior derecha con color distintivo.
-- Estados `ACTIVO`, `INACTIVO`, `ELIMINADO` con colores consistentes.
-- Validaciones al pie de cada campo obligatorio con nombre del campo y breve descripción.
-- En creación, edición, cambio de estado y login, usar popup visual del template.
-- No usar popups nativos del navegador (`window.alert`, `window.confirm`, `window.prompt`).
+## Lineamientos UI
+- Diseño responsive en móvil/tablet/escritorio.
+- Tema oscuro por defecto con toggle persistente.
+- Uso de popups visuales del template (sin `window.alert/confirm/prompt`).
+- Estados visuales consistentes (`ACTIVO`, `INACTIVO`, `ELIMINADO`).
 
-## Levantar con Docker
-```bash
-cp .env.example .env
-docker compose up --build
-```
-
-## Acceso desde celular (misma red WiFi)
-- Abre en el celular: `http://<IP_DE_TU_PC>:4200`
-- El frontend usa automáticamente `http://<IP_DE_TU_PC>:8080` como API.
+## Acceso desde celular (misma red)
+- Abrir: `http://<IP_DE_TU_PC>:4200`
+- Consumir API: `http://<IP_DE_TU_PC>:8080`
