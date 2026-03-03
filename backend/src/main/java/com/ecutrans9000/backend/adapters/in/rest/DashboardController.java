@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/dashboard")
 @Tag(name = "Dashboard")
+@PreAuthorize("@moduleAccessAuthorizationService.canAccess(authentication, 'DASHBOARD')")
 public class DashboardController {
 
   @GetMapping
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Metricas generales")
   public ResponseEntity<Map<String, Object>> metrics() {
     return ResponseEntity.ok(Map.of(

@@ -32,7 +32,7 @@ import { ThemeService } from '../core/services/theme.service';
             </div>
           </div>
           <nav class="space-y-1 overflow-y-auto p-4">
-            <a *ngIf="isSuperadmin()" routerLink="/dashboard" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
+            <a *ngIf="hasModuleAccess('DASHBOARD')" routerLink="/dashboard" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-5H4v5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
               <span>Dashboard</span>
             </a>
@@ -88,7 +88,7 @@ import { ThemeService } from '../core/services/theme.service';
             </button>
           </div>
           <nav class="space-y-1 p-4">
-            <a *ngIf="isSuperadmin()" routerLink="/dashboard" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
+            <a *ngIf="hasModuleAccess('DASHBOARD')" routerLink="/dashboard" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-5H4v5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
               <span>Dashboard</span>
             </a>

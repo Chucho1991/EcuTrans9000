@@ -6,7 +6,7 @@ import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api.config';
 
 const USER_KEY = 'ecutrans9000_user';
-const CONFIGURABLE_MODULE_KEYS = ['VEHICULOS', 'CLIENTES', 'BITACORA', 'PLACAS'] as const;
+const CONFIGURABLE_MODULE_KEYS = ['DASHBOARD', 'VEHICULOS', 'CLIENTES', 'BITACORA', 'PLACAS'] as const;
 
 interface CurrentModuleAccessResponse {
   role: string;

@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { moduleAccessGuard } from './core/guards/module-access.guard';
-import { roleGuard } from './core/guards/role.guard';
 import { AppLayoutComponent } from './layouts/app-layout.component';
+import { roleGuard } from './core/guards/role.guard';
 
 export const APP_ROUTES: Routes = [
   { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
@@ -12,7 +12,7 @@ export const APP_ROUTES: Routes = [
     component: AppLayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: 'dashboard', canActivate: [roleGuard], data: { roles: ['SUPERADMINISTRADOR'] }, loadComponent: () => import('./modules/dashboard/pages/home/dashboard-home.component').then(m => m.DashboardHomeComponent) },
+      { path: 'dashboard', canActivate: [moduleAccessGuard], data: { moduleKey: 'DASHBOARD' }, loadComponent: () => import('./modules/dashboard/pages/home/dashboard-home.component').then(m => m.DashboardHomeComponent) },
       { path: 'users', canActivate: [roleGuard], data: { roles: ['SUPERADMINISTRADOR'] }, loadComponent: () => import('./modules/users/pages/list/users-list.component').then(m => m.UsersListComponent) },
       { path: 'profile', loadComponent: () => import('./modules/users/pages/profile/users-profile.component').then(m => m.UsersProfileComponent) },
       { path: 'settings', canActivate: [roleGuard], data: { roles: ['SUPERADMINISTRADOR'] }, loadComponent: () => import('./modules/system/pages/settings/settings.component').then(m => m.SettingsComponent) },

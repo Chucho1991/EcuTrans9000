@@ -2,7 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
+import { ModuleAccessService } from '../../../../core/services/module-access.service';
 import { AuthService } from '../../services/auth.service';
 import { PopupService } from '../../../../core/services/popup.service';
 
@@ -89,6 +92,7 @@ export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly popupService = inject(PopupService);
+  private readonly moduleAccessService = inject(ModuleAccessService);
 
   protected loading = false;
   protected errorMessage = '';
@@ -109,15 +113,21 @@ export class LoginComponent {
     }
     this.errorMessage = '';
     this.loading = true;
-    this.authService.login(this.form.getRawValue()).subscribe({
-      next: () => {
+    this.authService.login(this.form.getRawValue()).pipe(
+      switchMap(() => this.authService.getRole() === 'SUPERADMINISTRADOR'
+        ? of(true)
+        : this.moduleAccessService.fetchMyAccess(true))
+    ).subscribe({
+      next: (accessResult) => {
         this.loading = false;
         void this.popupService.info({
           title: 'Inicio de sesión',
           message: 'Inicio de sesión exitoso.'
         });
         const role = this.authService.getRole();
-        this.router.navigateByUrl(role === 'SUPERADMINISTRADOR' ? '/dashboard' : '/profile');
+        const canViewDashboard = role === 'SUPERADMINISTRADOR'
+          || (accessResult instanceof Set && accessResult.has('DASHBOARD'));
+        this.router.navigateByUrl(canViewDashboard ? '/dashboard' : '/profile');
       },
       error: () => {
         this.loading = false;

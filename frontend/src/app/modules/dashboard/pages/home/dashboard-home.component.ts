@@ -11,7 +11,7 @@ import { DashboardService } from '../../services/dashboard.service';
     <section class="space-y-6">
       <header>
         <h1 class="page-title">Dashboard</h1>
-        <p class="page-subtitle">Vista inicial para administradores.</p>
+        <p class="page-subtitle">Vista inicial configurable segun el acceso habilitado para el rol.</p>
       </header>
       <div class="grid gap-4 md:grid-cols-3">
         <article class="metric-card">

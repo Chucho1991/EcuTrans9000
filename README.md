@@ -63,7 +63,7 @@ Base path: `/settings/module-access`
 Reglas operativas vigentes del módulo:
 - La pantalla se abre desde el botón de configuración del navbar y solo es visible para `SUPERADMINISTRADOR`.
 - `SUPERADMINISTRADOR` conserva acceso total al sistema y no es editable desde este módulo.
-- La configuración actual administra el acceso de los roles no privilegiados a los módulos `VEHICULOS`, `CLIENTES`, `BITACORA` y `PLACAS`.
+- La configuración actual administra el acceso de los roles no privilegiados a los módulos `DASHBOARD`, `VEHICULOS`, `CLIENTES`, `BITACORA` y `PLACAS`.
 - Cuando un módulo se desactiva para un rol, se bloquea tanto la navegación en frontend como el acceso backend a sus endpoints.
 - La configuración se persiste en la tabla `role_module_access`.
 

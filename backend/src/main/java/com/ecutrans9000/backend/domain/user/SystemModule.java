@@ -7,6 +7,7 @@ import java.util.List;
  * Catalogo de modulos funcionales cuyo acceso puede habilitarse o deshabilitarse por rol.
  */
 public enum SystemModule {
+  DASHBOARD("Dashboard"),
   VEHICULOS("Vehiculos"),
   CLIENTES("Clientes"),
   BITACORA("Bitacora"),
