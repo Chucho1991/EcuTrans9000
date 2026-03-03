@@ -111,6 +111,8 @@ import { ConsultaPlacaResponse, PlacasService } from '../services/placas.service
   `
 })
 export class PlacasPlaceholderComponent {
+  private static readonly ECUADOR_TIMEZONE = 'America/Guayaquil';
+
   private readonly placasService = inject(PlacasService);
   private readonly vehiculosService = inject(VehiculosService);
   private readonly popupService = inject(PopupService);
@@ -197,7 +199,12 @@ export class PlacasPlaceholderComponent {
     if (!value) {
       return '-';
     }
-    return new Intl.DateTimeFormat('es-EC', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(`${value}T00:00:00`));
+    return new Intl.DateTimeFormat('es-EC', {
+      timeZone: PlacasPlaceholderComponent.ECUADOR_TIMEZONE,
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).format(new Date(`${value}T00:00:00-05:00`));
   }
 
   protected displayText(value: string | null): string {

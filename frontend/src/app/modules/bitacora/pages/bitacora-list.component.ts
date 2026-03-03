@@ -369,6 +369,8 @@ import {
   `
 })
 export class BitacoraListComponent {
+  private static readonly ECUADOR_TIMEZONE = 'America/Guayaquil';
+
   private readonly bitacoraService = inject(BitacoraService);
   private readonly vehiculosService = inject(VehiculosService);
   private readonly clientesService = inject(ClientesService);
@@ -763,7 +765,13 @@ export class BitacoraListComponent {
   }
 
   private today(): string {
-    return new Date().toISOString().slice(0, 10);
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: BitacoraListComponent.ECUADOR_TIMEZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    return formatter.format(new Date());
   }
 
   private saveBlob(blob: Blob, fileName: string): void {
