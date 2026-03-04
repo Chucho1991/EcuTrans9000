@@ -84,7 +84,7 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 
 8. **Pruebas mínimas**
 - Backend: tests de casos críticos del módulo.
-- Frontend: validar build y flujos esenciales.
+- Frontend: validar compilación y flujos esenciales.
 
 ## Checklist para PR
 - [ ] Migraciones Flyway incluidas y válidas.
@@ -110,3 +110,28 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - Módulo `BITACORA`: implementado con CRUD, soft delete/restore, filtros por rango de fechas, exportación Excel basada en plantilla corporativa e importación Excel con plantilla simple y ejemplo.
 - Módulo `CONSULTA POR PLACAS`: implementado con filtros por placa y rango de fechas, lectura desde bitácora, resumen financiero calculado (retención 1%, comisión 6%, anticipos, pago total) y exportación Excel con logo y estilo corporativo.
 - Swagger/OpenAPI y colección Postman deben mantenerse sincronizados ante cada cambio de endpoint o payload.
+
+## Habilidades
+Una habilidad es un conjunto de instrucciones locales guardadas en un archivo `SKILL.md`. A continuación se lista lo disponible en esta sesión.
+
+### Habilidades disponibles
+- `skill-creator`: guía para crear habilidades efectivas. Úsala cuando se solicite crear o actualizar una habilidad que extienda las capacidades de Codex con flujos o conocimiento especializado. (archivo: `/opt/codex/skills/.system/skill-creator/SKILL.md`)
+- `skill-installer`: instala habilidades en `$CODEX_HOME/skills` desde opciones curadas o desde una ruta de repositorio GitHub. Úsala cuando se solicite listar o instalar habilidades. (archivo: `/opt/codex/skills/.system/skill-installer/SKILL.md`)
+
+### Cómo usar habilidades
+- Descubrimiento: la lista anterior define las habilidades disponibles en la sesión; el contenido está en las rutas indicadas.
+- Reglas de activación: si el usuario nombra una habilidad (con `$SkillName` o texto normal) o la tarea coincide claramente con su descripción, se debe usar esa habilidad en ese turno.
+- Habilidad faltante o bloqueada: si una habilidad solicitada no existe o no puede leerse, informarlo brevemente y continuar con la mejor alternativa.
+- Uso progresivo:
+  1. Abrir el `SKILL.md` de la habilidad elegida y leer solo lo necesario para ejecutar la tarea.
+  2. Si el `SKILL.md` referencia carpetas como `references/`, cargar únicamente los archivos necesarios.
+  3. Si existen `scripts/`, preferir ejecutarlos o ajustarlos en vez de reescribir bloques grandes.
+  4. Si existen `assets/` o plantillas, reutilizarlos antes de crear contenido desde cero.
+- Coordinación:
+  - Si aplican varias habilidades, usar el conjunto mínimo y definir el orden.
+  - Anunciar en una línea qué habilidad(es) se usan y por qué.
+- Higiene de contexto:
+  - Mantener el contexto corto; resumir en lugar de pegar bloques extensos.
+  - Evitar abrir referencias profundas innecesarias.
+  - Si hay variantes, elegir solo la referencia relevante y dejar constancia.
+- Seguridad y fallback: si una habilidad no puede aplicarse limpiamente, indicar el bloqueo y continuar con el mejor enfoque alternativo.
