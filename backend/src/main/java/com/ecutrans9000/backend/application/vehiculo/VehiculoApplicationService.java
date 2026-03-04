@@ -69,11 +69,24 @@ public class VehiculoApplicationService {
       "image/png",
       "image/webp"
   );
+  private static final List<String> ALLOWED_IMAGE_EXTENSIONS = List.of(
+      "jpg",
+      "jpeg",
+      "png",
+      "webp"
+  );
   private static final List<String> ALLOWED_DOC_CONTENT_TYPES = List.of(
       "image/jpeg",
       "image/png",
       "image/webp",
       "application/pdf"
+  );
+  private static final List<String> ALLOWED_DOC_EXTENSIONS = List.of(
+      "jpg",
+      "jpeg",
+      "png",
+      "webp",
+      "pdf"
   );
 
   private final VehiculoRepositoryPort vehiculoRepositoryPort;
@@ -191,7 +204,7 @@ public class VehiculoApplicationService {
 
   public Vehiculo uploadFoto(UUID id, MultipartFile file, String actorUsername, String actorRole) {
     Vehiculo vehiculo = getExisting(id);
-    upsertArchivo(file, vehiculo, TipoArchivoVehiculo.FOTO, ALLOWED_IMAGE_CONTENT_TYPES, "Solo JPG/PNG/WEBP");
+    upsertArchivo(file, vehiculo, TipoArchivoVehiculo.FOTO, ALLOWED_IMAGE_CONTENT_TYPES, ALLOWED_IMAGE_EXTENSIONS, "Solo JPG/PNG/WEBP");
     vehiculo.setFotoPath(file.getOriginalFilename());
     Vehiculo saved = vehiculoRepositoryPort.save(vehiculo);
     auditService.saveActionAudit(actorUsername, actorRole, "VEHICULOS", ActionType.EDICION, id.toString(), "vehiculos");
@@ -200,7 +213,7 @@ public class VehiculoApplicationService {
 
   public Vehiculo uploadDocumento(UUID id, MultipartFile file, String actorUsername, String actorRole) {
     Vehiculo vehiculo = getExisting(id);
-    upsertArchivo(file, vehiculo, TipoArchivoVehiculo.DOCUMENTO, ALLOWED_DOC_CONTENT_TYPES, "Solo JPG/PNG/WEBP/PDF");
+    upsertArchivo(file, vehiculo, TipoArchivoVehiculo.DOCUMENTO, ALLOWED_DOC_CONTENT_TYPES, ALLOWED_DOC_EXTENSIONS, "Solo JPG/PNG/WEBP/PDF");
     vehiculo.setDocPath(file.getOriginalFilename());
     Vehiculo saved = vehiculoRepositoryPort.save(vehiculo);
     auditService.saveActionAudit(actorUsername, actorRole, "VEHICULOS", ActionType.EDICION, id.toString(), "vehiculos");
@@ -209,7 +222,7 @@ public class VehiculoApplicationService {
 
   public Vehiculo uploadLicencia(UUID id, MultipartFile file, String actorUsername, String actorRole) {
     Vehiculo vehiculo = getExisting(id);
-    upsertArchivo(file, vehiculo, TipoArchivoVehiculo.LICENCIA, ALLOWED_DOC_CONTENT_TYPES, "Solo JPG/PNG/WEBP/PDF");
+    upsertArchivo(file, vehiculo, TipoArchivoVehiculo.LICENCIA, ALLOWED_DOC_CONTENT_TYPES, ALLOWED_DOC_EXTENSIONS, "Solo JPG/PNG/WEBP/PDF");
     vehiculo.setLicPath(file.getOriginalFilename());
     Vehiculo saved = vehiculoRepositoryPort.save(vehiculo);
     auditService.saveActionAudit(actorUsername, actorRole, "VEHICULOS", ActionType.EDICION, id.toString(), "vehiculos");
@@ -599,8 +612,9 @@ public class VehiculoApplicationService {
       Vehiculo vehiculo,
       TipoArchivoVehiculo tipo,
       List<String> allowedContentTypes,
+      List<String> allowedExtensions,
       String allowedHint) {
-    validateFile(file, allowedContentTypes, allowedHint);
+    validateFile(file, allowedContentTypes, allowedExtensions, allowedHint);
     try {
       Optional<VehiculoArchivo> existing = vehiculoArchivoRepositoryPort.findByVehiculoIdAndTipo(vehiculo.getId(), tipo);
       VehiculoArchivo archivo = VehiculoArchivo.builder()
@@ -608,7 +622,7 @@ public class VehiculoApplicationService {
           .vehiculoId(vehiculo.getId())
           .tipo(tipo)
           .fileName(file.getOriginalFilename() == null ? tipo.name().toLowerCase(Locale.ROOT) : file.getOriginalFilename())
-          .contentType(file.getContentType() == null ? "application/octet-stream" : file.getContentType())
+          .contentType(resolveStoredContentType(file))
           .contenido(file.getBytes())
           .sizeBytes(file.getSize())
           .createdAt(existing.map(VehiculoArchivo::getCreatedAt).orElse(LocalDateTime.now()))
@@ -620,7 +634,11 @@ public class VehiculoApplicationService {
     }
   }
 
-  private void validateFile(MultipartFile file, List<String> allowedContentTypes, String allowedHint) {
+  private void validateFile(
+      MultipartFile file,
+      List<String> allowedContentTypes,
+      List<String> allowedExtensions,
+      String allowedHint) {
     if (file == null || file.isEmpty()) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "Debe seleccionar un archivo");
     }
@@ -628,9 +646,38 @@ public class VehiculoApplicationService {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "Archivo excede tamano maximo");
     }
     String contentType = file.getContentType() == null ? "" : file.getContentType().toLowerCase(Locale.ROOT);
-    if (!allowedContentTypes.contains(contentType)) {
+    String extension = extractFileExtension(file.getOriginalFilename());
+    boolean allowedByContentType = allowedContentTypes.contains(contentType);
+    boolean allowedByExtension = !extension.isBlank() && allowedExtensions.contains(extension);
+    if (!allowedByContentType && !allowedByExtension) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "Tipo de archivo no permitido. " + allowedHint);
     }
+  }
+
+  private String resolveStoredContentType(MultipartFile file) {
+    String contentType = file.getContentType() == null ? "" : file.getContentType().toLowerCase(Locale.ROOT);
+    if (!contentType.isBlank() && !"application/octet-stream".equals(contentType)) {
+      return contentType;
+    }
+
+    return switch (extractFileExtension(file.getOriginalFilename())) {
+      case "pdf" -> "application/pdf";
+      case "png" -> "image/png";
+      case "jpg", "jpeg" -> "image/jpeg";
+      case "webp" -> "image/webp";
+      default -> "application/octet-stream";
+    };
+  }
+
+  private String extractFileExtension(String fileName) {
+    if (fileName == null || fileName.isBlank()) {
+      return "";
+    }
+    int dotIndex = fileName.lastIndexOf('.');
+    if (dotIndex < 0 || dotIndex == fileName.length() - 1) {
+      return "";
+    }
+    return fileName.substring(dotIndex + 1).toLowerCase(Locale.ROOT);
   }
 
   private Resource readArchivo(UUID vehiculoId, TipoArchivoVehiculo tipo) {

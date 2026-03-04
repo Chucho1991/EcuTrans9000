@@ -4,9 +4,11 @@ import com.ecutrans9000.backend.service.BusinessException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * Componente publico de backend para ApiExceptionHandler.
  */
 @RestControllerAdvice
+@Slf4j
 public class ApiExceptionHandler {
 
   @ExceptionHandler(BusinessException.class)
@@ -31,8 +34,14 @@ public class ApiExceptionHandler {
     return build(HttpStatus.BAD_REQUEST, "Datos de entrada invalidos", errors);
   }
 
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
+  public ResponseEntity<Map<String, Object>> handleMaxUploadSize(MaxUploadSizeExceededException ex) {
+    return build(HttpStatus.BAD_REQUEST, "Archivo excede tamano maximo permitido", null);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+    log.error("Error no controlado en API", ex);
     return build(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor", null);
   }
 

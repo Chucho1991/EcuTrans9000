@@ -472,11 +472,7 @@ export class VehiculosListComponent implements OnDestroy {
 
       this.vehiculosService.create(payload).subscribe({
         next: (saved) => {
-          this.uploadPendingImages(saved.id, () => {
-            void this.popupService.info({ title: 'Vehiculo creado', message: 'Vehiculo creado correctamente.' });
-            this.cancelForm();
-            this.loadVehiculos(this.page);
-          });
+          this.uploadPendingImages(saved.id, 'creado');
         },
         error: (error) => {
           void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
@@ -496,11 +492,7 @@ export class VehiculosListComponent implements OnDestroy {
 
       this.vehiculosService.update(this.editingId, payload).subscribe({
         next: (saved) => {
-          this.uploadPendingImages(saved.id, () => {
-            void this.popupService.info({ title: 'Vehiculo editado', message: 'Vehiculo editado correctamente.' });
-            this.cancelForm();
-            this.loadVehiculos(this.page);
-          });
+          this.uploadPendingImages(saved.id, 'editado');
         },
         error: (error) => {
           void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
@@ -615,7 +607,7 @@ export class VehiculosListComponent implements OnDestroy {
     });
   }
 
-  private uploadPendingImages(vehiculoId: string, onDone: () => void): void {
+  private uploadPendingImages(vehiculoId: string, actionLabel: 'creado' | 'editado'): void {
     const uploads = [];
     if (this.fotoFile) {
       uploads.push(this.vehiculosService.uploadFoto(vehiculoId, this.fotoFile));
@@ -627,13 +619,28 @@ export class VehiculosListComponent implements OnDestroy {
       uploads.push(this.vehiculosService.uploadLicenciaImg(vehiculoId, this.licenciaFile));
     }
     if (uploads.length === 0) {
-      onDone();
+      this.finishVehiculoMutation(actionLabel);
       return;
     }
     forkJoin(uploads).subscribe({
-      next: () => onDone(),
-      error: () => onDone()
+      next: () => this.finishVehiculoMutation(actionLabel),
+      error: (error) => {
+        void this.popupService.info({
+          title: 'Error al subir archivos',
+          message: this.getErrorMessage(error)
+        });
+        this.loadVehiculos(this.page);
+      }
     });
+  }
+
+  private finishVehiculoMutation(actionLabel: 'creado' | 'editado'): void {
+    void this.popupService.info({
+      title: `Vehiculo ${actionLabel}`,
+      message: `Vehiculo ${actionLabel} correctamente.`
+    });
+    this.cancelForm();
+    this.loadVehiculos(this.page);
   }
 
   private resetFormFiles(): void {

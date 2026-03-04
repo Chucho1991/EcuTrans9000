@@ -1,6 +1,10 @@
 spring:
   application:
     name: ecutrans9000-backend
+  servlet:
+    multipart:
+      max-file-size: ${VEHICULOS_MAX_IMAGE_BYTES:5242880}
+      max-request-size: ${VEHICULOS_MAX_IMAGE_BYTES:5242880}
   datasource:
     url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/ecutrans9000}
     username: ${POSTGRES_USER:ecutrans}
