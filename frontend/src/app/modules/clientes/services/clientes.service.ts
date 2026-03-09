@@ -14,6 +14,7 @@ export interface ClienteResponse {
   direccion: string | null;
   descripcion: string | null;
   logoPath: string | null;
+  logoPreviewDataUrl: string | null;
   activo: boolean;
   deleted: boolean;
   deletedAt: string | null;

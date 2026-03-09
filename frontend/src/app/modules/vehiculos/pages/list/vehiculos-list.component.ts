@@ -67,13 +67,15 @@ import {
               <tr class="border-b border-gray-100 dark:border-gray-800" *ngFor="let vehiculo of vehiculos">
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.placa }}</td>
                 <td class="px-3 py-3 sm:px-4">
-                  <span
-                    *ngIf="vehiculo.fotoPath; else sinFoto"
-                    class="inline-flex rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:border-blue-900/40 dark:bg-blue-900/20 dark:text-blue-300"
-                  >
-                    Disponible
-                  </span>
-                  <ng-template #sinFoto><span class="text-xs text-gray-400">Sin foto</span></ng-template>
+                  <img
+                    *ngIf="vehiculo.fotoPreviewDataUrl; else sinFoto"
+                    [src]="vehiculo.fotoPreviewDataUrl"
+                    alt="Foto de vehiculo"
+                    class="h-10 w-16 rounded-md border border-gray-200 object-cover dark:border-gray-700"
+                  />
+                  <ng-template #sinFoto>
+                    <span class="text-xs text-gray-400">Sin foto</span>
+                  </ng-template>
                 </td>
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.choferDefault }}</td>
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.tonelajeCategoria }}</td>
@@ -359,7 +361,7 @@ export class VehiculosListComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.revokeSelectedFotoPreview();
+    this.selectedFotoUrl = null;
   }
 
   protected canAdmin(): boolean {
@@ -398,7 +400,7 @@ export class VehiculosListComponent implements OnDestroy {
   protected selectDetail(vehiculo: VehiculoResponse): void {
     this.vehiculosService.getById(vehiculo.id).subscribe((detail) => {
       this.selectedVehiculo = detail;
-      this.loadSelectedFoto(detail);
+      this.selectedFotoUrl = detail.fotoPreviewDataUrl ?? null;
     });
   }
 
@@ -666,29 +668,6 @@ export class VehiculosListComponent implements OnDestroy {
   private getErrorMessage(error: unknown): string {
     const maybe = error as { error?: { message?: string } };
     return maybe?.error?.message ?? 'Ocurrio un error inesperado.';
-  }
-
-  private loadSelectedFoto(vehiculo: VehiculoResponse): void {
-    this.revokeSelectedFotoPreview();
-    if (!vehiculo.fotoPath) {
-      this.selectedFotoUrl = null;
-      return;
-    }
-    this.vehiculosService.getFotoBlob(vehiculo.id).subscribe({
-      next: (blob) => {
-        this.selectedFotoUrl = URL.createObjectURL(blob);
-      },
-      error: () => {
-        this.selectedFotoUrl = null;
-      }
-    });
-  }
-
-  private revokeSelectedFotoPreview(): void {
-    if (this.selectedFotoUrl) {
-      URL.revokeObjectURL(this.selectedFotoUrl);
-      this.selectedFotoUrl = null;
-    }
   }
 
   private triggerBlobDownload(blob: Blob, fileBaseName: string): void {

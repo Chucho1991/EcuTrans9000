@@ -6,6 +6,7 @@ import com.ecutrans9000.backend.adapters.out.persistence.repository.VehiculoArch
 import com.ecutrans9000.backend.domain.vehiculo.TipoArchivoVehiculo;
 import com.ecutrans9000.backend.domain.vehiculo.VehiculoArchivo;
 import com.ecutrans9000.backend.ports.out.vehiculo.VehiculoArchivoRepositoryPort;
+import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,5 +40,15 @@ public class VehiculoArchivoRepositoryAdapter implements VehiculoArchivoReposito
   @Override
   public Optional<VehiculoArchivo> findByVehiculoIdAndTipo(UUID vehiculoId, TipoArchivoVehiculo tipo) {
     return repository.findByVehiculoIdAndTipo(vehiculoId, tipo).map(VehiculoArchivoMapper::toDomain);
+  }
+
+  @Override
+  public List<VehiculoArchivo> findByVehiculoIdsAndTipo(List<UUID> vehiculoIds, TipoArchivoVehiculo tipo) {
+    if (vehiculoIds == null || vehiculoIds.isEmpty()) {
+      return List.of();
+    }
+    return repository.findByVehiculoIdInAndTipo(vehiculoIds, tipo).stream()
+        .map(VehiculoArchivoMapper::toDomain)
+        .toList();
   }
 }

@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.nio.file.Path;
+import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -226,6 +227,7 @@ public class ClienteController {
         .direccion(cliente.getDireccion())
         .descripcion(cliente.getDescripcion())
         .logoPath(cliente.getLogoFileName())
+        .logoPreviewDataUrl(toDataUrl(cliente.getLogoContentType(), cliente.getLogoContenido()))
         .activo(cliente.getActivo())
         .deleted(cliente.getDeleted())
         .deletedAt(cliente.getDeletedAt())
@@ -267,5 +269,16 @@ public class ClienteController {
       return fallbackName;
     }
     return Path.of(sourcePath).getFileName().toString();
+  }
+
+  private String toDataUrl(String contentType, byte[] content) {
+    if (content == null || content.length == 0) {
+      return null;
+    }
+    String resolvedContentType = contentType;
+    if (resolvedContentType == null || resolvedContentType.isBlank()) {
+      resolvedContentType = "application/octet-stream";
+    }
+    return "data:" + resolvedContentType + ";base64," + Base64.getEncoder().encodeToString(content);
   }
 }
