@@ -4,6 +4,7 @@ import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angu
 import { forkJoin } from 'rxjs';
 
 import { PopupService } from '../../../core/services/popup.service';
+import { DatePickerComponent } from '../../../shared/components/date-picker/date-picker.component';
 import { ClienteResponse, ClientesService } from '../../clientes/services/clientes.service';
 import { VehiculoResponse, VehiculosService } from '../../vehiculos/services/vehiculos.service';
 import {
@@ -16,7 +17,7 @@ import {
 @Component({
   selector: 'app-bitacora-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DatePickerComponent],
   template: `
     <section class="min-w-0 w-full space-y-6">
       <header class="flex flex-wrap items-center justify-between gap-3">
@@ -34,8 +35,8 @@ import {
       <article class="panel-card min-w-0 w-full max-w-full p-4">
         <form class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5" [formGroup]="filtersForm" (ngSubmit)="loadViajes(0)">
           <input class="filter-control" formControlName="q" placeholder="Buscar por viaje, destino o factura" />
-          <input class="filter-control" type="date" formControlName="fechaDesde" />
-          <input class="filter-control" type="date" formControlName="fechaHasta" />
+          <app-date-picker inputClass="filter-control" placeholder="Fecha desde" formControlName="fechaDesde" />
+          <app-date-picker inputClass="filter-control" placeholder="Fecha hasta" formControlName="fechaHasta" />
           <select class="filter-control" formControlName="vehiculoId">
             <option value="">Todos los vehiculos</option>
             <option *ngFor="let vehiculo of vehiculosCatalogo" [value]="vehiculo.id">
@@ -230,7 +231,7 @@ import {
           </div>
           <div class="min-w-0 xl:col-span-3">
             <label class="form-label">Fecha viaje</label>
-            <input class="form-control" type="date" formControlName="fechaViaje" />
+            <app-date-picker inputClass="form-control" placeholder="Selecciona la fecha del viaje" formControlName="fechaViaje" />
           </div>
           <div class="min-w-0 xl:col-span-3">
             <label class="form-label">Vehiculo</label>
@@ -293,11 +294,11 @@ import {
           </div>
           <div class="min-w-0 xl:col-span-3">
             <label class="form-label">Fecha factura</label>
-            <input class="form-control" type="date" formControlName="fechaFactura" />
+            <app-date-picker inputClass="form-control" placeholder="Selecciona la fecha de factura" formControlName="fechaFactura" />
           </div>
           <div class="min-w-0 xl:col-span-3">
             <label class="form-label">Fecha pago cliente</label>
-            <input class="form-control" type="date" formControlName="fechaPagoCliente" />
+            <app-date-picker inputClass="form-control" placeholder="Selecciona la fecha de pago" formControlName="fechaPagoCliente" />
           </div>
           <div class="min-w-0 xl:col-span-3">
             <label class="form-label">Resumen catalogo</label>

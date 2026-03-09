@@ -5,6 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 
 import { PopupService } from '../../../../core/services/popup.service';
+import { DatePickerComponent } from '../../../../shared/components/date-picker/date-picker.component';
 import {
   EstadoVehiculo,
   TipoDocumento,
@@ -16,7 +17,7 @@ import {
 @Component({
   selector: 'app-vehiculos-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DatePickerComponent],
   template: `
     <section class="min-w-0 w-full space-y-6">
       <header class="flex flex-wrap items-center justify-between gap-3">
@@ -200,7 +201,11 @@ import {
           </div>
           <div class="min-w-0 xl:col-span-3">
             <label class="form-label">Caducidad licencia</label>
-            <input class="form-control" type="date" formControlName="fechaCaducidadLicencia" />
+            <app-date-picker
+              inputClass="form-control"
+              placeholder="Selecciona la fecha de caducidad"
+              formControlName="fechaCaducidadLicencia"
+            />
           </div>
           <div class="min-w-0 xl:col-span-2">
             <label class="form-label">Estado</label>

@@ -3,13 +3,14 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 
 import { PopupService } from '../../../core/services/popup.service';
+import { DatePickerComponent } from '../../../shared/components/date-picker/date-picker.component';
 import { VehiculoResponse, VehiculosService } from '../../vehiculos/services/vehiculos.service';
 import { ConsultaPlacaResponse, PlacasService } from '../services/placas.service';
 
 @Component({
   selector: 'app-placas-placeholder',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DatePickerComponent],
   template: `
     <section class="min-w-0 w-full space-y-6">
       <header class="flex flex-wrap items-center justify-between gap-3">
@@ -30,8 +31,8 @@ import { ConsultaPlacaResponse, PlacasService } from '../services/placas.service
               {{ vehiculo.placa }} | {{ vehiculo.choferDefault }}
             </option>
           </select>
-          <input class="filter-control" type="date" formControlName="fechaDesde" />
-          <input class="filter-control" type="date" formControlName="fechaHasta" />
+          <app-date-picker inputClass="filter-control" placeholder="Fecha desde" formControlName="fechaDesde" />
+          <app-date-picker inputClass="filter-control" placeholder="Fecha hasta" formControlName="fechaHasta" />
           <button class="btn-outline-neutral h-10 rounded-lg font-medium hover:bg-gray-100" type="submit">Filtrar</button>
           <button class="btn-outline-neutral h-10 rounded-lg font-medium hover:bg-gray-100" type="button" (click)="limpiar()">Limpiar</button>
         </form>
