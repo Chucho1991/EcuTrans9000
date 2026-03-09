@@ -22,11 +22,11 @@ import { ThemeService } from '../core/services/theme.service';
             <div class="flex items-center gap-3">
               <img
                 src="brand/ecutrans-logo.png"
-                alt="Logo de EcuTrans"
+                alt="Logo de EcuTran"
                 class="h-12 w-12 rounded-xl bg-white object-contain p-1 shadow-sm"
               />
               <div class="min-w-0">
-                <h1 class="text-xl font-semibold text-gray-900 dark:text-white">EcuTrans9000</h1>
+                <h1 class="text-xl font-semibold text-gray-900 dark:text-white">EcuTran9000</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Sistema de trafico</p>
               </div>
             </div>
@@ -74,11 +74,11 @@ import { ThemeService } from '../core/services/theme.service';
             <div class="flex min-w-0 flex-1 items-center gap-3">
               <img
                 src="brand/ecutrans-logo.png"
-                alt="Logo de EcuTrans"
+                alt="Logo de EcuTran"
                 class="h-11 w-11 rounded-xl bg-white object-contain p-1 shadow-sm"
               />
               <div class="min-w-0">
-                <h1 class="break-words text-lg font-semibold leading-tight text-gray-900 dark:text-white sm:text-xl">EcuTrans9000</h1>
+                <h1 class="break-words text-lg font-semibold leading-tight text-gray-900 dark:text-white sm:text-xl">EcuTran9000</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Sistema de trafico</p>
               </div>
             </div>

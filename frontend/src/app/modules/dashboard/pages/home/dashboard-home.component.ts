@@ -20,7 +20,7 @@ import {
       <header class="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p class="text-xs font-semibold uppercase tracking-[0.24em] text-brand-500">Centro de control</p>
-          <h1 class="page-title mt-1">Dashboard operativo EcuTrans9000</h1>
+          <h1 class="page-title mt-1">Dashboard operativo EcuTran9000</h1>
           <p class="page-subtitle mt-2 max-w-3xl">
             Seguimiento de flota, facturacion, clientes y actividad reciente desde la bitacora central.
           </p>
