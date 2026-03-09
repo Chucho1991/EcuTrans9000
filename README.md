@@ -4,9 +4,9 @@ Plataforma para digitalizar la operación de transporte: control de usuarios, bi
 
 ## Servicios
 - Frontend (Nginx + Angular compilado): `http://localhost`
-- Backend API (Spring Boot): `http://localhost:8080`
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/api-docs`
+- Backend API (proxy por Nginx): `http://localhost`
+- Swagger UI: `http://localhost/swagger-ui.html`
+- OpenAPI JSON: `http://localhost/api-docs`
 
 ## Requisitos
 - Docker + Docker Compose
@@ -21,6 +21,8 @@ Variables clave:
 - Bootstrap administrador: `BOOTSTRAP_SUPERADMIN_*`
 - Límites de archivos/importación: `VEHICULOS_*`
 
+Para despliegue por dominio, `CORS_ALLOWED_ORIGINS` debe incluir el origen exacto del frontend. Ejemplo: `http://ecutran.cloud` y `https://ecutran.cloud`.
+
 ## Inicio rápido
 ```bash
 cp .env.example .env
@@ -31,9 +33,9 @@ docker compose up --build
 - El frontend se construye con `ng build --configuration production` y se sirve con `nginx`.
 - El backend se empaqueta como `jar` y se ejecuta con Java 17.
 - `docker-compose.yml` levanta los tres servicios con reinicio automático y healthchecks.
+- El backend no se publica hacia Internet; `nginx` hace proxy interno a rutas backend como `/auth`, `/api`, `/users`, `/clientes` y `/settings`.
 - Puertos expuestos:
   - Frontend: `80`
-  - Backend: `8080`
   - PostgreSQL: `5432`
 
 Comandos útiles:
@@ -115,4 +117,4 @@ Valida Javadocs públicos, cobertura base de Postman y secciones obligatorias de
 
 ## Acceso desde celular (misma red)
 - Abrir: `http://<IP_DE_TU_PC>`
-- Consumir API: `http://<IP_DE_TU_PC>:8080`
+- Consumir API: `http://<IP_DE_TU_PC>`
