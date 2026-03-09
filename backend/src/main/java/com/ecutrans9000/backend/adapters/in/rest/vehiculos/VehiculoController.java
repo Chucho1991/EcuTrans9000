@@ -26,7 +26,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.Map;
-import java.util.List;
 import java.util.UUID;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
@@ -89,8 +88,7 @@ public class VehiculoController {
   @GetMapping("/{id}")
   @Operation(summary = "Detalle de vehiculo")
   public ResponseEntity<VehiculoResponse> getById(@PathVariable UUID id) {
-    Vehiculo vehiculo = vehiculoApplicationService.getById(id);
-    return ResponseEntity.ok(toResponse(vehiculo, vehiculoApplicationService.getFotoPreviewDataUrl(id)));
+    return ResponseEntity.ok(toResponse(vehiculoApplicationService.getById(id)));
   }
 
   @GetMapping
@@ -102,10 +100,8 @@ public class VehiculoController {
       @RequestParam(required = false) String estado,
       @RequestParam(required = false, defaultValue = "false") Boolean includeDeleted) {
     Page<Vehiculo> result = searchVehiculosUseCase.execute(page, size, q, estado, includeDeleted);
-    List<UUID> vehiculoIds = result.getContent().stream().map(Vehiculo::getId).toList();
-    Map<UUID, String> fotoPreviews = vehiculoApplicationService.getFotoPreviewDataUrls(vehiculoIds);
     return ResponseEntity.ok(VehiculoListResponse.builder()
-        .content(result.getContent().stream().map(vehiculo -> toResponse(vehiculo, fotoPreviews.get(vehiculo.getId()))).toList())
+        .content(result.getContent().stream().map(this::toResponse).toList())
         .page(result.getNumber())
         .size(result.getSize())
         .totalElements(result.getTotalElements())
@@ -231,10 +227,6 @@ public class VehiculoController {
   }
 
   private VehiculoResponse toResponse(Vehiculo vehiculo) {
-    return toResponse(vehiculo, null);
-  }
-
-  private VehiculoResponse toResponse(Vehiculo vehiculo, String fotoPreviewDataUrl) {
     return VehiculoResponse.builder()
         .id(vehiculo.getId())
         .placa(vehiculo.getPlaca())
@@ -248,7 +240,6 @@ public class VehiculoController {
         .m3(vehiculo.getM3())
         .estado(vehiculo.getEstado().name())
         .fotoPath(vehiculo.getFotoPath())
-        .fotoPreviewDataUrl(fotoPreviewDataUrl)
         .docPath(vehiculo.getDocPath())
         .licPath(vehiculo.getLicPath())
         .deleted(vehiculo.getDeleted())

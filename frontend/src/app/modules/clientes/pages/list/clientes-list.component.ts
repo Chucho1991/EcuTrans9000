@@ -58,8 +58,8 @@ import {
                 <td class="px-3 py-3 sm:px-4">{{ cliente.tipoDocumento }} {{ cliente.documento }}</td>
                 <td class="px-3 py-3 sm:px-4">
                   <img
-                    *ngIf="cliente.logoPreviewDataUrl; else sinLogo"
-                    [src]="cliente.logoPreviewDataUrl"
+                    *ngIf="logoPreviewUrls[cliente.id]; else sinLogo"
+                    [src]="logoPreviewUrls[cliente.id]"
                     alt="Logo cliente"
                     class="h-10 w-10 rounded-md border border-gray-200 object-cover dark:border-gray-700"
                   />
@@ -256,6 +256,7 @@ export class ClientesListComponent implements OnDestroy {
   private readonly fb = inject(FormBuilder);
 
   protected clientes: ClienteResponse[] = [];
+  protected logoPreviewUrls: Record<string, string> = {};
   protected selectedCliente: ClienteResponse | null = null;
   protected selectedLogoUrl: string | null = null;
   protected mode: 'none' | 'create' | 'edit' = 'none';
@@ -291,7 +292,8 @@ export class ClientesListComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.selectedLogoUrl = null;
+    this.revokeLogoPreviews();
+    this.revokeSelectedLogoPreview();
   }
 
   protected canWrite(): boolean {
@@ -315,9 +317,11 @@ export class ClientesListComponent implements OnDestroy {
       })
       .subscribe({
         next: (response) => {
+          this.revokeLogoPreviews();
           this.clientes = response.content;
           this.page = response.page;
           this.totalPages = response.totalPages;
+          this.loadLogoPreviews(response.content);
         },
         error: (error) => {
           void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
@@ -329,7 +333,7 @@ export class ClientesListComponent implements OnDestroy {
     this.clientesService.getById(cliente.id).subscribe({
       next: (detail) => {
         this.selectedCliente = detail;
-        this.selectedLogoUrl = detail.logoPreviewDataUrl ?? null;
+        this.loadSelectedLogo(detail);
       }
     });
   }
@@ -587,6 +591,44 @@ export class ClientesListComponent implements OnDestroy {
       next: () => onDone(),
       error: () => onDone()
     });
+  }
+
+  private loadLogoPreviews(items: ClienteResponse[]): void {
+    items.filter((c) => !!c.logoPath).forEach((cliente) => {
+      this.clientesService.getLogoBlob(cliente.id).subscribe({
+        next: (blob) => {
+          this.logoPreviewUrls[cliente.id] = URL.createObjectURL(blob);
+        }
+      });
+    });
+  }
+
+  private revokeLogoPreviews(): void {
+    Object.values(this.logoPreviewUrls).forEach((url) => URL.revokeObjectURL(url));
+    this.logoPreviewUrls = {};
+  }
+
+  private loadSelectedLogo(cliente: ClienteResponse): void {
+    this.revokeSelectedLogoPreview();
+    if (!cliente.logoPath) {
+      this.selectedLogoUrl = null;
+      return;
+    }
+    this.clientesService.getLogoBlob(cliente.id).subscribe({
+      next: (blob) => {
+        this.selectedLogoUrl = URL.createObjectURL(blob);
+      },
+      error: () => {
+        this.selectedLogoUrl = null;
+      }
+    });
+  }
+
+  private revokeSelectedLogoPreview(): void {
+    if (this.selectedLogoUrl) {
+      URL.revokeObjectURL(this.selectedLogoUrl);
+      this.selectedLogoUrl = null;
+    }
   }
 
   private getErrorMessage(error: unknown): string {
