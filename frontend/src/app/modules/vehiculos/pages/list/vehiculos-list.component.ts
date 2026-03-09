@@ -67,15 +67,13 @@ import {
               <tr class="border-b border-gray-100 dark:border-gray-800" *ngFor="let vehiculo of vehiculos">
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.placa }}</td>
                 <td class="px-3 py-3 sm:px-4">
-                  <img
-                    *ngIf="fotoPreviewUrls[vehiculo.id]; else sinFoto"
-                    [src]="fotoPreviewUrls[vehiculo.id]"
-                    alt="Foto de vehiculo"
-                    class="h-10 w-16 rounded-md border border-gray-200 object-cover dark:border-gray-700"
-                  />
-                  <ng-template #sinFoto>
-                    <span class="text-xs text-gray-400">Sin foto</span>
-                  </ng-template>
+                  <span
+                    *ngIf="vehiculo.fotoPath; else sinFoto"
+                    class="inline-flex rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:border-blue-900/40 dark:bg-blue-900/20 dark:text-blue-300"
+                  >
+                    Disponible
+                  </span>
+                  <ng-template #sinFoto><span class="text-xs text-gray-400">Sin foto</span></ng-template>
                 </td>
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.choferDefault }}</td>
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.tonelajeCategoria }}</td>
@@ -320,7 +318,6 @@ export class VehiculosListComponent implements OnDestroy {
   private readonly authService = inject(AuthService);
 
   protected vehiculos: VehiculoResponse[] = [];
-  protected fotoPreviewUrls: Record<string, string> = {};
   protected selectedVehiculo: VehiculoResponse | null = null;
   protected selectedFotoUrl: string | null = null;
   protected mode: 'none' | 'create' | 'edit' = 'none';
@@ -362,7 +359,6 @@ export class VehiculosListComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.revokeFotoPreviews();
     this.revokeSelectedFotoPreview();
   }
 
@@ -384,11 +380,17 @@ export class VehiculosListComponent implements OnDestroy {
       })
       .subscribe({
         next: (response) => {
-          this.revokeFotoPreviews();
           this.vehiculos = response.content;
           this.page = response.page;
           this.totalPages = response.totalPages;
-          this.loadFotoPreviews(response.content);
+        },
+        error: (error) => {
+          this.vehiculos = [];
+          this.totalPages = 0;
+          void this.popupService.info({
+            title: 'Error al cargar vehiculos',
+            message: this.getErrorMessage(error)
+          });
         }
       });
   }
@@ -664,21 +666,6 @@ export class VehiculosListComponent implements OnDestroy {
   private getErrorMessage(error: unknown): string {
     const maybe = error as { error?: { message?: string } };
     return maybe?.error?.message ?? 'Ocurrio un error inesperado.';
-  }
-
-  private loadFotoPreviews(items: VehiculoResponse[]): void {
-    items.filter((v) => !!v.fotoPath).forEach((vehiculo) => {
-      this.vehiculosService.getFotoBlob(vehiculo.id).subscribe({
-        next: (blob) => {
-          this.fotoPreviewUrls[vehiculo.id] = URL.createObjectURL(blob);
-        }
-      });
-    });
-  }
-
-  private revokeFotoPreviews(): void {
-    Object.values(this.fotoPreviewUrls).forEach((url) => URL.revokeObjectURL(url));
-    this.fotoPreviewUrls = {};
   }
 
   private loadSelectedFoto(vehiculo: VehiculoResponse): void {
