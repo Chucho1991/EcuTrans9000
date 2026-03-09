@@ -21,6 +21,8 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - Mantener siempre una colección Postman actualizada en `/postman`.
 - Si el módulo requiere almacenamiento de archivos, usar persistencia en DB por defecto (tabla de binarios + metadatos), salvo instrucción explícita contraria.
 - En auditoría de API, no persistir payload binario crudo; registrar marcador/sanitizar contenido para evitar errores de encoding.
+- Si se modifica despliegue, contenedores o puertos, actualizar `README.md`, `.env.example` y `docker-compose.yml` en el mismo cambio.
+- Para frontend en producción, compilar Angular y servir estáticos con servidor web dedicado; no usar `ng serve` como runtime final.
 
 ## Lineamientos UI obligatorios para módulos nuevos
 - Tema oscuro por defecto.
@@ -85,6 +87,7 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 8. **Pruebas mínimas**
 - Backend: tests de casos críticos del módulo.
 - Frontend: validar compilación y flujos esenciales.
+- Infraestructura/despliegue: validar `docker compose build` cuando se cambien Dockerfiles, compose o variables de entorno.
 
 ## Checklist para PR
 - [ ] Migraciones Flyway incluidas y válidas.
@@ -100,6 +103,7 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - [ ] Popups descriptivos implementados para creación, edición, cambio de estado y login.
 - [ ] Popups implementados con estilo del template (sin `window.alert`/`window.confirm`/`window.prompt`).
 - [ ] README actualizado.
+- [ ] `.env.example` y `docker-compose.yml` alineados con el despliegue vigente.
 - [ ] Colección Postman actualizada en `/postman`.
 - [ ] Build/test ejecutados correctamente.
 
@@ -110,6 +114,7 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - Módulo `BITACORA`: implementado con CRUD, soft delete/restore, filtros por rango de fechas, exportación Excel basada en plantilla corporativa e importación Excel con plantilla simple y ejemplo.
 - Módulo `CONSULTA POR PLACAS`: implementado con filtros por placa y rango de fechas, lectura desde bitácora, resumen financiero calculado (retención 1%, comisión 6%, anticipos, pago total) y exportación Excel con logo y estilo corporativo.
 - Swagger/OpenAPI y colección Postman deben mantenerse sincronizados ante cada cambio de endpoint o payload.
+- Despliegue actual: frontend compilado para producción y servido por `nginx` en puerto `80`; backend en puerto `8080`; PostgreSQL en `5432`.
 
 ## Habilidades
 Una habilidad es un conjunto de instrucciones locales guardadas en un archivo `SKILL.md`. A continuación se lista lo disponible en esta sesión.
