@@ -10,9 +10,9 @@ Thumbs.db
 *.swo
 
 # Env files
-.env
-.env.local
-.env.*.local
+#.env
+#.env.local
+#.env.*.local
 
 # Logs
 *.log
