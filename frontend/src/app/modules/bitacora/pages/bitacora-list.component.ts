@@ -71,7 +71,7 @@ import {
                 <th class="px-3 py-3 sm:px-4">Factura</th>
                 <th class="px-3 py-3 sm:px-4">Fecha factura</th>
                 <th class="px-3 py-3 sm:px-4">Fecha pago cliente</th>
-                <th class="px-3 py-3 sm:px-4">Facturado Cliente</th>
+                <th class="px-3 py-3 sm:px-4">Pago Cliente</th>
                 <th class="px-3 py-3 sm:px-4">Pago Transportista</th>
                 <th class="px-3 py-3 sm:px-4">Acciones</th>
               </tr>
@@ -193,7 +193,7 @@ import {
             <p class="mt-1 text-sm text-gray-700 dark:text-gray-200">{{ selectedViaje.detalleViaje || '-' }}</p>
           </div>
           <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Facturacion</p>
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Pagado cliente</p>
             <p class="mt-1 text-sm text-gray-700 dark:text-gray-200">{{ selectedViaje.facturadoCliente ? (selectedViaje.numeroFactura || 'SI') : 'NO' }}</p>
           </div>
           <div>
@@ -274,7 +274,7 @@ import {
             <input class="form-control" type="number" min="0" step="0.01" formControlName="anticipo" />
           </div>
           <div class="min-w-0 xl:col-span-3">
-            <label class="form-label">Facturado cliente</label>
+            <label class="form-label">Pagado cliente</label>
             <label class="flex h-11 items-center gap-3 rounded-xl border border-gray-200 px-4 text-sm font-medium text-gray-700 dark:border-gray-800 dark:text-gray-200">
               <input class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" type="checkbox" formControlName="facturadoCliente" />
               <span>{{ viajeForm.get('facturadoCliente')?.value ? 'SI' : 'NO' }}</span>

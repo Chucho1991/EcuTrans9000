@@ -48,7 +48,7 @@ public class ViajeBitacoraExcelImportService {
       "valor",
       "estiba",
       "anticipo",
-      "facturado cliente",
+      "pagado cliente",
       "n° factura",
       "fecha factura",
       "fecha pago cliente a ecutrans",
@@ -401,7 +401,9 @@ public class ViajeBitacoraExcelImportService {
   }
 
   private String normalizeHeader(String value) {
-    return normalizeText(value).replace("n factura", "n° factura");
+    return normalizeText(value)
+        .replace("n factura", "n° factura")
+        .replace("facturado cliente", "pagado cliente");
   }
 
   private boolean headerMatches(List<String> header) {
@@ -439,7 +441,7 @@ public class ViajeBitacoraExcelImportService {
       case "valor" -> "Valor";
       case "estiba" -> "Estiba";
       case "anticipo" -> "Anticipo";
-      case "facturado cliente" -> "Facturado cliente";
+      case "pagado cliente" -> "Pagado cliente";
       case "n° factura" -> "N° Factura";
       case "fecha factura" -> "Fecha factura";
       case "fecha pago cliente a ecutrans" -> "Fecha pago cliente a Ecutrans";
