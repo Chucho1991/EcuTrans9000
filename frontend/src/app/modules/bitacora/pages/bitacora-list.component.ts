@@ -4,6 +4,7 @@ import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angu
 import { forkJoin } from 'rxjs';
 
 import { PopupService } from '../../../core/services/popup.service';
+import { AuthService } from '../../auth/services/auth.service';
 import { DatePickerComponent } from '../../../shared/components/date-picker/date-picker.component';
 import { ClienteResponse, ClientesService } from '../../clientes/services/clientes.service';
 import { VehiculoResponse, VehiculosService } from '../../vehiculos/services/vehiculos.service';
@@ -49,10 +50,11 @@ import {
               {{ cliente.nombre }}
             </option>
           </select>
-          <select class="filter-control" formControlName="includeDeleted">
+          <select *ngIf="canAdmin()" class="filter-control" formControlName="includeDeleted">
             <option value="false">No eliminados</option>
             <option value="true">Incluir eliminados</option>
           </select>
+          <div *ngIf="!canAdmin()"></div>
           <button class="btn-outline-neutral h-10 w-full rounded-lg font-medium hover:bg-gray-100" type="submit">Filtrar</button>
         </form>
       </article>
@@ -139,11 +141,11 @@ import {
                       <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="m3 21 3.8-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L3 21Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m13.5 6.5 3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                       <span class="icon-action-tooltip">Editar</span>
                     </button>
-                    <button *ngIf="!viaje.deleted" class="icon-action-btn text-orange-600 hover:text-orange-700" type="button" aria-label="Eliminar" (click)="softDelete(viaje)">
+                    <button *ngIf="canAdmin() && !viaje.deleted" class="icon-action-btn text-orange-600 hover:text-orange-700" type="button" aria-label="Eliminar" (click)="softDelete(viaje)">
                       <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                       <span class="icon-action-tooltip">Soft delete</span>
                     </button>
-                    <button *ngIf="viaje.deleted" class="icon-action-btn text-green-600 hover:text-green-700" type="button" aria-label="Restaurar" (click)="restore(viaje)">
+                    <button *ngIf="canAdmin() && viaje.deleted" class="icon-action-btn text-green-600 hover:text-green-700" type="button" aria-label="Restaurar" (click)="restore(viaje)">
                       <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 12a9 9 0 1 0 2.6-6.4M3 4v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                       <span class="icon-action-tooltip">Restaurar</span>
                     </button>
@@ -381,6 +383,7 @@ export class BitacoraListComponent {
   private readonly vehiculosService = inject(VehiculosService);
   private readonly clientesService = inject(ClientesService);
   private readonly popupService = inject(PopupService);
+  private readonly authService = inject(AuthService);
   private readonly fb = inject(FormBuilder);
 
   protected viajes: ViajeBitacoraResponse[] = [];
@@ -430,6 +433,10 @@ export class BitacoraListComponent {
     this.loadViajes(0);
   }
 
+  protected canAdmin(): boolean {
+    return this.authService.getRole() === 'SUPERADMINISTRADOR';
+  }
+
   protected loadCatalogos(): void {
     forkJoin({
       vehiculos: this.vehiculosService.list({ page: 0, size: 200, estado: 'ACTIVO', includeDeleted: false }),
@@ -457,7 +464,7 @@ export class BitacoraListComponent {
       fechaHasta: filters.fechaHasta || undefined,
       vehiculoId: filters.vehiculoId || undefined,
       clienteId: filters.clienteId || undefined,
-      includeDeleted: filters.includeDeleted === 'true'
+      includeDeleted: this.canAdmin() && filters.includeDeleted === 'true'
     }).subscribe({
       next: (response) => {
         this.viajes = response.content;

@@ -71,7 +71,6 @@ public class ClienteController {
   private final ClienteApplicationService clienteApplicationService;
 
   @PostMapping
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Crear cliente")
   public ResponseEntity<ClienteResponse> create(@Valid @RequestBody ClienteUpsertRequest request, Authentication auth) {
     Cliente saved = createClienteUseCase.execute(toCommand(request), auth.getName(), role(auth));
@@ -102,7 +101,6 @@ public class ClienteController {
   }
 
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Editar cliente")
   public ResponseEntity<ClienteResponse> update(
       @PathVariable UUID id,
@@ -113,7 +111,6 @@ public class ClienteController {
   }
 
   @PatchMapping("/{id}/toggle-activo")
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Alternar estado activo")
   public ResponseEntity<ClienteResponse> toggleActivo(@PathVariable UUID id, Authentication auth) {
     return ResponseEntity.ok(toResponse(toggleActivoClienteUseCase.execute(id, auth.getName(), role(auth))));
@@ -143,7 +140,6 @@ public class ClienteController {
   }
 
   @PostMapping(path = "/{id}/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Subir logo de cliente")
   public ResponseEntity<ClienteResponse> uploadLogo(@PathVariable UUID id, @RequestPart("file") MultipartFile file, Authentication auth) {
     Cliente saved = clienteApplicationService.uploadLogo(id, file, auth.getName(), role(auth));
@@ -171,7 +167,6 @@ public class ClienteController {
   }
 
   @PostMapping(path = "/import/preview", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Previsualizar importacion Excel")
   public ResponseEntity<ClienteImportResult> preview(
       @RequestPart("file") MultipartFile file,
@@ -181,7 +176,6 @@ public class ClienteController {
   }
 
   @PostMapping(path = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Importar Excel")
   public ResponseEntity<ClienteImportResult> importCsv(
       @RequestPart("file") MultipartFile file,

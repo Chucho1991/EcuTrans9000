@@ -22,7 +22,7 @@ import {
           <h1 class="page-title">Clientes</h1>
           <p class="page-subtitle">Gestion del catalogo de clientes para Bitacora de Viajes.</p>
         </div>
-        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row" *ngIf="canManage()">
+        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row" *ngIf="canWrite()">
           <button class="btn-outline-neutral px-4 py-2" type="button" (click)="openImportModal()">Importar Excel</button>
           <button class="btn-primary-brand basis-full sm:basis-auto" type="button" (click)="startCreate()">Nuevo cliente</button>
         </div>
@@ -31,11 +31,11 @@ import {
       <article class="panel-card min-w-0 w-full max-w-full p-4">
         <form class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4" [formGroup]="filtersForm" (ngSubmit)="loadClientes(0)">
           <input class="filter-control" formControlName="q" placeholder="Buscar documento o nombre" />
-          <select *ngIf="canManage()" class="filter-control" formControlName="includeDeleted">
+          <select *ngIf="canAdmin()" class="filter-control" formControlName="includeDeleted">
             <option value="false">No eliminados</option>
             <option value="true">Incluir eliminados</option>
           </select>
-          <div *ngIf="!canManage()"></div>
+          <div *ngIf="!canAdmin()"></div>
           <button class="btn-outline-neutral h-10 w-full rounded-lg font-medium hover:bg-gray-100" type="submit">Filtrar</button>
         </form>
       </article>
@@ -80,24 +80,24 @@ import {
                       <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
                       <span class="icon-action-tooltip">Ver</span>
                     </button>
-                    <button *ngIf="canManage() && !cliente.deleted" class="icon-action-btn" type="button" aria-label="Editar" (click)="startEdit(cliente)">
+                    <button *ngIf="canWrite() && !cliente.deleted" class="icon-action-btn" type="button" aria-label="Editar" (click)="startEdit(cliente)">
                       <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="m3 21 3.8-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L3 21Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m13.5 6.5 3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                       <span class="icon-action-tooltip">Editar</span>
                     </button>
-                    <button *ngIf="canManage() && !cliente.deleted" class="icon-action-btn" [class.text-green-600]="!cliente.activo" [class.text-red-600]="cliente.activo" type="button" aria-label="Cambiar estado" (click)="toggleActivo(cliente)">
+                    <button *ngIf="canWrite() && !cliente.deleted" class="icon-action-btn" [class.text-green-600]="!cliente.activo" [class.text-red-600]="cliente.activo" type="button" aria-label="Cambiar estado" (click)="toggleActivo(cliente)">
                       <svg *ngIf="!cliente.activo" viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                       <svg *ngIf="cliente.activo" viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                       <span class="icon-action-tooltip">{{ cliente.activo ? 'Inactivar' : 'Activar' }}</span>
                     </button>
-                    <button *ngIf="canManage() && !cliente.deleted" class="icon-action-btn text-orange-600 hover:text-orange-700" type="button" aria-label="Eliminar" (click)="softDelete(cliente)">
+                    <button *ngIf="canAdmin() && !cliente.deleted" class="icon-action-btn text-orange-600 hover:text-orange-700" type="button" aria-label="Eliminar" (click)="softDelete(cliente)">
                       <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                       <span class="icon-action-tooltip">Eliminar</span>
                     </button>
-                    <button *ngIf="canManage() && cliente.deleted" class="icon-action-btn text-green-600 hover:text-green-700" type="button" aria-label="Restaurar" (click)="restore(cliente)">
+                    <button *ngIf="canAdmin() && cliente.deleted" class="icon-action-btn text-green-600 hover:text-green-700" type="button" aria-label="Restaurar" (click)="restore(cliente)">
                       <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 12a9 9 0 1 0 2.6-6.4M3 4v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                       <span class="icon-action-tooltip">Restaurar</span>
                     </button>
-                    <button *ngIf="canManage() && cliente.deleted" class="icon-action-btn text-error-600 hover:text-error-700" type="button" aria-label="Eliminar fisico" (click)="forceDelete(cliente)">
+                    <button *ngIf="canAdmin() && cliente.deleted" class="icon-action-btn text-error-600 hover:text-error-700" type="button" aria-label="Eliminar fisico" (click)="forceDelete(cliente)">
                       <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                       <span class="icon-action-tooltip">Force delete</span>
                     </button>
@@ -143,7 +143,7 @@ import {
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Descripcion:</strong> {{ selectedCliente.descripcion || '-' }}</p>
       </article>
 
-      <article class="panel-card min-w-0 w-full max-w-full p-4 sm:p-6 lg:p-7" *ngIf="canManage() && mode !== 'none'">
+      <article class="panel-card min-w-0 w-full max-w-full p-4 sm:p-6 lg:p-7" *ngIf="canWrite() && mode !== 'none'">
         <div class="flex flex-wrap items-start justify-between gap-2">
           <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ mode === 'create' ? 'Crear cliente' : 'Editar cliente' }}</h2>
           <span class="text-xs text-gray-500 dark:text-gray-400">Completa los campos requeridos</span>
@@ -296,7 +296,12 @@ export class ClientesListComponent implements OnDestroy {
     this.revokeSelectedLogoPreview();
   }
 
-  protected canManage(): boolean {
+  protected canWrite(): boolean {
+    const role = this.authService.getRole();
+    return role === 'SUPERADMINISTRADOR' || role === 'REGISTRADOR';
+  }
+
+  protected canAdmin(): boolean {
     return this.authService.getRole() === 'SUPERADMINISTRADOR';
   }
 
@@ -308,7 +313,7 @@ export class ClientesListComponent implements OnDestroy {
         page: safePage,
         size: this.size,
         q: filters.q || undefined,
-        includeDeleted: this.canManage() && filters.includeDeleted === 'true'
+        includeDeleted: this.canAdmin() && filters.includeDeleted === 'true'
       })
       .subscribe({
         next: (response) => {

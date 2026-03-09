@@ -72,7 +72,6 @@ public class VehiculoController {
   private final VehiculoApplicationService vehiculoApplicationService;
 
   @PostMapping
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Crear vehiculo")
   public ResponseEntity<VehiculoResponse> create(@Valid @org.springframework.web.bind.annotation.RequestBody VehiculoUpsertRequest request, Authentication auth) {
     Vehiculo saved = createVehiculoUseCase.execute(toCommand(request), auth.getName(), role(auth));
@@ -80,7 +79,6 @@ public class VehiculoController {
   }
 
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Editar vehiculo")
   public ResponseEntity<VehiculoResponse> update(@PathVariable UUID id, @Valid @org.springframework.web.bind.annotation.RequestBody VehiculoUpsertRequest request, Authentication auth) {
     Vehiculo saved = updateVehiculoUseCase.execute(id, toCommand(request), auth.getName(), role(auth));
@@ -112,7 +110,6 @@ public class VehiculoController {
   }
 
   @PostMapping("/{id}/activate")
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Activar vehiculo")
   public ResponseEntity<Map<String, String>> activate(@PathVariable UUID id, Authentication auth) {
     activateVehiculoUseCase.execute(id, auth.getName(), role(auth));
@@ -120,7 +117,6 @@ public class VehiculoController {
   }
 
   @PostMapping("/{id}/deactivate")
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Inactivar vehiculo")
   public ResponseEntity<Map<String, String>> deactivate(@PathVariable UUID id, Authentication auth) {
     deactivateVehiculoUseCase.execute(id, auth.getName(), role(auth));
@@ -144,21 +140,18 @@ public class VehiculoController {
   }
 
   @PostMapping(path = "/{id}/foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Subir foto de vehiculo")
   public ResponseEntity<VehiculoResponse> uploadFoto(@PathVariable UUID id, @RequestPart("file") MultipartFile file, Authentication auth) {
     return ResponseEntity.ok(toResponse(uploadVehiculoImageUseCase.uploadFoto(id, file, auth.getName(), role(auth))));
   }
 
   @PostMapping(path = "/{id}/documento", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Subir imagen de documento")
   public ResponseEntity<VehiculoResponse> uploadDocumento(@PathVariable UUID id, @RequestPart("file") MultipartFile file, Authentication auth) {
     return ResponseEntity.ok(toResponse(uploadVehiculoImageUseCase.uploadDocumento(id, file, auth.getName(), role(auth))));
   }
 
   @PostMapping(path = "/{id}/licencia-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Subir imagen de licencia")
   public ResponseEntity<VehiculoResponse> uploadLicencia(@PathVariable UUID id, @RequestPart("file") MultipartFile file, Authentication auth) {
     return ResponseEntity.ok(toResponse(uploadVehiculoImageUseCase.uploadLicencia(id, file, auth.getName(), role(auth))));
@@ -201,7 +194,6 @@ public class VehiculoController {
   }
 
   @PostMapping(path = "/import/preview", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Previsualizar importacion Excel")
   public ResponseEntity<VehiculoImportResult> preview(
       @RequestPart("file") MultipartFile file,
@@ -211,7 +203,6 @@ public class VehiculoController {
   }
 
   @PostMapping(path = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("hasRole('SUPERADMINISTRADOR')")
   @Operation(summary = "Importar Excel")
   public ResponseEntity<VehiculoImportResult> importCsv(
       @RequestPart("file") MultipartFile file,
