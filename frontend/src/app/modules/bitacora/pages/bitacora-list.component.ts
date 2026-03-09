@@ -70,7 +70,8 @@ import {
                 <th class="px-3 py-3 sm:px-4">Factura</th>
                 <th class="px-3 py-3 sm:px-4">Fecha factura</th>
                 <th class="px-3 py-3 sm:px-4">Fecha pago cliente</th>
-                <th class="px-3 py-3 sm:px-4">Pago</th>
+                <th class="px-3 py-3 sm:px-4">Facturado Cliente</th>
+                <th class="px-3 py-3 sm:px-4">Pago Transportista</th>
                 <th class="px-3 py-3 sm:px-4">Acciones</th>
               </tr>
             </thead>
@@ -120,6 +121,10 @@ import {
                   </ng-template>
                 </td>
                 <td class="px-3 py-3 sm:px-4">
+                  <span *ngIf="viaje.facturadoCliente" class="inline-flex rounded-full border border-blue-light-200 bg-blue-light-50 px-2.5 py-1 text-xs font-semibold text-blue-light-700">Facturado</span>
+                  <span *ngIf="!viaje.facturadoCliente" class="inline-flex rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:border-orange-900/40 dark:bg-orange-900/20 dark:text-orange-300">Pendiente</span>
+                </td>
+                <td class="px-3 py-3 sm:px-4">
                   <span *ngIf="viaje.pagadoTransportista" class="inline-flex rounded-full border border-blue-light-200 bg-blue-light-50 px-2.5 py-1 text-xs font-semibold text-blue-light-700">Pagado</span>
                   <span *ngIf="!viaje.pagadoTransportista" class="inline-flex rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:border-orange-900/40 dark:bg-orange-900/20 dark:text-orange-300">Pendiente</span>
                 </td>
@@ -145,7 +150,7 @@ import {
                 </td>
               </tr>
               <tr *ngIf="viajes.length === 0">
-                <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400" colspan="11">No hay viajes registrados.</td>
+                <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400" colspan="12">No hay viajes registrados.</td>
               </tr>
             </tbody>
           </table>
