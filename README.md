@@ -3,10 +3,10 @@
 Plataforma para digitalizar la operación de transporte: control de usuarios, bitácora de viajes, catálogo de vehículos/clientes y consulta financiera por placa.
 
 ## Servicios
-- Frontend (Angular): `http://localhost:4200`
-- Backend API (Spring Boot): `http://localhost:8080`
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/api-docs`
+- Frontend (Nginx + Angular compilado): `http://localhost`
+- Backend API (proxy por Nginx): `http://localhost`
+- Swagger UI: `http://localhost/swagger-ui.html`
+- OpenAPI JSON: `http://localhost/api-docs`
 
 ## Requisitos
 - Docker + Docker Compose
@@ -19,12 +19,31 @@ Variables clave:
 - Seguridad: `JWT_SECRET`, `JWT_EXPIRATION_MINUTES`, `CORS_ALLOWED_ORIGINS`
 - Auditoría: `AUDIT_MAX_PAYLOAD_SIZE`
 - Bootstrap administrador: `BOOTSTRAP_SUPERADMIN_*`
-- Límites de archivos/importación: `VEHICULOS_*`, `CLIENTES_*`
+- Límites de archivos/importación: `VEHICULOS_*`
+
+Para despliegue por dominio, `CORS_ALLOWED_ORIGINS` debe incluir el origen exacto del frontend. Ejemplo: `http://ecutran.cloud` y `https://ecutran.cloud`.
 
 ## Inicio rápido
 ```bash
 cp .env.example .env
 docker compose up --build
+```
+
+## Despliegue de producción
+- El frontend se construye con `ng build --configuration production` y se sirve con `nginx`.
+- El backend se empaqueta como `jar` y se ejecuta con Java 17.
+- `docker-compose.yml` levanta los tres servicios con reinicio automático y healthchecks.
+- El backend no se publica hacia Internet; `nginx` hace proxy interno a rutas backend como `/auth`, `/api`, `/users`, `/clientes` y `/settings`.
+- Puertos expuestos:
+  - Frontend: `80`
+  - PostgreSQL: `5432`
+
+Comandos útiles:
+```bash
+docker compose build
+docker compose up -d
+docker compose ps
+docker compose logs -f
 ```
 
 ## Usuario inicial
@@ -73,6 +92,11 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - Auditoría API en `api_audit_log`.
 - Auditoría de acciones (creación, edición, estado, login, restauración, etc.) en `action_audit_log`.
 
+## Roles y acceso
+- `SUPERADMINISTRADOR`: acceso total y acciones administrativas.
+- `REGISTRADOR`: acceso operativo en módulos habilitados por configuración.
+- La configuración dinámica por rol se administra en `settings/module-access`.
+
 ## Colección Postman
 - Archivo oficial: `postman/EcuTrans9000.postman_collection.json`
 - Ejecutar primero `Auth > Login` para poblar token.
@@ -92,5 +116,5 @@ Valida Javadocs públicos, cobertura base de Postman y secciones obligatorias de
 - Estados visuales consistentes (`ACTIVO`, `INACTIVO`, `ELIMINADO`).
 
 ## Acceso desde celular (misma red)
-- Abrir: `http://<IP_DE_TU_PC>:4200`
-- Consumir API: `http://<IP_DE_TU_PC>:8080`
+- Abrir: `http://<IP_DE_TU_PC>`
+- Consumir API: `http://<IP_DE_TU_PC>`
