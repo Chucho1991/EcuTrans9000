@@ -2190,7 +2190,7 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/placas/consulta?placa=PAE4249&fechaDesde=2026-01-01&fechaHasta=2026-12-31",
+              "raw": "{{baseUrl}}/api/placas/consulta?placa=PAE4249&codigoViaje=120&estadoPagoChofer=NO_PAGADOS&fechaDesde=2026-01-01&fechaHasta=2026-12-31",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2203,6 +2203,14 @@
                 {
                   "key": "placa",
                   "value": "PAE4249"
+                },
+                {
+                  "key": "codigoViaje",
+                  "value": "120"
+                },
+                {
+                  "key": "estadoPagoChofer",
+                  "value": "NO_PAGADOS"
                 },
                 {
                   "key": "fechaDesde",
@@ -2232,7 +2240,7 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/placas/consulta/export?placa=PAE4249&fechaDesde=2026-01-01&fechaHasta=2026-12-31",
+              "raw": "{{baseUrl}}/api/placas/consulta/export?placa=PAE4249&codigoViaje=120&estadoPagoChofer=NO_PAGADOS&fechaDesde=2026-01-01&fechaHasta=2026-12-31",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2246,6 +2254,14 @@
                 {
                   "key": "placa",
                   "value": "PAE4249"
+                },
+                {
+                  "key": "codigoViaje",
+                  "value": "120"
+                },
+                {
+                  "key": "estadoPagoChofer",
+                  "value": "NO_PAGADOS"
                 },
                 {
                   "key": "fechaDesde",
