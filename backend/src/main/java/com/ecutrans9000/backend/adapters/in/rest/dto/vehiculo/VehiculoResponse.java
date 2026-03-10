@@ -31,7 +31,6 @@ public class VehiculoResponse {
   private BigDecimal m3;
   private String estado;
   private String fotoPath;
-  private String fotoPreviewDataUrl;
   private String docPath;
   private String licPath;
   private Boolean deleted;

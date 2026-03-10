@@ -8,9 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Payload REST de salida para el catálogo de clientes.
- */
 @Getter
 @Setter
 @Builder
@@ -25,7 +22,6 @@ public class ClienteResponse {
   private String direccion;
   private String descripcion;
   private String logoPath;
-  private String logoPreviewDataUrl;
   private Boolean activo;
   private Boolean deleted;
   private LocalDateTime deletedAt;

@@ -68,8 +68,8 @@ import {
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.placa }}</td>
                 <td class="px-3 py-3 sm:px-4">
                   <img
-                    *ngIf="vehiculo.fotoPreviewDataUrl; else sinFoto"
-                    [src]="vehiculo.fotoPreviewDataUrl"
+                    *ngIf="fotoPreviewUrls[vehiculo.id]; else sinFoto"
+                    [src]="fotoPreviewUrls[vehiculo.id]"
                     alt="Foto de vehiculo"
                     class="h-10 w-16 rounded-md border border-gray-200 object-cover dark:border-gray-700"
                   />
@@ -320,6 +320,7 @@ export class VehiculosListComponent implements OnDestroy {
   private readonly authService = inject(AuthService);
 
   protected vehiculos: VehiculoResponse[] = [];
+  protected fotoPreviewUrls: Record<string, string> = {};
   protected selectedVehiculo: VehiculoResponse | null = null;
   protected selectedFotoUrl: string | null = null;
   protected mode: 'none' | 'create' | 'edit' = 'none';
@@ -361,7 +362,8 @@ export class VehiculosListComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.selectedFotoUrl = null;
+    this.revokeFotoPreviews();
+    this.revokeSelectedFotoPreview();
   }
 
   protected canAdmin(): boolean {
@@ -382,17 +384,11 @@ export class VehiculosListComponent implements OnDestroy {
       })
       .subscribe({
         next: (response) => {
+          this.revokeFotoPreviews();
           this.vehiculos = response.content;
           this.page = response.page;
           this.totalPages = response.totalPages;
-        },
-        error: (error) => {
-          this.vehiculos = [];
-          this.totalPages = 0;
-          void this.popupService.info({
-            title: 'Error al cargar vehiculos',
-            message: this.getErrorMessage(error)
-          });
+          this.loadFotoPreviews(response.content);
         }
       });
   }
@@ -400,7 +396,7 @@ export class VehiculosListComponent implements OnDestroy {
   protected selectDetail(vehiculo: VehiculoResponse): void {
     this.vehiculosService.getById(vehiculo.id).subscribe((detail) => {
       this.selectedVehiculo = detail;
-      this.selectedFotoUrl = detail.fotoPreviewDataUrl ?? null;
+      this.loadSelectedFoto(detail);
     });
   }
 
@@ -668,6 +664,44 @@ export class VehiculosListComponent implements OnDestroy {
   private getErrorMessage(error: unknown): string {
     const maybe = error as { error?: { message?: string } };
     return maybe?.error?.message ?? 'Ocurrio un error inesperado.';
+  }
+
+  private loadFotoPreviews(items: VehiculoResponse[]): void {
+    items.filter((v) => !!v.fotoPath).forEach((vehiculo) => {
+      this.vehiculosService.getFotoBlob(vehiculo.id).subscribe({
+        next: (blob) => {
+          this.fotoPreviewUrls[vehiculo.id] = URL.createObjectURL(blob);
+        }
+      });
+    });
+  }
+
+  private revokeFotoPreviews(): void {
+    Object.values(this.fotoPreviewUrls).forEach((url) => URL.revokeObjectURL(url));
+    this.fotoPreviewUrls = {};
+  }
+
+  private loadSelectedFoto(vehiculo: VehiculoResponse): void {
+    this.revokeSelectedFotoPreview();
+    if (!vehiculo.fotoPath) {
+      this.selectedFotoUrl = null;
+      return;
+    }
+    this.vehiculosService.getFotoBlob(vehiculo.id).subscribe({
+      next: (blob) => {
+        this.selectedFotoUrl = URL.createObjectURL(blob);
+      },
+      error: () => {
+        this.selectedFotoUrl = null;
+      }
+    });
+  }
+
+  private revokeSelectedFotoPreview(): void {
+    if (this.selectedFotoUrl) {
+      URL.revokeObjectURL(this.selectedFotoUrl);
+      this.selectedFotoUrl = null;
+    }
   }
 
   private triggerBlobDownload(blob: Blob, fileBaseName: string): void {

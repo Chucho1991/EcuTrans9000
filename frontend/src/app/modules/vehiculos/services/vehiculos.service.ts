@@ -20,7 +20,6 @@ export interface VehiculoResponse {
   m3: number;
   estado: EstadoVehiculo;
   fotoPath: string | null;
-  fotoPreviewDataUrl: string | null;
   docPath: string | null;
   licPath: string | null;
   deleted: boolean;

@@ -2,7 +2,6 @@ package com.ecutrans9000.backend.ports.out.vehiculo;
 
 import com.ecutrans9000.backend.domain.vehiculo.TipoArchivoVehiculo;
 import com.ecutrans9000.backend.domain.vehiculo.VehiculoArchivo;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,6 +12,4 @@ public interface VehiculoArchivoRepositoryPort {
   VehiculoArchivo save(VehiculoArchivo archivo);
 
   Optional<VehiculoArchivo> findByVehiculoIdAndTipo(UUID vehiculoId, TipoArchivoVehiculo tipo);
-
-  List<VehiculoArchivo> findByVehiculoIdsAndTipo(List<UUID> vehiculoIds, TipoArchivoVehiculo tipo);
 }

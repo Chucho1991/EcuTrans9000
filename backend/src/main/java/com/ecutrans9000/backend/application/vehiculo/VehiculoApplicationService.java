@@ -19,14 +19,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.Base64;
-import java.util.LinkedHashMap;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -242,22 +239,6 @@ public class VehiculoApplicationService {
 
   public Resource getLicencia(UUID id) {
     return readArchivo(id, TipoArchivoVehiculo.LICENCIA);
-  }
-
-  public String getFotoPreviewDataUrl(UUID id) {
-    return vehiculoArchivoRepositoryPort.findByVehiculoIdAndTipo(id, TipoArchivoVehiculo.FOTO)
-        .map(this::toDataUrl)
-        .orElse(null);
-  }
-
-  public Map<UUID, String> getFotoPreviewDataUrls(List<UUID> vehiculoIds) {
-    if (vehiculoIds == null || vehiculoIds.isEmpty()) {
-      return Map.of();
-    }
-    Map<UUID, String> previews = new LinkedHashMap<>();
-    vehiculoArchivoRepositoryPort.findByVehiculoIdsAndTipo(vehiculoIds, TipoArchivoVehiculo.FOTO)
-        .forEach(archivo -> previews.put(archivo.getVehiculoId(), toDataUrl(archivo)));
-    return previews;
   }
 
   public byte[] downloadTemplate() {
@@ -703,18 +684,6 @@ public class VehiculoApplicationService {
     VehiculoArchivo archivo = vehiculoArchivoRepositoryPort.findByVehiculoIdAndTipo(vehiculoId, tipo)
         .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Archivo no encontrado"));
     return new ByteArrayResource(archivo.getContenido());
-  }
-
-  private String toDataUrl(VehiculoArchivo archivo) {
-    byte[] contenido = archivo.getContenido();
-    if (contenido == null || contenido.length == 0) {
-      return null;
-    }
-    String contentType = archivo.getContentType();
-    if (contentType == null || contentType.isBlank()) {
-      contentType = "application/octet-stream";
-    }
-    return "data:" + contentType + ";base64," + Base64.getEncoder().encodeToString(contenido);
   }
 
   private Vehiculo getExisting(UUID id) {
