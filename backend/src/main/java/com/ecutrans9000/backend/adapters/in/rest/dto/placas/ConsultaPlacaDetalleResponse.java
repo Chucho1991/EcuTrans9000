@@ -26,4 +26,5 @@ public class ConsultaPlacaDetalleResponse {
   private String despacho;
   private String cliente;
   private String origenDestino;
+  private Boolean pagadoTransportista;
 }

@@ -14,6 +14,7 @@ export interface ConsultaPlacaDetalleResponse {
   despacho: string;
   cliente: string;
   origenDestino: string;
+  pagadoTransportista: boolean;
 }
 
 export interface ConsultaPlacaResponse {
@@ -34,11 +35,23 @@ export class PlacasService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${API_BASE_URL}/api/placas/consulta`;
 
-  consultar(params: { placa?: string; fechaDesde?: string; fechaHasta?: string }): Observable<ConsultaPlacaResponse> {
+  consultar(params: {
+    placa?: string;
+    codigoViaje?: string;
+    estadoPagoChofer?: string;
+    fechaDesde?: string;
+    fechaHasta?: string;
+  }): Observable<ConsultaPlacaResponse> {
     let httpParams = new HttpParams();
 
     if (params.placa) {
       httpParams = httpParams.set('placa', params.placa);
+    }
+    if (params.codigoViaje) {
+      httpParams = httpParams.set('codigoViaje', params.codigoViaje);
+    }
+    if (params.estadoPagoChofer) {
+      httpParams = httpParams.set('estadoPagoChofer', params.estadoPagoChofer);
     }
     if (params.fechaDesde) {
       httpParams = httpParams.set('fechaDesde', params.fechaDesde);
@@ -50,11 +63,23 @@ export class PlacasService {
     return this.http.get<ConsultaPlacaResponse>(this.baseUrl, { params: httpParams });
   }
 
-  exportar(params: { placa?: string; fechaDesde?: string; fechaHasta?: string }): Observable<Blob> {
+  exportar(params: {
+    placa?: string;
+    codigoViaje?: string;
+    estadoPagoChofer?: string;
+    fechaDesde?: string;
+    fechaHasta?: string;
+  }): Observable<Blob> {
     let httpParams = new HttpParams();
 
     if (params.placa) {
       httpParams = httpParams.set('placa', params.placa);
+    }
+    if (params.codigoViaje) {
+      httpParams = httpParams.set('codigoViaje', params.codigoViaje);
+    }
+    if (params.estadoPagoChofer) {
+      httpParams = httpParams.set('estadoPagoChofer', params.estadoPagoChofer);
     }
     if (params.fechaDesde) {
       httpParams = httpParams.set('fechaDesde', params.fechaDesde);

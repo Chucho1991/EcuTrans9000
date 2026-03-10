@@ -8,6 +8,7 @@ import com.ecutrans9000.backend.adapters.out.persistence.entity.ViajeBitacoraJpa
 import com.ecutrans9000.backend.adapters.out.persistence.repository.ClienteJpaRepository;
 import com.ecutrans9000.backend.adapters.out.persistence.repository.VehiculoJpaRepository;
 import com.ecutrans9000.backend.adapters.out.persistence.repository.ViajeBitacoraJpaRepository;
+import com.ecutrans9000.backend.domain.bitacora.EstadoPagoChoferFiltro;
 import com.ecutrans9000.backend.domain.vehiculo.Vehiculo;
 import com.ecutrans9000.backend.service.BusinessException;
 import jakarta.persistence.criteria.Predicate;
@@ -69,17 +70,32 @@ public class ConsultaPlacasService {
   }
 
   @Transactional(readOnly = true)
-  public ConsultaPlacaResponse consultar(String placa, LocalDate fechaDesde, LocalDate fechaHasta) {
+  public ConsultaPlacaResponse consultar(
+      String placa,
+      String codigoViaje,
+      EstadoPagoChoferFiltro estadoPagoChofer,
+      LocalDate fechaDesde,
+      LocalDate fechaHasta) {
     validateDateRange(fechaDesde, fechaHasta);
 
     Optional<VehiculoJpaEntity> vehiculo = resolveVehiculo(placa);
-    List<ViajeBitacoraJpaEntity> viajes = loadViajes(vehiculo.orElse(null), fechaDesde, fechaHasta);
+    List<ViajeBitacoraJpaEntity> viajes = loadViajes(
+        vehiculo.orElse(null),
+        codigoViaje,
+        estadoPagoChofer == null ? EstadoPagoChoferFiltro.TODOS : estadoPagoChofer,
+        fechaDesde,
+        fechaHasta);
     return buildResponse(placa, vehiculo.orElse(null), fechaDesde, fechaHasta, viajes);
   }
 
   @Transactional(readOnly = true)
-  public byte[] exportExcel(String placa, LocalDate fechaDesde, LocalDate fechaHasta) {
-    ConsultaPlacaResponse response = consultar(placa, fechaDesde, fechaHasta);
+  public byte[] exportExcel(
+      String placa,
+      String codigoViaje,
+      EstadoPagoChoferFiltro estadoPagoChofer,
+      LocalDate fechaDesde,
+      LocalDate fechaHasta) {
+    ConsultaPlacaResponse response = consultar(placa, codigoViaje, estadoPagoChofer, fechaDesde, fechaHasta);
 
     try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
       XSSFSheet sheet = workbook.createSheet("Consulta Placas");
@@ -106,16 +122,32 @@ public class ConsultaPlacasService {
     return vehiculoRepository.findByPlacaNorm(Vehiculo.normalizePlaca(placa));
   }
 
-  private List<ViajeBitacoraJpaEntity> loadViajes(VehiculoJpaEntity vehiculo, LocalDate fechaDesde, LocalDate fechaHasta) {
-    if (vehiculo == null && fechaDesde == null && fechaHasta == null) {
+  private List<ViajeBitacoraJpaEntity> loadViajes(
+      VehiculoJpaEntity vehiculo,
+      String codigoViaje,
+      EstadoPagoChoferFiltro estadoPagoChofer,
+      LocalDate fechaDesde,
+      LocalDate fechaHasta) {
+    if (vehiculo == null
+        && isBlank(codigoViaje)
+        && fechaDesde == null
+        && fechaHasta == null
+        && estadoPagoChofer == EstadoPagoChoferFiltro.TODOS) {
       return List.of();
     }
-    Specification<ViajeBitacoraJpaEntity> specification = buildSpecification(vehiculo, fechaDesde, fechaHasta);
+    Specification<ViajeBitacoraJpaEntity> specification = buildSpecification(
+        vehiculo,
+        codigoViaje,
+        estadoPagoChofer,
+        fechaDesde,
+        fechaHasta);
     return viajeRepository.findAll(specification, Sort.by(Sort.Direction.ASC, "fechaViaje", "numeroViaje"));
   }
 
   private Specification<ViajeBitacoraJpaEntity> buildSpecification(
       VehiculoJpaEntity vehiculo,
+      String codigoViaje,
+      EstadoPagoChoferFiltro estadoPagoChofer,
       LocalDate fechaDesde,
       LocalDate fechaHasta) {
     return (root, query, cb) -> {
@@ -129,6 +161,15 @@ public class ConsultaPlacasService {
       }
       if (fechaHasta != null) {
         predicates.add(cb.lessThanOrEqualTo(root.get("fechaViaje"), fechaHasta));
+      }
+      if (!isBlank(codigoViaje)) {
+        String like = "%" + codigoViaje.trim() + "%";
+        predicates.add(cb.like(cb.concat("", root.get("numeroViaje").as(String.class)), like));
+      }
+      if (estadoPagoChofer == EstadoPagoChoferFiltro.PAGADOS) {
+        predicates.add(cb.isTrue(root.get("pagadoTransportista")));
+      } else if (estadoPagoChofer == EstadoPagoChoferFiltro.NO_PAGADOS) {
+        predicates.add(cb.isFalse(root.get("pagadoTransportista")));
       }
       return cb.and(predicates.toArray(Predicate[]::new));
     };
@@ -178,6 +219,7 @@ public class ConsultaPlacasService {
         .despacho(cleanTextOrDash(viaje.getDetalleViaje()))
         .cliente(preferredClientName(cliente))
         .origenDestino(cleanTextOrDash(viaje.getDestino()))
+        .pagadoTransportista(Boolean.TRUE.equals(viaje.getPagadoTransportista()))
         .build();
   }
 
@@ -226,7 +268,8 @@ public class ConsultaPlacasService {
         "Estiba",
         "Despacho",
         "Cliente",
-        "Origen - Destino"
+        "Origen - Destino",
+        "Pago chofer"
     };
     for (int i = 0; i < columns.length; i++) {
       Cell cell = header.createCell(i);
@@ -246,6 +289,7 @@ public class ConsultaPlacasService {
       writeTextCell(row, 6, registro.getDespacho(), styles.textCell);
       writeTextCell(row, 7, registro.getCliente(), styles.textCell);
       writeTextCell(row, 8, registro.getOrigenDestino(), styles.textCell);
+      writeTextCell(row, 9, Boolean.TRUE.equals(registro.getPagadoTransportista()) ? "Pagado" : "Pendiente", styles.centerCell);
     }
 
     if (registros.isEmpty()) {
@@ -403,7 +447,7 @@ public class ConsultaPlacasService {
   }
 
   private void configureColumns(XSSFSheet sheet) {
-    int[] widths = {20, 15, 16, 14, 14, 14, 16, 24, 30, 10, 10};
+    int[] widths = {20, 15, 16, 14, 14, 14, 16, 24, 30, 16};
     for (int i = 0; i < widths.length; i++) {
       sheet.setColumnWidth(i, widths[i] * 256);
     }
@@ -467,6 +511,10 @@ public class ConsultaPlacasService {
     }
     String trimmed = value.trim();
     return trimmed.isBlank() ? null : trimmed;
+  }
+
+  private boolean isBlank(String value) {
+    return value == null || value.isBlank();
   }
 
   private record Styles(

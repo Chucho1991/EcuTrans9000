@@ -65,7 +65,7 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - Importación masiva con plantilla
 
 ### Módulo Placas (`/api/placas`)
-- Consulta por placa y rango de fechas
+- Consulta por placa, código de viaje, estado de pago al chofer y rango de fechas
 - Exportación financiera por placa
 
 ## Soft delete y auditoría

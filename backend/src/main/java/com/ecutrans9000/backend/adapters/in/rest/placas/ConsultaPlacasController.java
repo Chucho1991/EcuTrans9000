@@ -2,7 +2,9 @@ package com.ecutrans9000.backend.adapters.in.rest.placas;
 
 import com.ecutrans9000.backend.adapters.in.rest.dto.placas.ConsultaPlacaResponse;
 import com.ecutrans9000.backend.application.placas.ConsultaPlacasService;
+import com.ecutrans9000.backend.domain.bitacora.EstadoPagoChoferFiltro;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 /**
  * Controlador REST para consultar y exportar reportes por placa.
@@ -34,22 +38,48 @@ public class ConsultaPlacasController {
   @Operation(summary = "Consultar bitacora por placa")
   public ResponseEntity<ConsultaPlacaResponse> consultar(
       @RequestParam(required = false) String placa,
+      @RequestParam(required = false) String codigoViaje,
+      @Parameter(description = "TODOS, PAGADOS o NO_PAGADOS")
+      @RequestParam(required = false) String estadoPagoChofer,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta) {
-    return ResponseEntity.ok(consultaPlacasService.consultar(placa, fechaDesde, fechaHasta));
+    return ResponseEntity.ok(consultaPlacasService.consultar(
+        placa,
+        codigoViaje,
+        parseEstadoPagoChofer(estadoPagoChofer),
+        fechaDesde,
+        fechaHasta));
   }
 
   @GetMapping("/consulta/export")
   @Operation(summary = "Exportar consulta por placa a Excel")
   public ResponseEntity<byte[]> exportar(
       @RequestParam(required = false) String placa,
+      @RequestParam(required = false) String codigoViaje,
+      @Parameter(description = "TODOS, PAGADOS o NO_PAGADOS")
+      @RequestParam(required = false) String estadoPagoChofer,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta) {
-    byte[] report = consultaPlacasService.exportExcel(placa, fechaDesde, fechaHasta);
+    byte[] report = consultaPlacasService.exportExcel(
+        placa,
+        codigoViaje,
+        parseEstadoPagoChofer(estadoPagoChofer),
+        fechaDesde,
+        fechaHasta);
     String normalized = placa == null || placa.isBlank() ? "consulta_placas" : placa.trim().toUpperCase();
     return ResponseEntity.ok()
         .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"placas_" + normalized + ".xlsx\"")
         .body(report);
+  }
+
+  private EstadoPagoChoferFiltro parseEstadoPagoChofer(String value) {
+    try {
+      return EstadoPagoChoferFiltro.fromValue(value);
+    } catch (IllegalArgumentException ex) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "El filtro estadoPagoChofer debe ser TODOS, PAGADOS o NO_PAGADOS");
+    }
   }
 }
