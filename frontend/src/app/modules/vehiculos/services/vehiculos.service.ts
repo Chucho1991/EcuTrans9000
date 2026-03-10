@@ -67,7 +67,7 @@ export interface VehiculoImportResult {
 @Injectable({ providedIn: 'root' })
 export class VehiculosService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${API_BASE_URL}/api/vehiculos`;
+  private readonly baseUrl = `${API_BASE_URL}/vehiculos`;
 
   list(params: {
     page: number;

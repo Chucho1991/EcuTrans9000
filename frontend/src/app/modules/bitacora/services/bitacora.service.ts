@@ -79,7 +79,7 @@ export interface ViajeBitacoraImportResult {
 @Injectable({ providedIn: 'root' })
 export class BitacoraService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${API_BASE_URL}/api/bitacora/viajes`;
+  private readonly baseUrl = `${API_BASE_URL}/bitacora/viajes`;
 
   list(params: {
     page: number;

@@ -32,7 +32,7 @@ export interface ConsultaPlacaResponse {
 @Injectable({ providedIn: 'root' })
 export class PlacasService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${API_BASE_URL}/api/placas/consulta`;
+  private readonly baseUrl = `${API_BASE_URL}/placas/consulta`;
 
   consultar(params: { placa?: string; fechaDesde?: string; fechaHasta?: string }): Observable<ConsultaPlacaResponse> {
     let httpParams = new HttpParams();
