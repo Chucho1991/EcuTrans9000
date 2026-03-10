@@ -90,6 +90,13 @@ Valida Javadocs públicos, cobertura base de Postman y secciones obligatorias de
 - Tema oscuro por defecto con toggle persistente.
 - Uso de popups visuales del template (sin `window.alert/confirm/prompt`).
 - Estados visuales consistentes (`ACTIVO`, `INACTIVO`, `ELIMINADO`).
+- Los catálogos grandes usados en filtros y formularios deben ofrecer buscador integrado.
+- En clientes, el buscador de catálogo debe permitir filtrar por documento y nombre.
+- En vehículos, el buscador de catálogo debe permitir filtrar por placa, documento y chofer.
+
+## Mantenimiento de documentación
+- Todo cambio funcional, de flujo, reglas de negocio, contratos, patrones reutilizables o convenciones visibles debe actualizar los archivos `.md` aplicables.
+- Como mínimo, evaluar `README.md`, guías operativas del repositorio y documentación del módulo afectado en cada implementación.
 
 ## Acceso desde celular (misma red)
 - Abrir: `http://<IP_DE_TU_PC>:4200`

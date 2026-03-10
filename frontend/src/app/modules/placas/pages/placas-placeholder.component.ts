@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 
 import { PopupService } from '../../../core/services/popup.service';
+import { CatalogSearchOption, CatalogSearchSelectComponent } from '../../../shared/components/catalog-search-select/catalog-search-select.component';
 import { DatePickerComponent } from '../../../shared/components/date-picker/date-picker.component';
 import { VehiculoResponse, VehiculosService } from '../../vehiculos/services/vehiculos.service';
 import { ConsultaPlacaResponse, PlacasService } from '../services/placas.service';
@@ -12,7 +13,7 @@ type EstadoPagoChoferOption = 'TODOS' | 'PAGADOS' | 'NO_PAGADOS';
 @Component({
   selector: 'app-placas-placeholder',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DatePickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, DatePickerComponent, CatalogSearchSelectComponent],
   template: `
     <section class="min-w-0 w-full space-y-6">
       <header class="flex flex-wrap items-center justify-between gap-3">
@@ -27,12 +28,12 @@ type EstadoPagoChoferOption = 'TODOS' | 'PAGADOS' | 'NO_PAGADOS';
 
       <article class="panel-card min-w-0 w-full max-w-full p-4">
         <form class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6" [formGroup]="filtersForm" (ngSubmit)="filtrar()">
-          <select class="filter-control" formControlName="placa">
-            <option value="">Selecciona una placa</option>
-            <option *ngFor="let vehiculo of vehiculosCatalogo" [value]="vehiculo.placa">
-              {{ vehiculo.placa }} | {{ vehiculo.choferDefault }}
-            </option>
-          </select>
+          <app-catalog-search-select
+            formControlName="placa"
+            placeholder="Selecciona una placa"
+            searchPlaceholder="Buscar vehiculo por placa, documento o chofer"
+            noResultsText="No hay vehiculos que coincidan."
+            [options]="vehiculoOptions" />
           <label class="relative block">
             <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400 dark:text-gray-500">
               <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -145,6 +146,7 @@ export class PlacasPlaceholderComponent {
   private readonly fb = inject(FormBuilder);
 
   protected vehiculosCatalogo: VehiculoResponse[] = [];
+  protected vehiculoOptions: CatalogSearchOption[] = [];
   protected consulta: ConsultaPlacaResponse | null = null;
   protected registros: ConsultaPlacaResponse['registros'] = [];
   protected searched = false;
@@ -281,6 +283,15 @@ export class PlacasPlaceholderComponent {
     this.vehiculosService.list({ page: 0, size: 500, includeDeleted: false }).subscribe({
       next: (response) => {
         this.vehiculosCatalogo = response.content.filter((item) => !item.deleted);
+        this.vehiculoOptions = [
+          { value: '', label: 'Selecciona una placa', searchText: 'seleccionar placa' },
+          ...this.vehiculosCatalogo.map((vehiculo) => ({
+            value: vehiculo.placa,
+            label: `${vehiculo.placa} | ${vehiculo.choferDefault}`,
+            secondaryLabel: `${vehiculo.tipoDocumento} | ${vehiculo.documentoPersonal}`,
+            searchText: `${vehiculo.placa} ${vehiculo.choferDefault} ${vehiculo.documentoPersonal} ${vehiculo.tipoDocumento}`
+          }))
+        ];
       },
       error: (error) => {
         void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });

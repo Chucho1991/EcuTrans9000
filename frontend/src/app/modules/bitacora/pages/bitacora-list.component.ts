@@ -4,6 +4,7 @@ import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angu
 import { forkJoin } from 'rxjs';
 
 import { PopupService } from '../../../core/services/popup.service';
+import { CatalogSearchOption, CatalogSearchSelectComponent } from '../../../shared/components/catalog-search-select/catalog-search-select.component';
 import { AuthService } from '../../auth/services/auth.service';
 import { DatePickerComponent } from '../../../shared/components/date-picker/date-picker.component';
 import { ClienteResponse, ClientesService } from '../../clientes/services/clientes.service';
@@ -18,7 +19,7 @@ import {
 @Component({
   selector: 'app-bitacora-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, DatePickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DatePickerComponent, CatalogSearchSelectComponent],
   template: `
     <section class="min-w-0 w-full space-y-6">
       <header class="flex flex-wrap items-center justify-between gap-3">
@@ -38,18 +39,18 @@ import {
           <input class="filter-control" formControlName="q" placeholder="Buscar por viaje, destino o factura" />
           <app-date-picker inputClass="filter-control" placeholder="Fecha desde" formControlName="fechaDesde" />
           <app-date-picker inputClass="filter-control" placeholder="Fecha hasta" formControlName="fechaHasta" />
-          <select class="filter-control" formControlName="vehiculoId">
-            <option value="">Todos los vehiculos</option>
-            <option *ngFor="let vehiculo of vehiculosCatalogo" [value]="vehiculo.id">
-              {{ vehiculo.placa }} | {{ vehiculo.choferDefault }}
-            </option>
-          </select>
-          <select class="filter-control" formControlName="clienteId">
-            <option value="">Todos los clientes</option>
-            <option *ngFor="let cliente of clientesCatalogo" [value]="cliente.id">
-              {{ cliente.nombre }}
-            </option>
-          </select>
+          <app-catalog-search-select
+            formControlName="vehiculoId"
+            placeholder="Todos los vehiculos"
+            searchPlaceholder="Buscar vehiculo por placa, documento o chofer"
+            noResultsText="No hay vehiculos que coincidan."
+            [options]="vehiculoFilterOptions" />
+          <app-catalog-search-select
+            formControlName="clienteId"
+            placeholder="Todos los clientes"
+            searchPlaceholder="Buscar cliente por documento o nombre"
+            noResultsText="No hay clientes que coincidan."
+            [options]="clienteFilterOptions" />
           <select *ngIf="canAdmin()" class="filter-control" formControlName="includeDeleted">
             <option value="false">No eliminados</option>
             <option value="true">Incluir eliminados</option>
@@ -237,21 +238,27 @@ import {
           </div>
           <div class="min-w-0 xl:col-span-3">
             <label class="form-label">Vehiculo</label>
-            <select class="form-control" formControlName="vehiculoId">
-              <option value="">Selecciona un vehiculo</option>
-              <option *ngFor="let vehiculo of vehiculosCatalogo" [value]="vehiculo.id">
-                {{ vehiculo.placa }} | {{ vehiculo.choferDefault }} | {{ vehiculo.tonelajeCategoria }}
-              </option>
-            </select>
+            <app-catalog-search-select
+              formControlName="vehiculoId"
+              placeholder="Selecciona un vehiculo"
+              searchPlaceholder="Buscar vehiculo por placa, documento o chofer"
+              noResultsText="No hay vehiculos disponibles."
+              [options]="vehiculoFormOptions" />
+            <p class="form-error" *ngIf="showError('vehiculoId', 'required')">
+              Vehiculo es obligatorio. Selecciona un vehiculo del catalogo.
+            </p>
           </div>
           <div class="min-w-0 xl:col-span-4">
             <label class="form-label">Cliente</label>
-            <select class="form-control" formControlName="clienteId">
-              <option value="">Selecciona un cliente</option>
-              <option *ngFor="let cliente of clientesCatalogo" [value]="cliente.id">
-                {{ cliente.nombre }}
-              </option>
-            </select>
+            <app-catalog-search-select
+              formControlName="clienteId"
+              placeholder="Selecciona un cliente"
+              searchPlaceholder="Buscar cliente por documento o nombre"
+              noResultsText="No hay clientes disponibles."
+              [options]="clienteFormOptions" />
+            <p class="form-error" *ngIf="showError('clienteId', 'required')">
+              Cliente es obligatorio. Selecciona un cliente del catalogo.
+            </p>
           </div>
 
           <div class="min-w-0 xl:col-span-4">
@@ -389,6 +396,10 @@ export class BitacoraListComponent {
   protected viajes: ViajeBitacoraResponse[] = [];
   protected vehiculosCatalogo: VehiculoResponse[] = [];
   protected clientesCatalogo: ClienteResponse[] = [];
+  protected vehiculoFilterOptions: CatalogSearchOption[] = [];
+  protected clienteFilterOptions: CatalogSearchOption[] = [];
+  protected vehiculoFormOptions: CatalogSearchOption[] = [];
+  protected clienteFormOptions: CatalogSearchOption[] = [];
   protected selectedViaje: ViajeBitacoraResponse | null = null;
   protected mode: 'none' | 'create' | 'edit' = 'none';
   protected editingId: string | null = null;
@@ -445,6 +456,16 @@ export class BitacoraListComponent {
       next: ({ vehiculos, clientes }) => {
         this.vehiculosCatalogo = vehiculos.content.filter((item) => !item.deleted && item.estado === 'ACTIVO');
         this.clientesCatalogo = clientes.content.filter((item) => !item.deleted && item.activo);
+        this.vehiculoFilterOptions = [
+          { value: '', label: 'Todos los vehiculos', searchText: 'todos vehiculos' },
+          ...this.vehiculosCatalogo.map((vehiculo) => this.mapVehiculoOption(vehiculo, false))
+        ];
+        this.clienteFilterOptions = [
+          { value: '', label: 'Todos los clientes', searchText: 'todos clientes' },
+          ...this.clientesCatalogo.map((cliente) => this.mapClienteOption(cliente, false))
+        ];
+        this.vehiculoFormOptions = this.vehiculosCatalogo.map((vehiculo) => this.mapVehiculoOption(vehiculo, true));
+        this.clienteFormOptions = this.clientesCatalogo.map((cliente) => this.mapClienteOption(cliente, true));
       },
       error: (error) => {
         void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
@@ -751,6 +772,11 @@ export class BitacoraListComponent {
     });
   }
 
+  protected showError(controlName: string, errorKey: string): boolean {
+    const control = this.viajeForm.get(controlName);
+    return !!control && control.touched && control.hasError(errorKey);
+  }
+
   private getErrorMessage(error: unknown): string {
     const maybe = error as { error?: { message?: string } };
     return maybe?.error?.message ?? 'Ocurrio un error inesperado.';
@@ -796,5 +822,23 @@ export class BitacoraListComponent {
     link.click();
     document.body.removeChild(link);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  private mapVehiculoOption(vehiculo: VehiculoResponse, includeResumen: boolean): CatalogSearchOption {
+    return {
+      value: vehiculo.id,
+      label: `${vehiculo.placa} | ${vehiculo.choferDefault}`,
+      secondaryLabel: includeResumen ? `${vehiculo.documentoPersonal} | ${vehiculo.tonelajeCategoria} | ${vehiculo.m3} m3` : vehiculo.documentoPersonal,
+      searchText: `${vehiculo.placa} ${vehiculo.choferDefault} ${vehiculo.documentoPersonal} ${vehiculo.tonelajeCategoria}`
+    };
+  }
+
+  private mapClienteOption(cliente: ClienteResponse, includeDocumento: boolean): CatalogSearchOption {
+    return {
+      value: cliente.id,
+      label: cliente.nombre,
+      secondaryLabel: includeDocumento ? `${cliente.tipoDocumento} | ${cliente.documento}` : cliente.documento,
+      searchText: `${cliente.nombre} ${cliente.documento} ${cliente.tipoDocumento} ${cliente.direccion ?? ''}`
+    };
   }
 }

@@ -18,6 +18,7 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - En frontend usar Tailwind con lineamientos TailAdmin.
 - Centralizar estilos globales y overrides en `frontend/src/styles.css`.
 - Estandarizar patrones visuales repetidos con utilidades (`@utility`) y reutilizarlas en todos los módulos.
+- Todo cambio funcional, de flujo, reglas, contratos, catálogos reutilizables o convenciones visibles debe reflejarse en los archivos `.md` aplicables (`README.md`, guías operativas, documentación del módulo y similares).
 - Mantener siempre una colección Postman actualizada en `/postman`.
 - Si el módulo requiere almacenamiento de archivos, usar persistencia en DB por defecto (tabla de binarios + metadatos), salvo instrucción explícita contraria.
 - En auditoría de API, no persistir payload binario crudo; registrar marcador/sanitizar contenido para evitar errores de encoding.
@@ -45,6 +46,7 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - En formularios, cuando falte un campo obligatorio, mostrar mensaje al pie del campo.
 - El mensaje debe incluir nombre del campo y breve descripción de qué debe llenar.
 - Mostrar mensajes específicos para formato inválido (por ejemplo correo).
+- Todo catálogo con alto volumen de registros usado en filtros o formularios debe incluir buscador integrado para filtrar al menos por nombre y documento; en vehículos, también por placa y chofer cuando aplique.
 - En creación, edición, cambio de estado y login, mostrar popup descriptivo de la acción.
 - Los popups deben implementarse con componentes del template (modal/dialog), no con popups nativos del navegador.
 - Prohibido usar `window.alert`, `window.confirm` o `window.prompt`.
@@ -80,6 +82,7 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 
 7. **Documentación**
 - Actualizar `README.md` con endpoints, variables y reglas del módulo.
+- Actualizar también los demás archivos `.md` afectados por el cambio funcional o técnico, aunque no se modifiquen endpoints.
 - Actualizar colección Postman en `/postman` con endpoints, payloads y auth vigentes.
 
 8. **Pruebas mínimas**
@@ -100,6 +103,7 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - [ ] Popups descriptivos implementados para creación, edición, cambio de estado y login.
 - [ ] Popups implementados con estilo del template (sin `window.alert`/`window.confirm`/`window.prompt`).
 - [ ] README actualizado.
+- [ ] Archivos `.md` aplicables actualizados según el alcance del cambio.
 - [ ] Colección Postman actualizada en `/postman`.
 - [ ] Build/test ejecutados correctamente.
 
