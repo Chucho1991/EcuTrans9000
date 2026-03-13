@@ -41,7 +41,7 @@ import { PopupService } from '../../../../core/services/popup.service';
 
             <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
               <div>
-                <label for="usernameOrEmail" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Usuario o correo</label>
+                <label for="usernameOrEmail" class="form-label form-label-required">Usuario o correo</label>
                 <input
                   id="usernameOrEmail"
                   type="text"
@@ -56,7 +56,7 @@ import { PopupService } from '../../../../core/services/popup.service';
                 </p>
               </div>
               <div>
-                <label for="password" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Contrasena</label>
+                <label for="password" class="form-label form-label-required">Contrasena</label>
                 <input
                   id="password"
                   type="password"

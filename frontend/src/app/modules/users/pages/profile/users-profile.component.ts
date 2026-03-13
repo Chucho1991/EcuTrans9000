@@ -28,14 +28,14 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
       <article class="panel-card p-6">
         <form class="grid gap-4 sm:grid-cols-2" [formGroup]="form" (ngSubmit)="save()">
           <div class="sm:col-span-2">
-            <label class="form-label">Nombres</label>
+            <label class="form-label form-label-required">Nombres</label>
             <input class="form-control-sm" formControlName="nombres" />
             <p class="form-error" *ngIf="showError('nombres', 'required')">
               Nombres es obligatorio. Escribe tu nombre completo.
             </p>
           </div>
           <div>
-            <label class="form-label">Correo</label>
+            <label class="form-label form-label-required">Correo</label>
             <input class="form-control-sm" formControlName="correo" />
             <p class="form-error" *ngIf="showError('correo', 'required')">
               Correo es obligatorio. Ingresa tu correo de contacto.
@@ -45,7 +45,7 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
             </p>
           </div>
           <div>
-            <label class="form-label">Username</label>
+            <label class="form-label form-label-required">Username</label>
             <input class="form-control-sm" formControlName="username" />
             <p class="form-error" *ngIf="showError('username', 'required')">
               Username es obligatorio. Define tu identificador de acceso.

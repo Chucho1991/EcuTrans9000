@@ -203,14 +203,14 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
         </div>
         <form class="mt-5 min-w-0 w-full grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12" [formGroup]="userForm" (ngSubmit)="submitUser()">
           <div class="min-w-0 md:col-span-2 xl:col-span-12">
-            <label class="form-label">Nombres</label>
+            <label class="form-label form-label-required">Nombres</label>
             <input class="form-control" formControlName="nombres" />
             <p class="form-error" *ngIf="showError('nombres', 'required')">
               Nombres es obligatorio. Escribe el nombre completo del usuario.
             </p>
           </div>
           <div class="min-w-0 xl:col-span-6">
-            <label class="form-label">Correo</label>
+            <label class="form-label form-label-required">Correo</label>
             <input class="form-control" formControlName="correo" />
             <p class="form-error" *ngIf="showError('correo', 'required')">
               Correo es obligatorio. Ingresa un email válido del usuario.
@@ -220,14 +220,14 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
             </p>
           </div>
           <div class="min-w-0 xl:col-span-3">
-            <label class="form-label">Username</label>
+            <label class="form-label form-label-required">Username</label>
             <input class="form-control" formControlName="username" />
             <p class="form-error" *ngIf="showError('username', 'required')">
               Username es obligatorio. Define el identificador de inicio de sesión.
             </p>
           </div>
           <div class="min-w-0 xl:col-span-3">
-            <label class="form-label">Rol</label>
+            <label class="form-label form-label-required">Rol</label>
             <select class="form-control" formControlName="rol">
               <option value="SUPERADMINISTRADOR">SUPERADMINISTRADOR</option>
               <option value="REGISTRADOR">REGISTRADOR</option>
@@ -237,7 +237,7 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
             </p>
           </div>
           <div class="min-w-0 xl:col-span-3">
-            <label class="form-label">Activo</label>
+            <label class="form-label form-label-required">Activo</label>
             <select class="form-control" formControlName="activo">
               <option [ngValue]="true">SI</option>
               <option [ngValue]="false">NO</option>
@@ -245,14 +245,14 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
           </div>
           <ng-container *ngIf="mode === 'create'">
             <div class="min-w-0 xl:col-span-4">
-              <label class="form-label">Password</label>
+              <label class="form-label form-label-required">Password</label>
               <input type="password" class="form-control" formControlName="password" />
               <p class="form-error" *ngIf="showError('password', 'required') && mode === 'create'">
                 Password es obligatorio. Ingresa una contraseña para el nuevo usuario.
               </p>
             </div>
             <div class="min-w-0 xl:col-span-5">
-              <label class="form-label">Confirmar password</label>
+              <label class="form-label form-label-required">Confirmar password</label>
               <input type="password" class="form-control" formControlName="confirmPassword" />
               <p class="form-error" *ngIf="showError('confirmPassword', 'required') && mode === 'create'">
                 Confirmar password es obligatorio. Repite la contraseña.
