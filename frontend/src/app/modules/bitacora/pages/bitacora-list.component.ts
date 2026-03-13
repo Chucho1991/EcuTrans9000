@@ -251,15 +251,24 @@ import {
 
         <form class="mt-5 min-w-0 w-full grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12" [formGroup]="viajeForm" (ngSubmit)="submitViaje()">
           <div class="min-w-0 xl:col-span-2">
-            <label class="form-label">Nro. Viaje</label>
+            <label class="form-label form-label-required">Nro. Viaje</label>
             <input class="form-control" type="number" min="1" formControlName="numeroViaje" />
+            <p class="form-error" *ngIf="showError('numeroViaje', 'required')">
+              Nro. Viaje es obligatorio. Ingresa el consecutivo del viaje.
+            </p>
+            <p class="form-error" *ngIf="showError('numeroViaje', 'min')">
+              Nro. Viaje tiene formato invalido. Ingresa un valor mayor o igual a 1.
+            </p>
           </div>
           <div class="min-w-0 xl:col-span-3">
-            <label class="form-label">Fecha viaje</label>
+            <label class="form-label form-label-required">Fecha viaje</label>
             <app-date-picker inputClass="form-control" placeholder="Selecciona la fecha del viaje" formControlName="fechaViaje" />
+            <p class="form-error" *ngIf="showError('fechaViaje', 'required')">
+              Fecha viaje es obligatoria. Selecciona la fecha del viaje.
+            </p>
           </div>
           <div class="min-w-0 xl:col-span-3">
-            <label class="form-label">Vehiculo</label>
+            <label class="form-label form-label-required">Vehiculo</label>
             <app-catalog-search-select
               formControlName="vehiculoId"
               placeholder="Selecciona un vehiculo"
@@ -271,7 +280,7 @@ import {
             </p>
           </div>
           <div class="min-w-0 xl:col-span-4">
-            <label class="form-label">Cliente</label>
+            <label class="form-label form-label-required">Cliente</label>
             <app-catalog-search-select
               formControlName="clienteId"
               placeholder="Selecciona un cliente"
@@ -284,8 +293,11 @@ import {
           </div>
 
           <div class="min-w-0 xl:col-span-4">
-            <label class="form-label">Destino</label>
+            <label class="form-label form-label-required">Destino</label>
             <input class="form-control" formControlName="destino" />
+            <p class="form-error" *ngIf="showError('destino', 'required')">
+              Destino es obligatorio. Ingresa el destino del viaje.
+            </p>
           </div>
           <div class="min-w-0 xl:col-span-8">
             <label class="form-label">Detalle viaje</label>
@@ -293,26 +305,44 @@ import {
           </div>
 
           <div class="min-w-0 xl:col-span-2">
-            <label class="form-label">Valor</label>
+            <label class="form-label form-label-required">Valor</label>
             <input class="form-control" type="number" min="0" step="0.01" formControlName="valor" />
+            <p class="form-error" *ngIf="showError('valor', 'required')">
+              Valor es obligatorio. Ingresa el valor del viaje.
+            </p>
+            <p class="form-error" *ngIf="showError('valor', 'min')">
+              Valor tiene formato invalido. Ingresa un valor igual o mayor a 0.
+            </p>
           </div>
           <div class="min-w-0 xl:col-span-2">
-            <label class="form-label">Estiba</label>
+            <label class="form-label form-label-required">Estiba</label>
             <input class="form-control" type="number" min="0" step="0.01" formControlName="estiba" />
+            <p class="form-error" *ngIf="showError('estiba', 'required')">
+              Estiba es obligatoria. Ingresa el valor de estiba.
+            </p>
+            <p class="form-error" *ngIf="showError('estiba', 'min')">
+              Estiba tiene formato invalido. Ingresa un valor igual o mayor a 0.
+            </p>
           </div>
           <div class="min-w-0 xl:col-span-2">
-            <label class="form-label">Anticipo</label>
+            <label class="form-label form-label-required">Anticipo</label>
             <input class="form-control" type="number" min="0" step="0.01" formControlName="anticipo" />
+            <p class="form-error" *ngIf="showError('anticipo', 'required')">
+              Anticipo es obligatorio. Ingresa el valor del anticipo.
+            </p>
+            <p class="form-error" *ngIf="showError('anticipo', 'min')">
+              Anticipo tiene formato invalido. Ingresa un valor igual o mayor a 0.
+            </p>
           </div>
           <div class="min-w-0 xl:col-span-3">
-            <label class="form-label">Pagado cliente</label>
+            <label class="form-label form-label-required">Pagado cliente</label>
             <label class="flex h-11 items-center gap-3 rounded-xl border border-gray-200 px-4 text-sm font-medium text-gray-700 dark:border-gray-800 dark:text-gray-200">
               <input class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" type="checkbox" formControlName="facturadoCliente" />
               <span>{{ viajeForm.get('facturadoCliente')?.value ? 'SI' : 'NO' }}</span>
             </label>
           </div>
           <div class="min-w-0 xl:col-span-3">
-            <label class="form-label">Pagado transportista</label>
+            <label class="form-label form-label-required">Pagado transportista</label>
             <label class="flex h-11 items-center gap-3 rounded-xl border border-gray-200 px-4 text-sm font-medium text-gray-700 dark:border-gray-800 dark:text-gray-200">
               <input class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" type="checkbox" formControlName="pagadoTransportista" />
               <span>{{ viajeForm.get('pagadoTransportista')?.value ? 'SI' : 'NO' }}</span>

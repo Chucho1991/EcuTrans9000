@@ -190,12 +190,18 @@ import {
 
         <form class="mt-5 min-w-0 w-full grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12" [formGroup]="vehiculoForm" (ngSubmit)="submitVehiculo()">
           <div class="min-w-0 xl:col-span-3">
-            <label class="form-label">Placa</label>
+            <label class="form-label form-label-required">Placa</label>
             <input class="form-control" formControlName="placa" />
+            <p class="form-error" *ngIf="showError('placa', 'required')">
+              Placa es obligatoria. Ingresa la placa del vehiculo.
+            </p>
           </div>
           <div class="min-w-0 xl:col-span-4">
-            <label class="form-label">Chofer</label>
+            <label class="form-label form-label-required">Chofer</label>
             <input class="form-control" formControlName="choferDefault" />
+            <p class="form-error" *ngIf="showError('choferDefault', 'required')">
+              Chofer es obligatorio. Ingresa el nombre del chofer asignado.
+            </p>
           </div>
           <div class="min-w-0 xl:col-span-3">
             <label class="form-label">Licencia</label>
@@ -210,32 +216,50 @@ import {
             />
           </div>
           <div class="min-w-0 xl:col-span-2">
-            <label class="form-label">Estado</label>
+            <label class="form-label form-label-required">Estado</label>
             <select class="form-control" formControlName="estado">
               <option value="ACTIVO">ACTIVO</option>
               <option value="INACTIVO">INACTIVO</option>
             </select>
+            <p class="form-error" *ngIf="showError('estado', 'required')">
+              Estado es obligatorio. Selecciona el estado del vehiculo.
+            </p>
           </div>
 
           <div class="min-w-0 xl:col-span-3">
-            <label class="form-label">Tipo documento</label>
+            <label class="form-label form-label-required">Tipo documento</label>
             <select class="form-control" formControlName="tipoDocumento">
               <option value="CEDULA">CEDULA</option>
               <option value="RUC">RUC</option>
               <option value="PASAPORTE">PASAPORTE</option>
             </select>
+            <p class="form-error" *ngIf="showError('tipoDocumento', 'required')">
+              Tipo documento es obligatorio. Selecciona el tipo de documento.
+            </p>
           </div>
           <div class="min-w-0 xl:col-span-3">
-            <label class="form-label">Documento personal</label>
+            <label class="form-label form-label-required">Documento personal</label>
             <input class="form-control" formControlName="documentoPersonal" />
+            <p class="form-error" *ngIf="showError('documentoPersonal', 'required')">
+              Documento personal es obligatorio. Ingresa el numero del documento.
+            </p>
           </div>
           <div class="min-w-0 xl:col-span-4">
-            <label class="form-label">Tonelaje/Categoria</label>
+            <label class="form-label form-label-required">Tonelaje/Categoria</label>
             <input class="form-control" formControlName="tonelajeCategoria" />
+            <p class="form-error" *ngIf="showError('tonelajeCategoria', 'required')">
+              Tonelaje/Categoria es obligatorio. Ingresa la categoria del vehiculo.
+            </p>
           </div>
           <div class="min-w-0 xl:col-span-2">
-            <label class="form-label">M3</label>
+            <label class="form-label form-label-required">M3</label>
             <input class="form-control" type="number" min="0" step="0.01" formControlName="m3" />
+            <p class="form-error" *ngIf="showError('m3', 'required')">
+              M3 es obligatorio. Ingresa la capacidad del vehiculo.
+            </p>
+            <p class="form-error" *ngIf="showError('m3', 'min')">
+              M3 tiene formato invalido. Ingresa un valor igual o mayor a 0.
+            </p>
           </div>
 
           <div class="min-w-0 xl:col-span-4">
@@ -617,6 +641,11 @@ export class VehiculosListComponent implements OnDestroy {
         void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
       }
     });
+  }
+
+  protected showError(controlName: string, errorKey: string): boolean {
+    const control = this.vehiculoForm.get(controlName);
+    return !!control && control.touched && control.hasError(errorKey);
   }
 
   private uploadPendingImages(vehiculoId: string, actionLabel: 'creado' | 'editado'): void {

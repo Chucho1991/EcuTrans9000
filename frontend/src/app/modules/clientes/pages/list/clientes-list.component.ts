@@ -150,7 +150,7 @@ import {
         </div>
         <form class="mt-5 min-w-0 w-full grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12" [formGroup]="clienteForm" (ngSubmit)="submitCliente()">
           <div class="min-w-0 xl:col-span-3">
-            <label class="form-label">Tipo Documento</label>
+            <label class="form-label form-label-required">Tipo Documento</label>
             <select class="form-control" formControlName="tipoDocumento">
               <option value="CEDULA">CEDULA</option>
               <option value="RUC">RUC</option>
@@ -159,17 +159,17 @@ import {
             <p class="form-error" *ngIf="showError('tipoDocumento', 'required')">Tipo de documento es obligatorio.</p>
           </div>
           <div class="min-w-0 xl:col-span-4">
-            <label class="form-label">Documento</label>
+            <label class="form-label form-label-required">Documento</label>
             <input class="form-control" formControlName="documento" />
             <p class="form-error" *ngIf="showError('documento', 'required')">Documento es obligatorio.</p>
           </div>
           <div class="min-w-0 xl:col-span-5">
-            <label class="form-label">Nombre</label>
+            <label class="form-label form-label-required">Nombre</label>
             <input class="form-control" formControlName="nombre" />
             <p class="form-error" *ngIf="showError('nombre', 'required')">Nombre es obligatorio.</p>
           </div>
           <div class="min-w-0 xl:col-span-6">
-            <label class="form-label">Activo</label>
+            <label class="form-label form-label-required">Activo</label>
             <select class="form-control" formControlName="activo">
               <option [ngValue]="true">SI</option>
               <option [ngValue]="false">NO</option>
