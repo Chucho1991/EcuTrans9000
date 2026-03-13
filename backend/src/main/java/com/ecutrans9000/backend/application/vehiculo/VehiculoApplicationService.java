@@ -241,6 +241,10 @@ public class VehiculoApplicationService {
     return readArchivo(id, TipoArchivoVehiculo.LICENCIA);
   }
 
+  public VehiculoArchivo getArchivo(UUID id, TipoArchivoVehiculo tipo) {
+    return getExistingArchivo(id, tipo);
+  }
+
   public byte[] downloadTemplate() {
     return buildTemplateWorkbook(false);
   }
@@ -681,9 +685,13 @@ public class VehiculoApplicationService {
   }
 
   private Resource readArchivo(UUID vehiculoId, TipoArchivoVehiculo tipo) {
-    VehiculoArchivo archivo = vehiculoArchivoRepositoryPort.findByVehiculoIdAndTipo(vehiculoId, tipo)
-        .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Archivo no encontrado"));
+    VehiculoArchivo archivo = getExistingArchivo(vehiculoId, tipo);
     return new ByteArrayResource(archivo.getContenido());
+  }
+
+  private VehiculoArchivo getExistingArchivo(UUID vehiculoId, TipoArchivoVehiculo tipo) {
+    return vehiculoArchivoRepositoryPort.findByVehiculoIdAndTipo(vehiculoId, tipo)
+        .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Archivo no encontrado"));
   }
 
   private Vehiculo getExisting(UUID id) {

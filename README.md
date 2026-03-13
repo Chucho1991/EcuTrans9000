@@ -63,6 +63,7 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - CRUD operativo + borrado lógico/restauración
 - Exportación Excel
 - Importación masiva con plantilla
+- En la plantilla de importación, la columna `E` (`Documento cliente`) se genera con formato texto para conservar ceros a la izquierda y documentos numéricos largos
 
 ### Módulo Placas (`/api/placas`)
 - Consulta por placa, código de viaje, estado de pago al chofer y rango de fechas

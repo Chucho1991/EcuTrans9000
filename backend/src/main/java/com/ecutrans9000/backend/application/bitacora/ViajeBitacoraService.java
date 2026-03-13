@@ -78,7 +78,7 @@ public class ViajeBitacoraService {
 
   @Transactional
   public ViajeBitacoraResponse create(ViajeBitacoraUpsertRequest request) {
-    validate(request, null);
+    validateForCreate(request);
     LocalDateTime now = LocalDateTime.now();
     ViajeBitacoraJpaEntity entity = ViajeBitacoraJpaEntity.builder()
         .id(UUID.randomUUID())
@@ -104,6 +104,10 @@ public class ViajeBitacoraService {
         .updatedAt(now)
         .build();
     return toResponse(viajeRepository.save(entity));
+  }
+
+  public void validateForCreate(ViajeBitacoraUpsertRequest request) {
+    validate(request, null);
   }
 
   @Transactional
