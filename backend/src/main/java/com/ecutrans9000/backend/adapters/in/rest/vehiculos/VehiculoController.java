@@ -21,13 +21,14 @@ import com.ecutrans9000.backend.application.vehiculo.VehiculoApplicationService;
 import com.ecutrans9000.backend.domain.vehiculo.EstadoVehiculo;
 import com.ecutrans9000.backend.domain.vehiculo.TipoDocumento;
 import com.ecutrans9000.backend.domain.vehiculo.Vehiculo;
+import com.ecutrans9000.backend.domain.vehiculo.VehiculoArchivo;
+import com.ecutrans9000.backend.domain.vehiculo.TipoArchivoVehiculo;
 import com.ecutrans9000.backend.service.BusinessException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.Map;
 import java.util.UUID;
-import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -160,25 +161,25 @@ public class VehiculoController {
   @GetMapping("/{id}/foto")
   @Operation(summary = "Descargar foto")
   public ResponseEntity<Resource> getFoto(@PathVariable UUID id) {
-    Vehiculo vehiculo = vehiculoApplicationService.getById(id);
+    VehiculoArchivo archivo = vehiculoApplicationService.getArchivo(id, TipoArchivoVehiculo.FOTO);
     Resource resource = vehiculoApplicationService.getFoto(id);
-    return buildFileResponse(resource, vehiculo.getFotoPath(), "foto");
+    return buildFileResponse(resource, archivo, "foto");
   }
 
   @GetMapping("/{id}/documento")
   @Operation(summary = "Descargar imagen de documento")
   public ResponseEntity<Resource> getDocumento(@PathVariable UUID id) {
-    Vehiculo vehiculo = vehiculoApplicationService.getById(id);
+    VehiculoArchivo archivo = vehiculoApplicationService.getArchivo(id, TipoArchivoVehiculo.DOCUMENTO);
     Resource resource = vehiculoApplicationService.getDocumento(id);
-    return buildFileResponse(resource, vehiculo.getDocPath(), "documento");
+    return buildFileResponse(resource, archivo, "documento");
   }
 
   @GetMapping("/{id}/licencia-img")
   @Operation(summary = "Descargar imagen de licencia")
   public ResponseEntity<Resource> getLicencia(@PathVariable UUID id) {
-    Vehiculo vehiculo = vehiculoApplicationService.getById(id);
+    VehiculoArchivo archivo = vehiculoApplicationService.getArchivo(id, TipoArchivoVehiculo.LICENCIA);
     Resource resource = vehiculoApplicationService.getLicencia(id);
-    return buildFileResponse(resource, vehiculo.getLicPath(), "licencia");
+    return buildFileResponse(resource, archivo, "licencia");
   }
 
   @GetMapping("/import/template")
@@ -277,9 +278,9 @@ public class VehiculoController {
     return auth.getAuthorities().stream().findFirst().map(a -> a.getAuthority()).orElse("UNKNOWN");
   }
 
-  private ResponseEntity<Resource> buildFileResponse(Resource resource, String sourcePath, String fallbackName) {
-    MediaType mediaType = resolveMediaType(sourcePath);
-    String fileName = resolveFileName(sourcePath, fallbackName);
+  private ResponseEntity<Resource> buildFileResponse(Resource resource, VehiculoArchivo archivo, String fallbackName) {
+    MediaType mediaType = resolveMediaType(archivo.getContentType(), archivo.getFileName());
+    String fileName = resolveFileName(archivo.getFileName(), fallbackName);
     return ResponseEntity.ok()
         .contentType(mediaType)
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
@@ -293,8 +294,15 @@ public class VehiculoController {
         .body(new ByteArrayResource(content));
   }
 
-  private MediaType resolveMediaType(String sourcePath) {
-    String lower = sourcePath == null ? "" : sourcePath.toLowerCase();
+  private MediaType resolveMediaType(String contentType, String fileName) {
+    if (contentType != null && !contentType.isBlank()) {
+      try {
+        return MediaType.parseMediaType(contentType);
+      } catch (Exception ignored) {
+        // fallback to file extension resolution below
+      }
+    }
+    String lower = fileName == null ? "" : fileName.toLowerCase();
     if (lower.endsWith(".pdf")) {
       return MediaType.APPLICATION_PDF;
     }
@@ -310,10 +318,10 @@ public class VehiculoController {
     return MediaType.APPLICATION_OCTET_STREAM;
   }
 
-  private String resolveFileName(String sourcePath, String fallbackName) {
-    if (sourcePath == null || sourcePath.isBlank()) {
+  private String resolveFileName(String fileName, String fallbackName) {
+    if (fileName == null || fileName.isBlank()) {
       return fallbackName;
     }
-    return Path.of(sourcePath).getFileName().toString();
+    return fileName;
   }
 }

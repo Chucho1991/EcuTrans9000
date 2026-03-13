@@ -25,15 +25,17 @@ import java.util.Locale;
 import java.util.Map;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -62,18 +64,21 @@ public class ViajeBitacoraExcelImportService {
   private final VehiculoJpaRepository vehiculoRepository;
   private final ClienteJpaRepository clienteRepository;
   private final AuditService auditService;
+  private final TransactionTemplate transactionTemplate;
 
   public ViajeBitacoraExcelImportService(
       ViajeBitacoraService viajeBitacoraService,
       ViajeBitacoraJpaRepository viajeRepository,
       VehiculoJpaRepository vehiculoRepository,
       ClienteJpaRepository clienteRepository,
-      AuditService auditService) {
+      AuditService auditService,
+      TransactionTemplate transactionTemplate) {
     this.viajeBitacoraService = viajeBitacoraService;
     this.viajeRepository = viajeRepository;
     this.vehiculoRepository = vehiculoRepository;
     this.clienteRepository = clienteRepository;
     this.auditService = auditService;
+    this.transactionTemplate = transactionTemplate;
   }
 
   @Transactional(readOnly = true)
@@ -89,6 +94,8 @@ public class ViajeBitacoraExcelImportService {
   private byte[] buildTemplateWorkbook(boolean includeExampleRow) {
     try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
       XSSFSheet sheet = workbook.createSheet("Bitacora Import");
+      CellStyle textColumnStyle = createTextColumnStyle(workbook);
+      sheet.setDefaultColumnStyle(4, textColumnStyle);
       Row headerRow = sheet.createRow(0);
       for (int i = 0; i < TEMPLATE_HEADERS.size(); i++) {
         Cell cell = headerRow.createCell(i);
@@ -101,7 +108,9 @@ public class ViajeBitacoraExcelImportService {
         exampleRow.createCell(1).setCellValue("ABC-1234");
         exampleRow.createCell(2).setCellValue("UIO - GYE");
         exampleRow.createCell(3).setCellValue("ENTREGA PROGRAMADA");
-        exampleRow.createCell(4).setCellValue("0999999999001");
+        Cell documentoClienteCell = exampleRow.createCell(4);
+        documentoClienteCell.setCellStyle(textColumnStyle);
+        documentoClienteCell.setCellValue("0999999999001");
         exampleRow.createCell(5).setCellValue(150.00);
         exampleRow.createCell(6).setCellValue(15.00);
         exampleRow.createCell(7).setCellValue(25.00);
@@ -118,21 +127,20 @@ public class ViajeBitacoraExcelImportService {
     }
   }
 
-  @Transactional
+  private CellStyle createTextColumnStyle(XSSFWorkbook workbook) {
+    CellStyle style = workbook.createCellStyle();
+    style.cloneStyleFrom(workbook.createCellStyle());
+    style.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("@"));
+    style.setFillPattern(FillPatternType.NO_FILL);
+    return style;
+  }
+
   public ViajeBitacoraImportResult previewExcel(MultipartFile file, ImportMode mode, boolean partialOk) {
     return processExcel(file, mode, partialOk, true, "SYSTEM", "SYSTEM");
   }
 
-  @Transactional
   public ViajeBitacoraImportResult importExcel(MultipartFile file, ImportMode mode, boolean partialOk, String actorUsername, String actorRole) {
-    ViajeBitacoraImportResult result = processExcel(file, mode, partialOk, false, actorUsername, actorRole);
-    if (!partialOk && result.getErrorsCount() > 0) {
-      TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-    }
-    if (result.getProcessed() > 0) {
-      auditService.saveActionAudit(actorUsername, actorRole, "BITACORA", ActionType.IMPORT_CSV, "N/A", "viajes_bitacora");
-    }
-    return result;
+    return processExcel(file, mode, partialOk, false, actorUsername, actorRole);
   }
 
   private ViajeBitacoraImportResult processExcel(
@@ -150,6 +158,7 @@ public class ViajeBitacoraExcelImportService {
     int updated = 0;
     int skipped = 0;
     List<ViajeBitacoraImportError> errors = new ArrayList<>();
+    List<ViajeBitacoraUpsertRequest> validRequests = new ArrayList<>();
 
     try (XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream())) {
       XSSFSheet sheet = workbook.getSheetAt(0);
@@ -169,12 +178,9 @@ public class ViajeBitacoraExcelImportService {
         totalRows++;
         try {
           ViajeBitacoraUpsertRequest request = parseImportRow(row, clientesLookup, nextNumeroViaje);
-
-          if (previewOnly) {
-            viajeBitacoraService.create(request);
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-          } else {
-            viajeBitacoraService.create(request);
+          viajeBitacoraService.validateForCreate(request);
+          if (!previewOnly) {
+            validRequests.add(request);
           }
           inserted++;
           processed++;
@@ -199,6 +205,13 @@ public class ViajeBitacoraExcelImportService {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "No se pudo leer el archivo Excel");
     }
 
+    if (!previewOnly) {
+      persistValidRequests(validRequests, errors, partialOk);
+      if (!validRequests.isEmpty() && (partialOk || errors.isEmpty())) {
+        auditService.saveActionAudit(actorUsername, actorRole, "BITACORA", ActionType.IMPORT_CSV, "N/A", "viajes_bitacora");
+      }
+    }
+
     return ViajeBitacoraImportResult.builder()
         .totalRows(totalRows)
         .processed(processed)
@@ -208,6 +221,23 @@ public class ViajeBitacoraExcelImportService {
         .errorsCount(errors.size())
         .errors(errors)
         .build();
+  }
+
+  private void persistValidRequests(
+      List<ViajeBitacoraUpsertRequest> validRequests,
+      List<ViajeBitacoraImportError> errors,
+      boolean partialOk) {
+    if (validRequests.isEmpty()) {
+      return;
+    }
+    if (!partialOk && !errors.isEmpty()) {
+      return;
+    }
+    if (partialOk) {
+      validRequests.forEach(viajeBitacoraService::create);
+      return;
+    }
+    transactionTemplate.executeWithoutResult(status -> validRequests.forEach(viajeBitacoraService::create));
   }
 
   private void validateHeaderRow(Row row) {

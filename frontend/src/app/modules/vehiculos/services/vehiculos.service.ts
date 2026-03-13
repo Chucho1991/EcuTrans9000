@@ -1,6 +1,6 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api.config';
 
@@ -62,6 +62,11 @@ export interface VehiculoImportResult {
   skipped: number;
   errorsCount: number;
   errors: VehiculoImportError[];
+}
+
+export interface VehiculoFileDownload {
+  blob: Blob;
+  fileName: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -143,12 +148,18 @@ export class VehiculosService {
     return this.http.get(`${this.baseUrl}/${id}/foto`, { responseType: 'blob' });
   }
 
-  getDocumentoBlob(id: string): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/${id}/documento`, { responseType: 'blob' });
+  getDocumentoBlob(id: string): Observable<VehiculoFileDownload> {
+    return this.http.get(`${this.baseUrl}/${id}/documento`, {
+      observe: 'response',
+      responseType: 'blob'
+    }).pipe(map((response) => this.toFileDownload(response)));
   }
 
-  getLicenciaBlob(id: string): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/${id}/licencia-img`, { responseType: 'blob' });
+  getLicenciaBlob(id: string): Observable<VehiculoFileDownload> {
+    return this.http.get(`${this.baseUrl}/${id}/licencia-img`, {
+      observe: 'response',
+      responseType: 'blob'
+    }).pipe(map((response) => this.toFileDownload(response)));
   }
 
   downloadTemplate(): Observable<Blob> {
@@ -169,5 +180,26 @@ export class VehiculosService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<VehiculoImportResult>(`${this.baseUrl}/import?mode=${mode}&partialOk=${partialOk}`, formData);
+  }
+
+  private toFileDownload(response: HttpResponse<Blob>): VehiculoFileDownload {
+    return {
+      blob: response.body ?? new Blob(),
+      fileName: this.extractFileName(response.headers.get('content-disposition'))
+    };
+  }
+
+  private extractFileName(contentDisposition: string | null): string | null {
+    if (!contentDisposition) {
+      return null;
+    }
+
+    const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+    if (utf8Match?.[1]) {
+      return decodeURIComponent(utf8Match[1]).replace(/["']/g, '').trim();
+    }
+
+    const basicMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
+    return basicMatch?.[1]?.trim() ?? null;
   }
 }

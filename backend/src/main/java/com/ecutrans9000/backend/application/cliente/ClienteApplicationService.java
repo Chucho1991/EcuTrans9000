@@ -54,6 +54,12 @@ public class ClienteApplicationService {
       "image/png",
       "image/webp"
   );
+  private static final List<String> ALLOWED_LOGO_EXTENSIONS = List.of(
+      "jpg",
+      "jpeg",
+      "png",
+      "webp"
+  );
   private static final DataFormatter DATA_FORMATTER = new DataFormatter();
 
   private final ClienteRepositoryPort clienteRepositoryPort;
@@ -177,7 +183,7 @@ public class ClienteApplicationService {
     validateLogoFile(file);
     try {
       cliente.setLogoFileName(file.getOriginalFilename());
-      cliente.setLogoContentType(file.getContentType() == null ? "application/octet-stream" : file.getContentType());
+      cliente.setLogoContentType(resolveStoredContentType(file));
       cliente.setLogoContenido(file.getBytes());
     } catch (IOException ex) {
       throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "No se pudo guardar logo");
@@ -503,9 +509,37 @@ public class ClienteApplicationService {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "Archivo excede tamano maximo");
     }
     String contentType = file.getContentType() == null ? "" : file.getContentType().toLowerCase(Locale.ROOT);
-    if (!ALLOWED_LOGO_CONTENT_TYPES.contains(contentType)) {
+    String extension = extractFileExtension(file.getOriginalFilename());
+    boolean allowedByContentType = ALLOWED_LOGO_CONTENT_TYPES.contains(contentType);
+    boolean allowedByExtension = !extension.isBlank() && ALLOWED_LOGO_EXTENSIONS.contains(extension);
+    if (!allowedByContentType && !allowedByExtension) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "Tipo de archivo no permitido. Solo JPG/PNG/WEBP");
     }
+  }
+
+  private String resolveStoredContentType(MultipartFile file) {
+    String contentType = file.getContentType() == null ? "" : file.getContentType().toLowerCase(Locale.ROOT);
+    if (!contentType.isBlank() && !"application/octet-stream".equals(contentType)) {
+      return contentType;
+    }
+
+    return switch (extractFileExtension(file.getOriginalFilename())) {
+      case "png" -> "image/png";
+      case "jpg", "jpeg" -> "image/jpeg";
+      case "webp" -> "image/webp";
+      default -> "application/octet-stream";
+    };
+  }
+
+  private String extractFileExtension(String fileName) {
+    if (fileName == null || fileName.isBlank()) {
+      return "";
+    }
+    int dotIndex = fileName.lastIndexOf('.');
+    if (dotIndex < 0 || dotIndex == fileName.length() - 1) {
+      return "";
+    }
+    return fileName.substring(dotIndex + 1).toLowerCase(Locale.ROOT);
   }
 
   private String trimNullable(String value) {

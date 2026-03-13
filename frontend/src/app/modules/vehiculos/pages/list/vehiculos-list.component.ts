@@ -547,14 +547,14 @@ export class VehiculosListComponent implements OnDestroy {
 
   protected downloadDocumento(vehiculo: VehiculoResponse): void {
     this.vehiculosService.getDocumentoBlob(vehiculo.id).subscribe({
-      next: (blob) => this.triggerBlobDownload(blob, `documento_${this.safeFileBase(vehiculo.placa)}`),
+      next: ({ blob, fileName }) => this.triggerBlobDownload(blob, `documento_${this.safeFileBase(vehiculo.placa)}`, fileName),
       error: (error) => this.handleDownloadError(error, 'documento')
     });
   }
 
   protected downloadLicencia(vehiculo: VehiculoResponse): void {
     this.vehiculosService.getLicenciaBlob(vehiculo.id).subscribe({
-      next: (blob) => this.triggerBlobDownload(blob, `licencia_${this.safeFileBase(vehiculo.placa)}`),
+      next: ({ blob, fileName }) => this.triggerBlobDownload(blob, `licencia_${this.safeFileBase(vehiculo.placa)}`, fileName),
       error: (error) => this.handleDownloadError(error, 'licencia')
     });
   }
@@ -704,12 +704,12 @@ export class VehiculosListComponent implements OnDestroy {
     }
   }
 
-  private triggerBlobDownload(blob: Blob, fileBaseName: string): void {
-    const ext = this.resolveBlobExtension(blob);
+  private triggerBlobDownload(blob: Blob, fileBaseName: string, fileName?: string | null): void {
+    const resolvedFileName = fileName?.trim() ? fileName : `${fileBaseName}.${this.resolveBlobExtension(blob)}`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${fileBaseName}.${ext}`;
+    a.download = resolvedFileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

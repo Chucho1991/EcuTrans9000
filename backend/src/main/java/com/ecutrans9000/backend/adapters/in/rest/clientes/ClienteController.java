@@ -24,7 +24,6 @@ import com.ecutrans9000.backend.service.BusinessException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -151,7 +150,7 @@ public class ClienteController {
   public ResponseEntity<Resource> getLogo(@PathVariable UUID id) {
     Cliente cliente = getClienteByIdUseCase.execute(id);
     Resource resource = clienteApplicationService.getLogo(id);
-    return buildFileResponse(resource, cliente.getLogoFileName(), "logo");
+    return buildFileResponse(resource, cliente.getLogoContentType(), cliente.getLogoFileName(), "logo");
   }
 
   @GetMapping("/import/template")
@@ -235,12 +234,12 @@ public class ClienteController {
         .build();
   }
 
-  private ResponseEntity<Resource> buildFileResponse(Resource resource, String sourcePath, String fallbackName) {
-    MediaType mediaType = resolveMediaType(sourcePath);
-    String fileName = resolveFileName(sourcePath, fallbackName);
+  private ResponseEntity<Resource> buildFileResponse(Resource resource, String contentType, String fileName, String fallbackName) {
+    MediaType mediaType = resolveMediaType(contentType, fileName);
+    String resolvedFileName = resolveFileName(fileName, fallbackName);
     return ResponseEntity.ok()
         .contentType(mediaType)
-        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resolvedFileName + "\"")
         .body(resource);
   }
 
@@ -251,8 +250,15 @@ public class ClienteController {
         .body(new ByteArrayResource(content));
   }
 
-  private MediaType resolveMediaType(String sourcePath) {
-    String lower = sourcePath == null ? "" : sourcePath.toLowerCase();
+  private MediaType resolveMediaType(String contentType, String fileName) {
+    if (contentType != null && !contentType.isBlank()) {
+      try {
+        return MediaType.parseMediaType(contentType);
+      } catch (Exception ignored) {
+        // fallback to file extension resolution below
+      }
+    }
+    String lower = fileName == null ? "" : fileName.toLowerCase();
     if (lower.endsWith(".png")) {
       return MediaType.IMAGE_PNG;
     }
@@ -262,10 +268,10 @@ public class ClienteController {
     return MediaType.IMAGE_JPEG;
   }
 
-  private String resolveFileName(String sourcePath, String fallbackName) {
-    if (sourcePath == null || sourcePath.isBlank()) {
+  private String resolveFileName(String fileName, String fallbackName) {
+    if (fileName == null || fileName.isBlank()) {
       return fallbackName;
     }
-    return Path.of(sourcePath).getFileName().toString();
+    return fileName;
   }
 }

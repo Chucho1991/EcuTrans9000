@@ -218,6 +218,28 @@ import {
             <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">&#36;{{ selectedViaje.anticipo | number: '1.2-2' }}</p>
           </div>
         </div>
+        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Valor factura</p>
+            <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">&#36;{{ selectedViaje.valor | number: '1.2-2' }}</p>
+          </div>
+          <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Retencion 1%</p>
+            <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">&#36;{{ calculateRetencion(selectedViaje.valor) | number: '1.2-2' }}</p>
+          </div>
+          <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Comision 6%</p>
+            <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">&#36;{{ calculateComision(selectedViaje.valor) | number: '1.2-2' }}</p>
+          </div>
+          <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Anticipos</p>
+            <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">&#36;{{ selectedViaje.anticipo | number: '1.2-2' }}</p>
+          </div>
+          <div class="rounded-xl border border-brand-500/20 bg-brand-500/5 p-4 dark:border-gray-800">
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-500">Pago total</p>
+            <p class="mt-1 text-lg font-semibold text-brand-700 dark:text-brand-300">&#36;{{ calculatePagoTotal(selectedViaje) | number: '1.2-2' }}</p>
+          </div>
+        </div>
         <p class="mt-4 text-sm text-gray-600 dark:text-gray-300"><strong>Observaciones:</strong> {{ selectedViaje.observaciones || '-' }}</p>
       </article>
 
@@ -840,5 +862,23 @@ export class BitacoraListComponent {
       secondaryLabel: includeDocumento ? `${cliente.tipoDocumento} | ${cliente.documento}` : cliente.documento,
       searchText: `${cliente.nombre} ${cliente.documento} ${cliente.tipoDocumento} ${cliente.direccion ?? ''}`
     };
+  }
+
+  protected calculateRetencion(valor: number): number {
+    return this.roundCurrency((valor || 0) * 0.01);
+  }
+
+  protected calculateComision(valor: number): number {
+    return this.roundCurrency((valor || 0) * 0.06);
+  }
+
+  protected calculatePagoTotal(viaje: ViajeBitacoraResponse): number {
+    const valor = viaje.valor || 0;
+    const anticipo = viaje.anticipo || 0;
+    return this.roundCurrency(valor - this.calculateRetencion(valor) - this.calculateComision(valor) - anticipo);
+  }
+
+  private roundCurrency(value: number): number {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
   }
 }
