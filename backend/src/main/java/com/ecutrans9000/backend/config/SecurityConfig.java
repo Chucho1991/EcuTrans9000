@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -30,7 +31,21 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-  @Value("${app.cors.allowed-origins:http://localhost:4200}")
+  private static final String CONTENT_SECURITY_POLICY =
+      "default-src 'self'; "
+          + "base-uri 'self'; "
+          + "form-action 'self'; "
+          + "frame-ancestors 'none'; "
+          + "object-src 'none'; "
+          + "script-src 'self'; "
+          + "style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; "
+          + "font-src 'self' https://fonts.gstatic.com data:; "
+          + "img-src 'self' data: blob:; "
+          + "connect-src 'self'; "
+          + "manifest-src 'self'; "
+          + "worker-src 'self' blob:;";
+
+  @Value("${app.cors.allowed-origins:http://localhost}")
   private String allowedOrigins;
 
   @Bean
@@ -41,6 +56,14 @@ public class SecurityConfig {
     http
         .cors(Customizer.withDefaults())
         .csrf(AbstractHttpConfigurer::disable)
+        .headers(headers -> headers
+            .contentSecurityPolicy(csp -> csp.policyDirectives(CONTENT_SECURITY_POLICY))
+            .frameOptions(frame -> frame.deny())
+            .contentTypeOptions(Customizer.withDefaults())
+            .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+            .permissionsPolicy(permissions -> permissions.policy("camera=(), geolocation=(), microphone=()"))
+            .httpStrictTransportSecurity(
+                hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000)))
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
