@@ -34,7 +34,6 @@ docker compose up --build
 - El backend se empaqueta como `jar` y se ejecuta con Java 17.
 - `docker-compose.yml` levanta los tres servicios con reinicio automático y healthchecks.
 - El backend no se publica hacia Internet; `nginx` hace proxy interno a rutas backend como `/auth`, `/api`, `/users`, `/clientes` y `/settings`.
-- `nginx` aplica cabeceras de endurecimiento (`Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, `Strict-Transport-Security`, `Referrer-Policy` y `Permissions-Policy`) y políticas de caché explícitas para SPA, estáticos y `robots.txt`.
 - Puertos expuestos:
   - Frontend: `80`
   - PostgreSQL: `5432`
