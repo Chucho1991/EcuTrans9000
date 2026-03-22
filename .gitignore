@@ -60,3 +60,4 @@ docker-compose.override.yml
 *.tgz
 *.bz2
 *.rar
+/.m2
