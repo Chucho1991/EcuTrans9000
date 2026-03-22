@@ -18,6 +18,7 @@ public final class VehiculoMapper {
         .fechaCaducidadLicencia(entity.getFechaCaducidadLicencia())
         .tipoDocumento(entity.getTipoDocumento())
         .documentoPersonal(entity.getDocumentoPersonal())
+        .cuentaBancaria(entity.getCuentaBancaria())
         .tonelajeCategoria(entity.getTonelajeCategoria())
         .m3(entity.getM3())
         .estado(entity.getEstado())

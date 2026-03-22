@@ -51,6 +51,7 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 
 ### Módulo Vehículos (`/api/vehiculos`)
 - CRUD operativo + estados
+- Campo adicional `cuentaBancaria` disponible en formulario, detalle, listado e importación Excel
 - Carga/lectura de foto, documento y licencia
 - Importación masiva (`preview` y `import`) y plantillas
 

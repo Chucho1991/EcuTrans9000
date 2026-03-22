@@ -37,6 +37,8 @@ public class VehiculoUpsertRequest {
   @NotBlank
   private String documentoPersonal;
 
+  private String cuentaBancaria;
+
   @NotBlank
   private String tonelajeCategoria;
 

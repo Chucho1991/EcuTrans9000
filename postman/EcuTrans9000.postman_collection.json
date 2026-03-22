@@ -710,7 +710,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"placa\": \"ABC-1234\",\n  \"choferDefault\": \"Chofer Prueba\",\n  \"licencia\": \"LIC-0001\",\n  \"tipoDocumento\": \"CEDULA\",\n  \"documentoPersonal\": \"0102030405\",\n  \"tonelajeCategoria\": \"PESADO\",\n  \"m3\": 12.5,\n  \"estado\": \"ACTIVO\"\n}"
+              "raw": "{\n  \"placa\": \"ABC-1234\",\n  \"choferDefault\": \"Chofer Prueba\",\n  \"licencia\": \"LIC-0001\",\n  \"tipoDocumento\": \"CEDULA\",\n  \"documentoPersonal\": \"0102030405\",\n  \"cuentaBancaria\": \"Banco Pichincha - 1234567890\",\n  \"tonelajeCategoria\": \"PESADO\",\n  \"m3\": 12.5,\n  \"estado\": \"ACTIVO\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/vehiculos",
@@ -791,7 +791,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"placa\": \"ABC-1234\",\n  \"choferDefault\": \"Chofer Editado\",\n  \"licencia\": \"LIC-0002\",\n  \"tipoDocumento\": \"RUC\",\n  \"documentoPersonal\": \"1799999999001\",\n  \"tonelajeCategoria\": \"SEMI-PESADO\",\n  \"m3\": 15.75,\n  \"estado\": \"INACTIVO\"\n}"
+              "raw": "{\n  \"placa\": \"ABC-1234\",\n  \"choferDefault\": \"Chofer Editado\",\n  \"licencia\": \"LIC-0002\",\n  \"tipoDocumento\": \"RUC\",\n  \"documentoPersonal\": \"1799999999001\",\n  \"cuentaBancaria\": \"Banco Guayaquil - 9876543210\",\n  \"tonelajeCategoria\": \"SEMI-PESADO\",\n  \"m3\": 15.75,\n  \"estado\": \"INACTIVO\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/vehiculos/{{targetVehiculoId}}",

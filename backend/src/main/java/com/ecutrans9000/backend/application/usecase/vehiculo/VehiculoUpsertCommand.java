@@ -15,6 +15,7 @@ public record VehiculoUpsertCommand(
     LocalDate fechaCaducidadLicencia,
     TipoDocumento tipoDocumento,
     String documentoPersonal,
+    String cuentaBancaria,
     String tonelajeCategoria,
     BigDecimal m3,
     EstadoVehiculo estado
