@@ -12,6 +12,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * DTO de entrada para crear o actualizar un viaje de bitácora.
+ */
 @Getter
 @Setter
 @Builder
@@ -39,6 +42,10 @@ public class ViajeBitacoraUpsertRequest {
   @NotNull
   @DecimalMin(value = "0", inclusive = true)
   private BigDecimal valor;
+
+  @NotNull
+  @DecimalMin(value = "0", inclusive = true)
+  private BigDecimal costoChofer;
 
   @NotNull
   @DecimalMin(value = "0", inclusive = true)

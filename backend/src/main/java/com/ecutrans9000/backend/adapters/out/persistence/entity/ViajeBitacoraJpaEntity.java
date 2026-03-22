@@ -14,6 +14,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Entidad JPA que representa un viaje registrado en la bitácora operativa.
+ */
 @Entity
 @Table(name = "viajes_bitacora")
 @Getter
@@ -47,6 +50,9 @@ public class ViajeBitacoraJpaEntity {
 
   @Column(name = "valor", nullable = false, precision = 12, scale = 2)
   private BigDecimal valor;
+
+  @Column(name = "costo_chofer", nullable = false, precision = 12, scale = 2)
+  private BigDecimal costoChofer;
 
   @Column(name = "estiba", nullable = false, precision = 12, scale = 2)
   private BigDecimal estiba;

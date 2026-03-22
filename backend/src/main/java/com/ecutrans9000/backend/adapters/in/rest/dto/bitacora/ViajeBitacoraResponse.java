@@ -10,6 +10,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * DTO de salida para exponer viajes de bitácora.
+ */
 @Getter
 @Setter
 @Builder
@@ -30,6 +33,7 @@ public class ViajeBitacoraResponse {
   private String destino;
   private String detalleViaje;
   private BigDecimal valor;
+  private BigDecimal costoChofer;
   private BigDecimal estiba;
   private BigDecimal anticipo;
   private Boolean facturadoCliente;

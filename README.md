@@ -66,6 +66,8 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - CRUD operativo + borrado lógico/restauración
 - Exportación Excel
 - Importación masiva con plantilla
+- Campo obligatorio `costoChofer` en creación, edición e importación Excel
+- Si el cliente seleccionado tiene tabla de equivalencia, el formulario cambia `Destino` a selección por opciones y autocompleta `valor` y `costoChofer`
 - En la plantilla de importación, la columna `E` (`Documento cliente`) se genera con formato texto para conservar ceros a la izquierda y documentos numéricos largos
 
 ### Módulo Placas (`/api/placas`)

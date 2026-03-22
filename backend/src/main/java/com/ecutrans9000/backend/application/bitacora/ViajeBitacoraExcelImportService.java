@@ -38,6 +38,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Servicio de aplicación para la importación masiva Excel del módulo bitácora.
+ */
 @Service
 public class ViajeBitacoraExcelImportService {
 
@@ -48,6 +51,7 @@ public class ViajeBitacoraExcelImportService {
       "detalle viaje",
       "documento cliente",
       "valor",
+      "costo chofer",
       "estiba",
       "anticipo",
       "pagado cliente",
@@ -112,13 +116,14 @@ public class ViajeBitacoraExcelImportService {
         documentoClienteCell.setCellStyle(textColumnStyle);
         documentoClienteCell.setCellValue("0999999999001");
         exampleRow.createCell(5).setCellValue(150.00);
-        exampleRow.createCell(6).setCellValue(15.00);
-        exampleRow.createCell(7).setCellValue(25.00);
-        exampleRow.createCell(8).setCellValue("SI");
-        exampleRow.createCell(9).setCellValue("FAC-001");
-        exampleRow.createCell(10).setCellValue("03/03/2026");
-        exampleRow.createCell(11).setCellValue("05/03/2026");
-        exampleRow.createCell(12).setCellValue("NO");
+        exampleRow.createCell(6).setCellValue(110.00);
+        exampleRow.createCell(7).setCellValue(15.00);
+        exampleRow.createCell(8).setCellValue(25.00);
+        exampleRow.createCell(9).setCellValue("SI");
+        exampleRow.createCell(10).setCellValue("FAC-001");
+        exampleRow.createCell(11).setCellValue("03/03/2026");
+        exampleRow.createCell(12).setCellValue("05/03/2026");
+        exampleRow.createCell(13).setCellValue("NO");
       }
       workbook.write(outputStream);
       return outputStream.toByteArray();
@@ -310,13 +315,14 @@ public class ViajeBitacoraExcelImportService {
     String detalleViaje = detailOrNull(readCellAsString(row.getCell(3)));
     String clienteDocumento = requireText(row.getCell(4), "Documento cliente");
     BigDecimal valor = parseDecimalCell(row.getCell(5), "Valor");
-    BigDecimal estiba = parseDecimalCell(row.getCell(6), "Estiba");
-    BigDecimal anticipo = parseDecimalCell(row.getCell(7), "Anticipo");
-    boolean facturadoCliente = parseBooleanCell(row.getCell(8));
-    String numeroFactura = detailOrNull(readCellAsString(row.getCell(9)));
-    LocalDate fechaFactura = parseOptionalDateCell(row.getCell(10));
-    LocalDate fechaPagoCliente = parseOptionalDateCell(row.getCell(11));
-    boolean pagadoTransportista = parseBooleanCell(row.getCell(12));
+    BigDecimal costoChofer = parseRequiredDecimalCell(row.getCell(6), "Costo chofer");
+    BigDecimal estiba = parseDecimalCell(row.getCell(7), "Estiba");
+    BigDecimal anticipo = parseDecimalCell(row.getCell(8), "Anticipo");
+    boolean facturadoCliente = parseBooleanCell(row.getCell(9));
+    String numeroFactura = detailOrNull(readCellAsString(row.getCell(10)));
+    LocalDate fechaFactura = parseOptionalDateCell(row.getCell(11));
+    LocalDate fechaPagoCliente = parseOptionalDateCell(row.getCell(12));
+    boolean pagadoTransportista = parseBooleanCell(row.getCell(13));
 
     VehiculoJpaEntity vehiculo = vehiculoRepository.findByPlacaNorm(normalizePlate(placa))
         .orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST, "Vehiculo no encontrado para placa: " + placa));
@@ -333,6 +339,7 @@ public class ViajeBitacoraExcelImportService {
         .destino(destino)
         .detalleViaje(detalleViaje)
         .valor(valor)
+        .costoChofer(costoChofer)
         .estiba(estiba)
         .anticipo(anticipo)
         .facturadoCliente(facturadoCliente)
@@ -362,6 +369,18 @@ public class ViajeBitacoraExcelImportService {
     String value = readCellAsString(cell);
     if (value == null || value.isBlank()) {
       return BigDecimal.ZERO;
+    }
+    try {
+      return new BigDecimal(value.replace(",", "."));
+    } catch (Exception ex) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, field + " invalido");
+    }
+  }
+
+  private BigDecimal parseRequiredDecimalCell(Cell cell, String field) {
+    String value = readCellAsString(cell);
+    if (value == null || value.isBlank()) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, field + " es obligatorio");
     }
     try {
       return new BigDecimal(value.replace(",", "."));
@@ -469,6 +488,7 @@ public class ViajeBitacoraExcelImportService {
       case "detalle viaje" -> "Detalle viaje";
       case "documento cliente" -> "Documento cliente";
       case "valor" -> "Valor";
+      case "costo chofer" -> "Costo Chofer";
       case "estiba" -> "Estiba";
       case "anticipo" -> "Anticipo";
       case "pagado cliente" -> "Pagado cliente";

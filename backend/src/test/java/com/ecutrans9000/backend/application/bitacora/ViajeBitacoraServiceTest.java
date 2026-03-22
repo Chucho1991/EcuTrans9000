@@ -66,6 +66,7 @@ class ViajeBitacoraServiceTest {
         .destino("Destino interprovincial muy largo")
         .detalleViaje("Detalle de viaje con descripcion operativa extensa")
         .valor(new BigDecimal("150.00"))
+        .costoChofer(new BigDecimal("110.00"))
         .estiba(new BigDecimal("10.00"))
         .anticipo(new BigDecimal("25.00"))
         .facturadoCliente(true)
@@ -123,17 +124,25 @@ class ViajeBitacoraServiceTest {
       assertEquals(HorizontalAlignment.LEFT, row.getCell(6).getCellStyle().getAlignment());
       assertEquals(HorizontalAlignment.LEFT, row.getCell(7).getCellStyle().getAlignment());
       assertEquals(HorizontalAlignment.LEFT, row.getCell(8).getCellStyle().getAlignment());
+      assertEquals(110d, row.getCell(17).getNumericCellValue());
 
       assertEquals(expectedColumnWidth("Chofer con nombre bastante largo", "Chofer"), sheet.getColumnWidth(5));
       assertEquals(expectedColumnWidth("Destino interprovincial muy largo", "Destino"), sheet.getColumnWidth(6));
       assertEquals(expectedColumnWidth("Detalle de viaje con descripcion operativa extensa", "Detalle viaje"), sheet.getColumnWidth(7));
       assertEquals(expectedColumnWidth("Cliente comercial de nombre extenso", "Cliente"), sheet.getColumnWidth(8));
+      assertEquals(expectedAmountColumnWidth("110", "Costo Chofer"), sheet.getColumnWidth(17));
     }
   }
 
   private int expectedColumnWidth(String value, String header) {
     int maxLength = Math.max(value.trim().length(), header.length());
     int normalizedWidth = Math.max(12, Math.min(maxLength + 2, 80));
+    return normalizedWidth * 256;
+  }
+
+  private int expectedAmountColumnWidth(String value, String header) {
+    int maxLength = Math.max(value.trim().length(), header.length());
+    int normalizedWidth = Math.max(14, Math.min(maxLength + 2, 20));
     return normalizedWidth * 256;
   }
 

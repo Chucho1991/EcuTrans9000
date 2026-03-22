@@ -7,6 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.ecutrans9000.backend.adapters.in.rest.dto.bitacora.ViajeBitacoraUpsertRequest;
 import com.ecutrans9000.backend.adapters.in.rest.dto.bitacora.ViajeBitacoraImportResult;
 import com.ecutrans9000.backend.adapters.out.persistence.entity.ClienteJpaEntity;
 import com.ecutrans9000.backend.adapters.out.persistence.entity.VehiculoJpaEntity;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.http.HttpStatus;
@@ -85,7 +87,9 @@ class ViajeBitacoraExcelImportServiceTest {
     assertEquals(1, result.getProcessed());
     assertEquals(1, result.getInserted());
     assertEquals(0, result.getErrorsCount());
-    verify(viajeBitacoraService).validateForCreate(any());
+    ArgumentCaptor<ViajeBitacoraUpsertRequest> requestCaptor = ArgumentCaptor.forClass(ViajeBitacoraUpsertRequest.class);
+    verify(viajeBitacoraService).validateForCreate(requestCaptor.capture());
+    assertEquals(new BigDecimal("110"), requestCaptor.getValue().getCostoChofer());
     verify(viajeBitacoraService, never()).create(any());
   }
 
@@ -161,13 +165,14 @@ class ViajeBitacoraExcelImportServiceTest {
       header.createCell(3).setCellValue("Detalle viaje");
       header.createCell(4).setCellValue("Documento cliente");
       header.createCell(5).setCellValue("Valor");
-      header.createCell(6).setCellValue("Estiba");
-      header.createCell(7).setCellValue("Anticipo");
-      header.createCell(8).setCellValue("Pagado cliente");
-      header.createCell(9).setCellValue("N° Factura");
-      header.createCell(10).setCellValue("Fecha factura");
-      header.createCell(11).setCellValue("Fecha pago cliente a Ecutrans");
-      header.createCell(12).setCellValue("Pagado transportista");
+      header.createCell(6).setCellValue("Costo Chofer");
+      header.createCell(7).setCellValue("Estiba");
+      header.createCell(8).setCellValue("Anticipo");
+      header.createCell(9).setCellValue("Pagado cliente");
+      header.createCell(10).setCellValue("N° Factura");
+      header.createCell(11).setCellValue("Fecha factura");
+      header.createCell(12).setCellValue("Fecha pago cliente a Ecutrans");
+      header.createCell(13).setCellValue("Pagado transportista");
 
       var row = sheet.createRow(1);
       row.createCell(0).setCellValue("02/03/2026");
@@ -176,13 +181,14 @@ class ViajeBitacoraExcelImportServiceTest {
       row.createCell(3).setCellValue("ENTREGA PROGRAMADA");
       row.createCell(4).setCellValue("0999999999001");
       row.createCell(5).setCellValue(150d);
-      row.createCell(6).setCellValue(15d);
-      row.createCell(7).setCellValue(25d);
-      row.createCell(8).setCellValue("SI");
-      row.createCell(9).setCellValue("FAC-001");
-      row.createCell(10).setCellValue("03/03/2026");
-      row.createCell(11).setCellValue("05/03/2026");
-      row.createCell(12).setCellValue("NO");
+      row.createCell(6).setCellValue(110d);
+      row.createCell(7).setCellValue(15d);
+      row.createCell(8).setCellValue(25d);
+      row.createCell(9).setCellValue("SI");
+      row.createCell(10).setCellValue("FAC-001");
+      row.createCell(11).setCellValue("03/03/2026");
+      row.createCell(12).setCellValue("05/03/2026");
+      row.createCell(13).setCellValue("NO");
 
       workbook.write(outputStream);
       return outputStream.toByteArray();

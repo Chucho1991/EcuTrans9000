@@ -38,12 +38,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Servicio de aplicación para la gestión operativa de viajes en bitácora.
+ */
 @Service
 public class ViajeBitacoraService {
   private static final int CHOFER_COLUMN_INDEX = 5;
   private static final int DESTINO_COLUMN_INDEX = 6;
   private static final int DETALLE_VIAJE_COLUMN_INDEX = 7;
   private static final int CLIENTE_COLUMN_INDEX = 8;
+  private static final int COSTO_CHOFER_COLUMN_INDEX = 17;
   private static final int MIN_TEXT_COLUMN_WIDTH = 12;
   private static final int MAX_TEXT_COLUMN_WIDTH = 80;
 
@@ -99,6 +103,7 @@ public class ViajeBitacoraService {
         .destino(clean(request.getDestino()))
         .detalleViaje(clean(request.getDetalleViaje()))
         .valor(zeroIfNull(request.getValor()))
+        .costoChofer(zeroIfNull(request.getCostoChofer()))
         .estiba(zeroIfNull(request.getEstiba()))
         .anticipo(zeroIfNull(request.getAnticipo()))
         .facturadoCliente(Boolean.TRUE.equals(request.getFacturadoCliente()))
@@ -135,6 +140,7 @@ public class ViajeBitacoraService {
     entity.setDestino(clean(request.getDestino()));
     entity.setDetalleViaje(clean(request.getDetalleViaje()));
     entity.setValor(zeroIfNull(request.getValor()));
+    entity.setCostoChofer(zeroIfNull(request.getCostoChofer()));
     entity.setEstiba(zeroIfNull(request.getEstiba()));
     entity.setAnticipo(zeroIfNull(request.getAnticipo()));
     entity.setFacturadoCliente(Boolean.TRUE.equals(request.getFacturadoCliente()));
@@ -330,6 +336,9 @@ public class ViajeBitacoraService {
     setDynamicColumnWidth(sheet, CLIENTE_COLUMN_INDEX, "Cliente", viajes.stream()
         .map(this::preferredClientName)
         .toList());
+    setAmountColumnWidth(sheet, COSTO_CHOFER_COLUMN_INDEX, "Costo Chofer", viajes.stream()
+        .map(ViajeBitacoraResponse::getCostoChofer)
+        .toList());
   }
 
   private void setDynamicColumnWidth(XSSFSheet sheet, int columnIndex, String headerValue, List<String> values) {
@@ -418,7 +427,7 @@ public class ViajeBitacoraService {
   }
 
   private boolean rowHasContent(Row row) {
-    for (int i = 0; i < 17; i++) {
+    for (int i = 0; i < 18; i++) {
       Cell cell = row.getCell(i);
       if (cell == null) {
         continue;
@@ -498,6 +507,7 @@ public class ViajeBitacoraService {
     setCellValue(row, 14, viaje.getFechaFactura());
     setCellValue(row, 15, viaje.getFechaPagoCliente());
     setCellValue(row, 16, Boolean.TRUE.equals(viaje.getPagadoTransportista()) ? "a" : "r");
+    setCellValue(row, COSTO_CHOFER_COLUMN_INDEX, viaje.getCostoChofer());
   }
 
   private String preferredClientName(ViajeBitacoraResponse viaje) {
@@ -525,6 +535,15 @@ public class ViajeBitacoraService {
       return;
     }
     cell.setCellValue(String.valueOf(value));
+  }
+
+  private void setAmountColumnWidth(XSSFSheet sheet, int columnIndex, String headerValue, List<BigDecimal> values) {
+    int maxLength = visibleLength(headerValue);
+    for (BigDecimal value : values) {
+      maxLength = Math.max(maxLength, visibleLength(value == null ? null : value.stripTrailingZeros().toPlainString()));
+    }
+    int normalizedWidth = Math.max(14, Math.min(maxLength + 2, 20));
+    sheet.setColumnWidth(columnIndex, normalizedWidth * 256);
   }
 
   private void clearRowValues(Row row) {
@@ -568,6 +587,7 @@ public class ViajeBitacoraService {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "La fecha de pago no puede ser anterior a la fecha del viaje");
     }
     validateAmount(request.getValor(), "Valor");
+    validateAmount(request.getCostoChofer(), "Costo chofer");
     validateAmount(request.getEstiba(), "Estiba");
     validateAmount(request.getAnticipo(), "Anticipo");
 
@@ -626,6 +646,7 @@ public class ViajeBitacoraService {
         .destino(entity.getDestino())
         .detalleViaje(entity.getDetalleViaje())
         .valor(entity.getValor())
+        .costoChofer(entity.getCostoChofer())
         .estiba(entity.getEstiba())
         .anticipo(entity.getAnticipo())
         .facturadoCliente(entity.getFacturadoCliente())

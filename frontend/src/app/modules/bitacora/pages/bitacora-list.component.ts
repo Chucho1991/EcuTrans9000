@@ -71,6 +71,7 @@ import {
                 <th class="px-3 py-3 sm:px-4">Cliente</th>
                 <th class="px-3 py-3 sm:px-4">Destino</th>
                 <th class="px-3 py-3 sm:px-4">Valor</th>
+                <th class="px-3 py-3 sm:px-4">Costo chofer</th>
                 <th class="px-3 py-3 sm:px-4">Factura</th>
                 <th class="px-3 py-3 sm:px-4">Fecha factura</th>
                 <th class="px-3 py-3 sm:px-4">Fecha pago cliente</th>
@@ -93,6 +94,7 @@ import {
                 </td>
                 <td class="px-3 py-3 sm:px-4">{{ viaje.destino }}</td>
                 <td class="px-3 py-3 sm:px-4">&#36;{{ viaje.valor | number: '1.2-2' }}</td>
+                <td class="px-3 py-3 sm:px-4">&#36;{{ viaje.costoChofer | number: '1.2-2' }}</td>
                 <td class="px-3 py-3 sm:px-4">
                   <span *ngIf="viaje.deleted" class="mb-2 inline-flex rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:border-orange-900/40 dark:bg-orange-900/20 dark:text-orange-300">
                     ELIMINADO
@@ -154,7 +156,7 @@ import {
                 </td>
               </tr>
               <tr *ngIf="viajes.length === 0">
-                <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400" colspan="12">No hay viajes registrados.</td>
+                <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400" colspan="13">No hay viajes registrados.</td>
               </tr>
             </tbody>
           </table>
@@ -208,6 +210,10 @@ import {
           <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
             <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Valor</p>
             <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">&#36;{{ selectedViaje.valor | number: '1.2-2' }}</p>
+          </div>
+          <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Costo chofer</p>
+            <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">&#36;{{ selectedViaje.costoChofer | number: '1.2-2' }}</p>
           </div>
           <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
             <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Estiba</p>
@@ -294,9 +300,19 @@ import {
 
           <div class="min-w-0 xl:col-span-4">
             <label class="form-label form-label-required">Destino</label>
-            <input class="form-control" formControlName="destino" />
+            <ng-container *ngIf="usesEquivalenciasForSelectedCliente(); else manualDestinoField">
+              <app-catalog-search-select
+                formControlName="destino"
+                placeholder="Selecciona un destino"
+                searchPlaceholder="Buscar destino"
+                noResultsText="No hay destinos que coincidan."
+                [options]="destinoEquivalenciaFormOptions" />
+            </ng-container>
+            <ng-template #manualDestinoField>
+              <input class="form-control" formControlName="destino" />
+            </ng-template>
             <p class="form-error" *ngIf="showError('destino', 'required')">
-              Destino es obligatorio. Ingresa el destino del viaje.
+              Destino es obligatorio. {{ usesEquivalenciasForSelectedCliente() ? 'Selecciona un destino disponible para el cliente.' : 'Ingresa el destino del viaje.' }}
             </p>
           </div>
           <div class="min-w-0 xl:col-span-8">
@@ -306,12 +322,22 @@ import {
 
           <div class="min-w-0 xl:col-span-2">
             <label class="form-label form-label-required">Valor</label>
-            <input class="form-control" type="number" min="0" step="0.01" formControlName="valor" />
+            <input class="form-control" type="number" min="0" step="0.01" formControlName="valor" [readonly]="usesEquivalenciasForSelectedCliente()" />
             <p class="form-error" *ngIf="showError('valor', 'required')">
               Valor es obligatorio. Ingresa el valor del viaje.
             </p>
             <p class="form-error" *ngIf="showError('valor', 'min')">
               Valor tiene formato invalido. Ingresa un valor igual o mayor a 0.
+            </p>
+          </div>
+          <div class="min-w-0 xl:col-span-2">
+            <label class="form-label form-label-required">Costo chofer</label>
+            <input class="form-control" type="number" min="0" step="0.01" formControlName="costoChofer" [readonly]="usesEquivalenciasForSelectedCliente()" />
+            <p class="form-error" *ngIf="showError('costoChofer', 'required')">
+              Costo chofer es obligatorio. Ingresa el valor a pagar al chofer.
+            </p>
+            <p class="form-error" *ngIf="showError('costoChofer', 'min')">
+              Costo chofer tiene formato invalido. Ingresa un valor igual o mayor a 0.
             </p>
           </div>
           <div class="min-w-0 xl:col-span-2">
@@ -452,6 +478,7 @@ export class BitacoraListComponent {
   protected clienteFilterOptions: CatalogSearchOption[] = [];
   protected vehiculoFormOptions: CatalogSearchOption[] = [];
   protected clienteFormOptions: CatalogSearchOption[] = [];
+  protected destinoEquivalenciaFormOptions: CatalogSearchOption[] = [];
   protected selectedViaje: ViajeBitacoraResponse | null = null;
   protected mode: 'none' | 'create' | 'edit' = 'none';
   protected editingId: string | null = null;
@@ -481,6 +508,7 @@ export class BitacoraListComponent {
     destino: ['', [Validators.required]],
     detalleViaje: [''],
     valor: [0, [Validators.required, Validators.min(0)]],
+    costoChofer: [0, [Validators.required, Validators.min(0)]],
     estiba: [0, [Validators.required, Validators.min(0)]],
     anticipo: [0, [Validators.required, Validators.min(0)]],
     facturadoCliente: [false, [Validators.required]],
@@ -492,6 +520,12 @@ export class BitacoraListComponent {
   });
 
   constructor() {
+    this.viajeForm.get('clienteId')?.valueChanges.subscribe((clienteId) => {
+      this.syncClienteEquivalencias(clienteId ?? '');
+    });
+    this.viajeForm.get('destino')?.valueChanges.subscribe((destino) => {
+      this.syncValoresDesdeDestino(destino ?? '');
+    });
     this.loadCatalogos();
     this.loadViajes(0);
   }
@@ -572,6 +606,7 @@ export class BitacoraListComponent {
       destino: '',
       detalleViaje: '',
       valor: 0,
+      costoChofer: 0,
       estiba: 0,
       anticipo: 0,
       facturadoCliente: false,
@@ -668,6 +703,7 @@ export class BitacoraListComponent {
       destino: viaje.destino,
       detalleViaje: viaje.detalleViaje || '',
       valor: viaje.valor,
+      costoChofer: viaje.costoChofer,
       estiba: viaje.estiba,
       anticipo: viaje.anticipo,
       facturadoCliente: viaje.facturadoCliente,
@@ -747,6 +783,7 @@ export class BitacoraListComponent {
       destino: value.destino ?? '',
       detalleViaje: value.detalleViaje ?? '',
       valor: Number(value.valor ?? 0),
+      costoChofer: Number(value.costoChofer ?? 0),
       estiba: Number(value.estiba ?? 0),
       anticipo: Number(value.anticipo ?? 0),
       facturadoCliente: !!value.facturadoCliente,
@@ -827,6 +864,16 @@ export class BitacoraListComponent {
   protected showError(controlName: string, errorKey: string): boolean {
     const control = this.viajeForm.get(controlName);
     return !!control && control.touched && control.hasError(errorKey);
+  }
+
+  protected usesEquivalenciasForSelectedCliente(): boolean {
+    return this.selectedClienteEquivalencias().length > 0;
+  }
+
+  protected selectedClienteEquivalencias(): ClienteResponse['equivalencias'] {
+    const clienteId = this.viajeForm.getRawValue().clienteId;
+    const cliente = this.clientesCatalogo.find((item) => item.id === clienteId);
+    return cliente?.aplicaTablaEquivalencia ? cliente.equivalencias : [];
   }
 
   private getErrorMessage(error: unknown): string {
@@ -910,5 +957,53 @@ export class BitacoraListComponent {
 
   private roundCurrency(value: number): number {
     return Math.round((value + Number.EPSILON) * 100) / 100;
+  }
+
+  private syncClienteEquivalencias(clienteId: string): void {
+    const cliente = this.clientesCatalogo.find((item) => item.id === clienteId);
+    const equivalencias = cliente?.aplicaTablaEquivalencia ? cliente.equivalencias : [];
+    this.destinoEquivalenciaFormOptions = equivalencias.map((equivalencia) => ({
+      value: equivalencia.destino,
+      label: equivalencia.destino,
+      secondaryLabel: `Valor: $${equivalencia.valorDestino.toFixed(2)} | Costo chofer: $${equivalencia.costoChofer.toFixed(2)}`,
+      searchText: equivalencia.destino
+    }));
+
+    if (equivalencias.length === 0) {
+      this.destinoEquivalenciaFormOptions = [];
+      return;
+    }
+
+    const destinoActual = this.viajeForm.get('destino')?.value ?? '';
+    const equivalenciaActual = equivalencias.find((item) => item.destino === destinoActual);
+    if (equivalenciaActual) {
+      this.applyEquivalenciaValues(equivalenciaActual.valorDestino, equivalenciaActual.costoChofer);
+      return;
+    }
+
+    this.viajeForm.patchValue({
+      destino: '',
+      valor: 0,
+      costoChofer: 0
+    });
+  }
+
+  private syncValoresDesdeDestino(destino: string): void {
+    if (!this.usesEquivalenciasForSelectedCliente()) {
+      return;
+    }
+    const equivalencia = this.selectedClienteEquivalencias().find((item) => item.destino === destino);
+    if (!equivalencia) {
+      this.applyEquivalenciaValues(0, 0);
+      return;
+    }
+    this.applyEquivalenciaValues(equivalencia.valorDestino, equivalencia.costoChofer);
+  }
+
+  private applyEquivalenciaValues(valorDestino: number, costoChofer: number): void {
+    this.viajeForm.patchValue({
+      valor: valorDestino,
+      costoChofer
+    }, { emitEvent: false });
   }
 }
