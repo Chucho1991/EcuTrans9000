@@ -40,6 +40,7 @@ public class VehiculoRepositoryAdapter implements VehiculoRepositoryPort {
         .fechaCaducidadLicencia(vehiculo.getFechaCaducidadLicencia())
         .tipoDocumento(vehiculo.getTipoDocumento())
         .documentoPersonal(vehiculo.getDocumentoPersonal())
+        .cuentaBancaria(vehiculo.getCuentaBancaria())
         .tonelajeCategoria(vehiculo.getTonelajeCategoria())
         .m3(vehiculo.getM3())
         .estado(vehiculo.getEstado())

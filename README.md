@@ -70,6 +70,7 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 
 ### Módulo Vehículos (`/api/vehiculos`)
 - CRUD operativo + estados
+- Campo adicional `cuentaBancaria` disponible en formulario, detalle, listado e importación Excel
 - Carga/lectura de foto, documento y licencia
 - Importación masiva (`preview` y `import`) y plantillas
 
@@ -77,11 +78,16 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - CRUD operativo + estados
 - Logo empresarial en base de datos
 - Importación masiva (`preview` y `import`) y plantillas
+- Flag `Aplica Tabla de Equivalencia` por cliente
+- Tabla de equivalencia por destino con carga Excel (`DESTINO`, `VALOR DESTINO`, `COSTO CHOFER`)
+- Edición manual de equivalencias desde el detalle del cliente
 
 ### Módulo Bitácora (`/api/bitacora/viajes`)
 - CRUD operativo + borrado lógico/restauración
 - Exportación Excel
 - Importación masiva con plantilla
+- Campo obligatorio `costoChofer` en creación, edición e importación Excel
+- Si el cliente seleccionado tiene tabla de equivalencia, el formulario cambia `Destino` a selección por opciones y autocompleta `valor` y `costoChofer`
 - En la plantilla de importación, la columna `E` (`Documento cliente`) se genera con formato texto para conservar ceros a la izquierda y documentos numéricos largos
 
 ### Módulo Placas (`/api/placas`)

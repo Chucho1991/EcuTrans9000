@@ -17,10 +17,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -34,8 +38,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Servicio de aplicación para la gestión operativa de viajes en bitácora.
+ */
 @Service
 public class ViajeBitacoraService {
+  private static final int CHOFER_COLUMN_INDEX = 5;
+  private static final int DESTINO_COLUMN_INDEX = 6;
+  private static final int DETALLE_VIAJE_COLUMN_INDEX = 7;
+  private static final int CLIENTE_COLUMN_INDEX = 8;
+  private static final int COSTO_CHOFER_COLUMN_INDEX = 17;
+  private static final int MIN_TEXT_COLUMN_WIDTH = 12;
+  private static final int MAX_TEXT_COLUMN_WIDTH = 80;
 
   private final ViajeBitacoraJpaRepository viajeRepository;
   private final VehiculoJpaRepository vehiculoRepository;
@@ -89,6 +103,7 @@ public class ViajeBitacoraService {
         .destino(clean(request.getDestino()))
         .detalleViaje(clean(request.getDetalleViaje()))
         .valor(zeroIfNull(request.getValor()))
+        .costoChofer(zeroIfNull(request.getCostoChofer()))
         .estiba(zeroIfNull(request.getEstiba()))
         .anticipo(zeroIfNull(request.getAnticipo()))
         .facturadoCliente(Boolean.TRUE.equals(request.getFacturadoCliente()))
@@ -125,6 +140,7 @@ public class ViajeBitacoraService {
     entity.setDestino(clean(request.getDestino()));
     entity.setDetalleViaje(clean(request.getDetalleViaje()));
     entity.setValor(zeroIfNull(request.getValor()));
+    entity.setCostoChofer(zeroIfNull(request.getCostoChofer()));
     entity.setEstiba(zeroIfNull(request.getEstiba()));
     entity.setAnticipo(zeroIfNull(request.getAnticipo()));
     entity.setFacturadoCliente(Boolean.TRUE.equals(request.getFacturadoCliente()));
@@ -264,9 +280,81 @@ public class ViajeBitacoraService {
       }
     }
 
+    applyLeftAlignmentToDataColumns(sheet, firstDataRowIndex, viajes.size());
+    adjustDynamicTextColumnWidths(sheet, viajes);
+
     if (hasNotesSection) {
       removeRows(sheet, finalNotesRowIndex, sheet.getLastRowNum());
     }
+  }
+
+  private void applyLeftAlignmentToDataColumns(XSSFSheet sheet, int firstDataRowIndex, int totalRows) {
+    if (totalRows <= 0) {
+      return;
+    }
+    Map<CellStyle, CellStyle> leftAlignedStyles = new HashMap<>();
+    for (int rowIndex = firstDataRowIndex; rowIndex < firstDataRowIndex + totalRows; rowIndex++) {
+      Row row = sheet.getRow(rowIndex);
+      if (row == null) {
+        continue;
+      }
+      applyLeftAlignment(row, CHOFER_COLUMN_INDEX, leftAlignedStyles);
+      applyLeftAlignment(row, DESTINO_COLUMN_INDEX, leftAlignedStyles);
+      applyLeftAlignment(row, DETALLE_VIAJE_COLUMN_INDEX, leftAlignedStyles);
+      applyLeftAlignment(row, CLIENTE_COLUMN_INDEX, leftAlignedStyles);
+    }
+  }
+
+  private void applyLeftAlignment(Row row, int columnIndex, Map<CellStyle, CellStyle> leftAlignedStyles) {
+    Cell cell = row.getCell(columnIndex);
+    if (cell == null) {
+      return;
+    }
+    CellStyle originalStyle = cell.getCellStyle();
+    if (originalStyle == null) {
+      return;
+    }
+    CellStyle leftAlignedStyle = leftAlignedStyles.computeIfAbsent(originalStyle, style -> {
+      CellStyle clonedStyle = row.getSheet().getWorkbook().createCellStyle();
+      clonedStyle.cloneStyleFrom(style);
+      clonedStyle.setAlignment(HorizontalAlignment.LEFT);
+      return clonedStyle;
+    });
+    cell.setCellStyle(leftAlignedStyle);
+  }
+
+  private void adjustDynamicTextColumnWidths(XSSFSheet sheet, List<ViajeBitacoraResponse> viajes) {
+    setDynamicColumnWidth(sheet, CHOFER_COLUMN_INDEX, "Chofer", viajes.stream()
+        .map(ViajeBitacoraResponse::getVehiculoChofer)
+        .toList());
+    setDynamicColumnWidth(sheet, DESTINO_COLUMN_INDEX, "Destino", viajes.stream()
+        .map(ViajeBitacoraResponse::getDestino)
+        .toList());
+    setDynamicColumnWidth(sheet, DETALLE_VIAJE_COLUMN_INDEX, "Detalle viaje", viajes.stream()
+        .map(ViajeBitacoraResponse::getDetalleViaje)
+        .toList());
+    setDynamicColumnWidth(sheet, CLIENTE_COLUMN_INDEX, "Cliente", viajes.stream()
+        .map(this::preferredClientName)
+        .toList());
+    setAmountColumnWidth(sheet, COSTO_CHOFER_COLUMN_INDEX, "Costo Chofer", viajes.stream()
+        .map(ViajeBitacoraResponse::getCostoChofer)
+        .toList());
+  }
+
+  private void setDynamicColumnWidth(XSSFSheet sheet, int columnIndex, String headerValue, List<String> values) {
+    int maxLength = visibleLength(headerValue);
+    for (String value : values) {
+      maxLength = Math.max(maxLength, visibleLength(value));
+    }
+    int normalizedWidth = Math.max(MIN_TEXT_COLUMN_WIDTH, Math.min(maxLength + 2, MAX_TEXT_COLUMN_WIDTH));
+    sheet.setColumnWidth(columnIndex, normalizedWidth * 256);
+  }
+
+  private int visibleLength(String value) {
+    if (value == null || value.isBlank()) {
+      return 0;
+    }
+    return value.trim().length();
   }
 
   private int findNotesRowIndex(XSSFSheet sheet) {
@@ -339,7 +427,7 @@ public class ViajeBitacoraService {
   }
 
   private boolean rowHasContent(Row row) {
-    for (int i = 0; i < 17; i++) {
+    for (int i = 0; i < 18; i++) {
       Cell cell = row.getCell(i);
       if (cell == null) {
         continue;
@@ -419,6 +507,7 @@ public class ViajeBitacoraService {
     setCellValue(row, 14, viaje.getFechaFactura());
     setCellValue(row, 15, viaje.getFechaPagoCliente());
     setCellValue(row, 16, Boolean.TRUE.equals(viaje.getPagadoTransportista()) ? "a" : "r");
+    setCellValue(row, COSTO_CHOFER_COLUMN_INDEX, viaje.getCostoChofer());
   }
 
   private String preferredClientName(ViajeBitacoraResponse viaje) {
@@ -446,6 +535,15 @@ public class ViajeBitacoraService {
       return;
     }
     cell.setCellValue(String.valueOf(value));
+  }
+
+  private void setAmountColumnWidth(XSSFSheet sheet, int columnIndex, String headerValue, List<BigDecimal> values) {
+    int maxLength = visibleLength(headerValue);
+    for (BigDecimal value : values) {
+      maxLength = Math.max(maxLength, visibleLength(value == null ? null : value.stripTrailingZeros().toPlainString()));
+    }
+    int normalizedWidth = Math.max(14, Math.min(maxLength + 2, 20));
+    sheet.setColumnWidth(columnIndex, normalizedWidth * 256);
   }
 
   private void clearRowValues(Row row) {
@@ -489,6 +587,7 @@ public class ViajeBitacoraService {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "La fecha de pago no puede ser anterior a la fecha del viaje");
     }
     validateAmount(request.getValor(), "Valor");
+    validateAmount(request.getCostoChofer(), "Costo chofer");
     validateAmount(request.getEstiba(), "Estiba");
     validateAmount(request.getAnticipo(), "Anticipo");
 
@@ -547,6 +646,7 @@ public class ViajeBitacoraService {
         .destino(entity.getDestino())
         .detalleViaje(entity.getDetalleViaje())
         .valor(entity.getValor())
+        .costoChofer(entity.getCostoChofer())
         .estiba(entity.getEstiba())
         .anticipo(entity.getAnticipo())
         .facturadoCliente(entity.getFacturadoCliente())

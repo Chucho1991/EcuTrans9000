@@ -1,6 +1,8 @@
 package com.ecutrans9000.backend.domain.cliente;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -9,6 +11,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Entidad de dominio del módulo clientes.
+ */
 @Getter
 @Setter
 @Builder
@@ -23,6 +28,9 @@ public class Cliente {
   private String nombreComercial;
   private String direccion;
   private String descripcion;
+  private Boolean aplicaTablaEquivalencia;
+  @Builder.Default
+  private List<ClienteEquivalencia> equivalencias = new ArrayList<>();
   private String logoFileName;
   private String logoContentType;
   private byte[] logoContenido;

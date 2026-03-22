@@ -97,6 +97,7 @@ class VehiculoApplicationServiceTest {
         .licencia("LIC-1")
         .tipoDocumento(TipoDocumento.CEDULA)
         .documentoPersonal("0102030405")
+        .cuentaBancaria("Banco Pichincha - 1234567890")
         .tonelajeCategoria("PESADO")
         .m3(BigDecimal.ONE)
         .estado(EstadoVehiculo.ACTIVO)

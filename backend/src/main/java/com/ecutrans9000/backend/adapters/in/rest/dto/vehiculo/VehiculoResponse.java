@@ -27,6 +27,7 @@ public class VehiculoResponse {
   private LocalDate fechaCaducidadLicencia;
   private String tipoDocumento;
   private String documentoPersonal;
+  private String cuentaBancaria;
   private String tonelajeCategoria;
   private BigDecimal m3;
   private String estado;

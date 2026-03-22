@@ -1,11 +1,13 @@
 package com.ecutrans9000.backend.application.cliente;
 
+import com.ecutrans9000.backend.application.usecase.cliente.ClienteEquivalenciaUpsertCommand;
 import com.ecutrans9000.backend.application.usecase.cliente.ClienteImportError;
 import com.ecutrans9000.backend.application.usecase.cliente.ClienteImportResult;
 import com.ecutrans9000.backend.application.usecase.cliente.ClienteUpsertCommand;
 import com.ecutrans9000.backend.application.usecase.cliente.ImportMode;
 import com.ecutrans9000.backend.domain.audit.ActionType;
 import com.ecutrans9000.backend.domain.cliente.Cliente;
+import com.ecutrans9000.backend.domain.cliente.ClienteEquivalencia;
 import com.ecutrans9000.backend.domain.cliente.TipoDocumentoCliente;
 import com.ecutrans9000.backend.ports.out.cliente.ClienteRepositoryPort;
 import com.ecutrans9000.backend.service.AuditService;
@@ -14,12 +16,18 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -37,6 +45,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Servicio de aplicación del módulo clientes.
+ */
 @Service
 @RequiredArgsConstructor
 public class ClienteApplicationService {
@@ -48,6 +59,11 @@ public class ClienteApplicationService {
       "direccion",
       "descripcion",
       "activo"
+  );
+  private static final List<String> EQUIVALENCIA_HEADER_COLUMNS = List.of(
+      "destino",
+      "valor destino",
+      "costo chofer"
   );
   private static final List<String> ALLOWED_LOGO_CONTENT_TYPES = List.of(
       "image/jpeg",
@@ -86,6 +102,8 @@ public class ClienteApplicationService {
         .nombreComercial(trimNullable(command.nombreComercial()))
         .direccion(trimNullable(command.direccion()))
         .descripcion(trimNullable(command.descripcion()))
+        .aplicaTablaEquivalencia(Boolean.TRUE.equals(command.aplicaTablaEquivalencia()))
+        .equivalencias(new ArrayList<>())
         .activo(command.activo() == null || command.activo())
         .deleted(false)
         .deletedAt(null)
@@ -114,6 +132,10 @@ public class ClienteApplicationService {
     cliente.setNombreComercial(trimNullable(command.nombreComercial()));
     cliente.setDireccion(trimNullable(command.direccion()));
     cliente.setDescripcion(trimNullable(command.descripcion()));
+    cliente.setAplicaTablaEquivalencia(Boolean.TRUE.equals(command.aplicaTablaEquivalencia()));
+    if (!Boolean.TRUE.equals(command.aplicaTablaEquivalencia())) {
+      cliente.setEquivalencias(new ArrayList<>());
+    }
     cliente.setActivo(command.activo() == null || command.activo());
 
     validate(cliente);
@@ -201,12 +223,45 @@ public class ClienteApplicationService {
     return new ByteArrayResource(cliente.getLogoContenido());
   }
 
+  public Cliente replaceEquivalencias(
+      UUID id,
+      List<ClienteEquivalenciaUpsertCommand> equivalencias,
+      String actorUsername,
+      String actorRole) {
+    Cliente cliente = getExisting(id);
+    cliente.setAplicaTablaEquivalencia(true);
+    cliente.setEquivalencias(buildEquivalencias(cliente, equivalencias));
+    validate(cliente);
+    Cliente saved = clienteRepositoryPort.save(cliente);
+    auditService.saveActionAudit(actorUsername, actorRole, "CLIENTES", ActionType.EDICION, id.toString(), "clientes");
+    return saved;
+  }
+
+  public Cliente importEquivalenciasExcel(UUID id, MultipartFile file, String actorUsername, String actorRole) {
+    Cliente cliente = getExisting(id);
+    List<ClienteEquivalenciaUpsertCommand> equivalencias = parseEquivalenciasExcel(file);
+    cliente.setAplicaTablaEquivalencia(true);
+    cliente.setEquivalencias(buildEquivalencias(cliente, equivalencias));
+    validate(cliente);
+    Cliente saved = clienteRepositoryPort.save(cliente);
+    auditService.saveActionAudit(actorUsername, actorRole, "CLIENTES", ActionType.EDICION, id.toString(), "clientes");
+    return saved;
+  }
+
   public byte[] downloadTemplate() {
-    return buildTemplateWorkbook(false);
+    return buildClienteTemplateWorkbook(false);
   }
 
   public byte[] downloadExampleTemplate() {
-    return buildTemplateWorkbook(true);
+    return buildClienteTemplateWorkbook(true);
+  }
+
+  public byte[] downloadEquivalenciasTemplate() {
+    return buildEquivalenciasTemplateWorkbook(false);
+  }
+
+  public byte[] downloadEquivalenciasTemplateExample() {
+    return buildEquivalenciasTemplateWorkbook(true);
   }
 
   public ClienteImportResult previewExcel(MultipartFile file, ImportMode mode, boolean partialOk) {
@@ -225,7 +280,7 @@ public class ClienteApplicationService {
     return result;
   }
 
-  private byte[] buildTemplateWorkbook(boolean includeExampleRow) {
+  private byte[] buildClienteTemplateWorkbook(boolean includeExampleRow) {
     try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
       XSSFSheet sheet = workbook.createSheet("Clientes Import");
       Row headerRow = sheet.createRow(0);
@@ -241,6 +296,27 @@ public class ClienteApplicationService {
         exampleRow.createCell(3).setCellValue("Av. Americas y Naciones Unidas");
         exampleRow.createCell(4).setCellValue("Cliente corporativo");
         exampleRow.createCell(5).setCellValue("true");
+      }
+      workbook.write(outputStream);
+      return outputStream.toByteArray();
+    } catch (IOException ex) {
+      throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "No se pudo generar la plantilla Excel");
+    }
+  }
+
+  private byte[] buildEquivalenciasTemplateWorkbook(boolean includeExampleRow) {
+    try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+      XSSFSheet sheet = workbook.createSheet("Tabla Equivalencia");
+      Row headerRow = sheet.createRow(0);
+      for (int i = 0; i < EQUIVALENCIA_HEADER_COLUMNS.size(); i++) {
+        headerRow.createCell(i).setCellValue(EQUIVALENCIA_HEADER_COLUMNS.get(i).toUpperCase(Locale.ROOT));
+        sheet.setColumnWidth(i, 24 * 256);
+      }
+      if (includeExampleRow) {
+        Row exampleRow = sheet.createRow(1);
+        exampleRow.createCell(0).setCellValue("GUAYAQUIL");
+        exampleRow.createCell(1).setCellValue(145.50);
+        exampleRow.createCell(2).setCellValue(85.00);
       }
       workbook.write(outputStream);
       return outputStream.toByteArray();
@@ -274,11 +350,11 @@ public class ClienteApplicationService {
       if (headerRow == null) {
         throw new BusinessException(HttpStatus.BAD_REQUEST, "La plantilla Excel no tiene encabezados");
       }
-      validateHeader(readHeader(headerRow));
+      validateHeader(readHeader(headerRow, HEADER_COLUMNS.size()), HEADER_COLUMNS);
 
       for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
         Row row = sheet.getRow(rowIndex);
-        if (row == null || !rowHasContent(row)) {
+        if (row == null || !rowHasContent(row, HEADER_COLUMNS.size())) {
           continue;
         }
 
@@ -286,7 +362,7 @@ public class ClienteApplicationService {
         totalRows++;
 
         try {
-          ClienteUpsertCommand command = parseCommand(row, rowNumber);
+          ClienteUpsertCommand command = parseCommand(row);
           String documentoNorm = Cliente.normalizeDocumento(command.documento());
 
           Optional<Cliente> existing = clienteRepositoryPort.findByDocumentoNorm(documentoNorm);
@@ -322,6 +398,8 @@ public class ClienteApplicationService {
                 .nombreComercial(trimNullable(command.nombreComercial()))
                 .direccion(trimNullable(command.direccion()))
                 .descripcion(trimNullable(command.descripcion()))
+                .aplicaTablaEquivalencia(false)
+                .equivalencias(new ArrayList<>())
                 .activo(command.activo() == null || command.activo())
                 .deleted(false)
                 .deletedAt(null)
@@ -371,7 +449,7 @@ public class ClienteApplicationService {
         .build();
   }
 
-  private ClienteUpsertCommand parseCommand(Row row, int rowNumber) {
+  private ClienteUpsertCommand parseCommand(Row row) {
     String tipoDocumento = readCellAsString(row.getCell(0));
     String documento = readCellAsString(row.getCell(1));
     String nombre = readCellAsString(row.getCell(2));
@@ -400,8 +478,51 @@ public class ClienteApplicationService {
         null,
         direccion,
         descripcion,
+        false,
         activo
     );
+  }
+
+  private List<ClienteEquivalenciaUpsertCommand> parseEquivalenciasExcel(MultipartFile file) {
+    validateExcelFile(file);
+    try (InputStream inputStream = new BufferedInputStream(file.getInputStream());
+         XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
+      XSSFSheet sheet = workbook.getSheetAt(0);
+      Row headerRow = sheet.getRow(0);
+      if (headerRow == null) {
+        throw new BusinessException(HttpStatus.BAD_REQUEST, "La plantilla Excel no tiene encabezados");
+      }
+      validateHeader(readHeader(headerRow, EQUIVALENCIA_HEADER_COLUMNS.size()), EQUIVALENCIA_HEADER_COLUMNS);
+
+      List<ClienteEquivalenciaUpsertCommand> commands = new ArrayList<>();
+      for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+        Row row = sheet.getRow(rowIndex);
+        if (row == null || !rowHasContent(row, EQUIVALENCIA_HEADER_COLUMNS.size())) {
+          continue;
+        }
+        commands.add(parseEquivalenciaCommand(row, rowIndex + 1));
+      }
+      validateEquivalenciaCommands(commands);
+      return commands;
+    } catch (IOException ex) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "No se pudo leer el archivo Excel");
+    }
+  }
+
+  private ClienteEquivalenciaUpsertCommand parseEquivalenciaCommand(Row row, int rowNumber) {
+    String destino = readCellAsString(row.getCell(0));
+    String valorDestino = readCellAsString(row.getCell(1));
+    String costoChofer = readCellAsString(row.getCell(2));
+
+    if (destino == null || destino.isBlank()) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "Fila " + rowNumber + ": DESTINO es obligatorio");
+    }
+
+    return new ClienteEquivalenciaUpsertCommand(
+        null,
+        destino,
+        parseDecimal(valorDestino, "Fila " + rowNumber + ": VALOR DESTINO invalido"),
+        parseDecimal(costoChofer, "Fila " + rowNumber + ": COSTO CHOFER invalido"));
   }
 
   private TipoDocumentoCliente parseTipoDocumento(String value) {
@@ -421,6 +542,17 @@ public class ClienteApplicationService {
     };
   }
 
+  private BigDecimal parseDecimal(String value, String message) {
+    if (value == null || value.isBlank()) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, message);
+    }
+    try {
+      return new BigDecimal(value.trim().replace(",", ""));
+    } catch (NumberFormatException ex) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, message);
+    }
+  }
+
   private void validateExcelFile(MultipartFile file) {
     if (file == null || file.isEmpty()) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "Debe adjuntar un archivo Excel");
@@ -431,25 +563,25 @@ public class ClienteApplicationService {
     }
   }
 
-  private void validateHeader(List<String> header) {
-    if (!header.equals(HEADER_COLUMNS)) {
+  private void validateHeader(List<String> header, List<String> expected) {
+    if (!header.equals(expected)) {
       throw new BusinessException(
           HttpStatus.BAD_REQUEST,
-            "Encabezados invalidos. Debe usar: " + String.join(",", HEADER_COLUMNS));
+          "Encabezados invalidos. Debe usar: " + String.join(",", expected));
     }
   }
 
-  private List<String> readHeader(Row row) {
+  private List<String> readHeader(Row row, int columns) {
     List<String> values = new ArrayList<>();
-    for (int i = 0; i < HEADER_COLUMNS.size(); i++) {
+    for (int i = 0; i < columns; i++) {
       String value = readCellAsString(row.getCell(i));
       values.add(value == null ? "" : value.trim().toLowerCase(Locale.ROOT));
     }
     return values;
   }
 
-  private boolean rowHasContent(Row row) {
-    for (int i = 0; i < HEADER_COLUMNS.size(); i++) {
+  private boolean rowHasContent(Row row, int columns) {
+    for (int i = 0; i < columns; i++) {
       Cell cell = row.getCell(i);
       if (cell == null || cell.getCellType() == CellType.BLANK) {
         continue;
@@ -489,6 +621,34 @@ public class ClienteApplicationService {
         .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Cliente no encontrado"));
   }
 
+  private List<ClienteEquivalencia> buildEquivalencias(
+      Cliente cliente,
+      List<ClienteEquivalenciaUpsertCommand> commands) {
+    List<ClienteEquivalenciaUpsertCommand> safeCommands = commands == null ? List.of() : commands;
+    validateEquivalenciaCommands(safeCommands);
+
+    Map<UUID, ClienteEquivalencia> existingById = cliente.getEquivalencias() == null
+        ? Map.of()
+        : cliente.getEquivalencias().stream()
+            .filter(item -> item.getId() != null)
+            .collect(Collectors.toMap(ClienteEquivalencia::getId, Function.identity()));
+
+    LocalDateTime now = LocalDateTime.now();
+    List<ClienteEquivalencia> result = new ArrayList<>();
+    for (ClienteEquivalenciaUpsertCommand command : safeCommands) {
+      ClienteEquivalencia existing = command.id() == null ? null : existingById.get(command.id());
+      result.add(ClienteEquivalencia.builder()
+          .id(existing != null ? existing.getId() : UUID.randomUUID())
+          .destino(command.destino().trim())
+          .valorDestino(command.valorDestino())
+          .costoChofer(command.costoChofer())
+          .createdAt(existing != null ? existing.getCreatedAt() : now)
+          .updatedAt(now)
+          .build());
+    }
+    return result;
+  }
+
   private void validate(Cliente cliente) {
     if (cliente.getTipoDocumento() == null) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "Tipo de documento es obligatorio");
@@ -499,6 +659,47 @@ public class ClienteApplicationService {
     if (cliente.getNombre() == null || cliente.getNombre().isBlank()) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "Nombre es obligatorio");
     }
+    if (!Boolean.TRUE.equals(cliente.getAplicaTablaEquivalencia())) {
+      return;
+    }
+    validateEquivalencias(cliente.getEquivalencias());
+  }
+
+  private void validateEquivalenciaCommands(List<ClienteEquivalenciaUpsertCommand> commands) {
+    Set<String> destinos = new LinkedHashSet<>();
+    for (ClienteEquivalenciaUpsertCommand command : commands) {
+      if (command.destino() == null || command.destino().isBlank()) {
+        throw new BusinessException(HttpStatus.BAD_REQUEST, "Destino es obligatorio");
+      }
+      if (command.valorDestino() == null) {
+        throw new BusinessException(HttpStatus.BAD_REQUEST, "Valor destino es obligatorio");
+      }
+      if (command.costoChofer() == null) {
+        throw new BusinessException(HttpStatus.BAD_REQUEST, "Costo chofer es obligatorio");
+      }
+      if (command.valorDestino().compareTo(BigDecimal.ZERO) < 0) {
+        throw new BusinessException(HttpStatus.BAD_REQUEST, "Valor destino no puede ser negativo");
+      }
+      if (command.costoChofer().compareTo(BigDecimal.ZERO) < 0) {
+        throw new BusinessException(HttpStatus.BAD_REQUEST, "Costo chofer no puede ser negativo");
+      }
+      String destinoNorm = normalizeDestino(command.destino());
+      if (!destinos.add(destinoNorm)) {
+        throw new BusinessException(HttpStatus.BAD_REQUEST, "No se puede repetir el destino: " + command.destino().trim());
+      }
+    }
+  }
+
+  private void validateEquivalencias(List<ClienteEquivalencia> equivalencias) {
+    validateEquivalenciaCommands(equivalencias == null
+        ? List.of()
+        : equivalencias.stream()
+            .map(item -> new ClienteEquivalenciaUpsertCommand(
+                item.getId(),
+                item.getDestino(),
+                item.getValorDestino(),
+                item.getCostoChofer()))
+            .toList());
   }
 
   private void validateLogoFile(MultipartFile file) {
@@ -540,6 +741,10 @@ public class ClienteApplicationService {
       return "";
     }
     return fileName.substring(dotIndex + 1).toLowerCase(Locale.ROOT);
+  }
+
+  private String normalizeDestino(String destino) {
+    return destino == null ? "" : destino.trim().toUpperCase(Locale.ROOT);
   }
 
   private String trimNullable(String value) {

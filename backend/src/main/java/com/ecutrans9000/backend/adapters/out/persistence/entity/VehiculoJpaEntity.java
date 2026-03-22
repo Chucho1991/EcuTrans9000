@@ -56,6 +56,9 @@ public class VehiculoJpaEntity {
   @Column(name = "documento_personal", nullable = false, length = 100)
   private String documentoPersonal;
 
+  @Column(name = "cuenta_bancaria", length = 255)
+  private String cuentaBancaria;
+
   @Column(name = "tonelaje_categoria", nullable = false, length = 100)
   private String tonelajeCategoria;
 

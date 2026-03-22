@@ -6,13 +6,25 @@ import { API_BASE_URL } from '../../../core/config/api.config';
 
 export type TipoDocumentoCliente = 'CEDULA' | 'RUC' | 'PASAPORTE';
 
+export interface ClienteEquivalencia {
+  id: string;
+  destino: string;
+  valorDestino: number;
+  costoChofer: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ClienteResponse {
   id: string;
   tipoDocumento: TipoDocumentoCliente;
   documento: string;
   nombre: string;
+  nombreComercial: string | null;
   direccion: string | null;
   descripcion: string | null;
+  aplicaTablaEquivalencia: boolean;
+  equivalencias: ClienteEquivalencia[];
   logoPath: string | null;
   activo: boolean;
   deleted: boolean;
@@ -36,7 +48,15 @@ export interface ClienteUpsertRequest {
   nombre: string;
   direccion: string;
   descripcion: string;
+  aplicaTablaEquivalencia: boolean;
   activo: boolean;
+}
+
+export interface ClienteEquivalenciaRequest {
+  id?: string;
+  destino: string;
+  valorDestino: number;
+  costoChofer: number;
 }
 
 export interface ClienteImportError {
@@ -92,6 +112,16 @@ export class ClientesService {
     return this.http.put<ClienteResponse>(`${this.baseUrl}/${id}`, payload);
   }
 
+  updateEquivalencias(id: string, equivalencias: ClienteEquivalenciaRequest[]): Observable<ClienteResponse> {
+    return this.http.put<ClienteResponse>(`${this.baseUrl}/${id}/equivalencias`, { equivalencias });
+  }
+
+  importEquivalencias(id: string, file: File): Observable<ClienteResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ClienteResponse>(`${this.baseUrl}/${id}/equivalencias/import`, formData);
+  }
+
   toggleActivo(id: string): Observable<ClienteResponse> {
     return this.http.patch<ClienteResponse>(`${this.baseUrl}/${id}/toggle-activo`, {});
   }
@@ -124,6 +154,14 @@ export class ClientesService {
 
   downloadExampleTemplate(): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/import/template/example`, { responseType: 'blob' });
+  }
+
+  downloadEquivalenciasTemplate(): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/equivalencias/template`, { responseType: 'blob' });
+  }
+
+  downloadEquivalenciasTemplateExample(): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/equivalencias/template/example`, { responseType: 'blob' });
   }
 
   previewImport(file: File, mode: 'INSERT_ONLY' | 'UPSERT', partialOk: boolean): Observable<ClienteImportResult> {

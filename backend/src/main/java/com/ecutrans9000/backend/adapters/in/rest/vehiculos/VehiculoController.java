@@ -221,6 +221,7 @@ public class VehiculoController {
         request.getFechaCaducidadLicencia(),
         parseTipoDocumento(request.getTipoDocumento()),
         request.getDocumentoPersonal(),
+        request.getCuentaBancaria(),
         request.getTonelajeCategoria(),
         request.getM3(),
         parseEstado(request.getEstado())
@@ -237,6 +238,7 @@ public class VehiculoController {
         .fechaCaducidadLicencia(vehiculo.getFechaCaducidadLicencia())
         .tipoDocumento(vehiculo.getTipoDocumento().name())
         .documentoPersonal(vehiculo.getDocumentoPersonal())
+        .cuentaBancaria(vehiculo.getCuentaBancaria())
         .tonelajeCategoria(vehiculo.getTonelajeCategoria())
         .m3(vehiculo.getM3())
         .estado(vehiculo.getEstado().name())

@@ -16,6 +16,7 @@ export interface VehiculoResponse {
   fechaCaducidadLicencia: string | null;
   tipoDocumento: TipoDocumento;
   documentoPersonal: string;
+  cuentaBancaria: string | null;
   tonelajeCategoria: string;
   m3: number;
   estado: EstadoVehiculo;
@@ -43,6 +44,7 @@ export interface VehiculoUpsertRequest {
   fechaCaducidadLicencia: string | null;
   tipoDocumento: TipoDocumento;
   documentoPersonal: string;
+  cuentaBancaria: string;
   tonelajeCategoria: string;
   m3: number;
   estado: EstadoVehiculo;

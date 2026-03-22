@@ -58,6 +58,7 @@ public class VehiculoApplicationService {
       "fecha_caducidad_licencia",
       "tipo_documento",
       "documento_personal",
+      "cuenta_bancaria",
       "tonelaje_categoria",
       "m3",
       "estado"
@@ -114,6 +115,7 @@ public class VehiculoApplicationService {
         .fechaCaducidadLicencia(command.fechaCaducidadLicencia())
         .tipoDocumento(command.tipoDocumento())
         .documentoPersonal(command.documentoPersonal().trim())
+        .cuentaBancaria(trimNullable(command.cuentaBancaria()))
         .tonelajeCategoria(command.tonelajeCategoria().trim())
         .m3(command.m3())
         .estado(command.estado())
@@ -144,6 +146,7 @@ public class VehiculoApplicationService {
     vehiculo.setFechaCaducidadLicencia(command.fechaCaducidadLicencia());
     vehiculo.setTipoDocumento(command.tipoDocumento());
     vehiculo.setDocumentoPersonal(command.documentoPersonal().trim());
+    vehiculo.setCuentaBancaria(trimNullable(command.cuentaBancaria()));
     vehiculo.setTonelajeCategoria(command.tonelajeCategoria().trim());
     vehiculo.setM3(command.m3());
     vehiculo.setEstado(command.estado());
@@ -294,9 +297,10 @@ public class VehiculoApplicationService {
         row.createCell(3).setCellValue("2026-12-31");
         row.createCell(4).setCellValue("CEDULA");
         row.createCell(5).setCellValue("0102030405");
-        row.createCell(6).setCellValue("PESADO");
-        row.createCell(7).setCellValue(12.5d);
-        row.createCell(8).setCellValue("ACTIVO");
+        row.createCell(6).setCellValue("Banco Pichincha - 1234567890");
+        row.createCell(7).setCellValue("PESADO");
+        row.createCell(8).setCellValue(12.5d);
+        row.createCell(9).setCellValue("ACTIVO");
       }
       workbook.write(outputStream);
       return outputStream.toByteArray();
@@ -357,6 +361,7 @@ public class VehiculoApplicationService {
             vehiculo.setFechaCaducidadLicencia(command.fechaCaducidadLicencia());
             vehiculo.setTipoDocumento(command.tipoDocumento());
             vehiculo.setDocumentoPersonal(command.documentoPersonal().trim());
+            vehiculo.setCuentaBancaria(trimNullable(command.cuentaBancaria()));
             vehiculo.setTonelajeCategoria(command.tonelajeCategoria().trim());
             vehiculo.setM3(command.m3());
             vehiculo.setEstado(command.estado());
@@ -378,6 +383,7 @@ public class VehiculoApplicationService {
                 .fechaCaducidadLicencia(command.fechaCaducidadLicencia())
                 .tipoDocumento(command.tipoDocumento())
                 .documentoPersonal(command.documentoPersonal().trim())
+                .cuentaBancaria(trimNullable(command.cuentaBancaria()))
                 .tonelajeCategoria(command.tonelajeCategoria().trim())
                 .m3(command.m3())
                 .estado(command.estado())
@@ -448,9 +454,10 @@ public class VehiculoApplicationService {
     LocalDate fechaCaducidadLicencia = parseOptionalDate(row.getCell(3));
     String tipoDocumento = readCellAsString(row.getCell(4));
     String documentoPersonal = readCellAsString(row.getCell(5));
-    String tonelajeCategoria = readCellAsString(row.getCell(6));
-    String m3Value = readCellAsString(row.getCell(7));
-    String estado = readCellAsString(row.getCell(8));
+    String cuentaBancaria = readCellAsString(row.getCell(6));
+    String tonelajeCategoria = readCellAsString(row.getCell(7));
+    String m3Value = readCellAsString(row.getCell(8));
+    String estado = readCellAsString(row.getCell(9));
 
     if (placa == null || placa.isBlank()) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "placa es obligatoria");
@@ -482,6 +489,7 @@ public class VehiculoApplicationService {
         fechaCaducidadLicencia,
         parseTipoDocumento(tipoDocumento),
         documentoPersonal,
+        cuentaBancaria,
         tonelajeCategoria,
         m3,
         parseEstado(estado)

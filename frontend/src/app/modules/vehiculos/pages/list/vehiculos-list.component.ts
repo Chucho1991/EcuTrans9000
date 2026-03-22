@@ -51,12 +51,13 @@ import {
 
       <article class="panel-card min-w-0 w-full max-w-full overflow-hidden">
         <div class="min-w-0 w-full max-w-full overflow-x-auto">
-          <table class="w-full table-auto min-w-[760px] text-left text-xs sm:text-sm lg:min-w-full">
+          <table class="w-full table-auto min-w-[920px] text-left text-xs sm:text-sm lg:min-w-full">
             <thead class="border-b border-gray-200 bg-gray-50 text-gray-600 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300">
               <tr>
                 <th class="px-3 py-3 sm:px-4">Placa</th>
                 <th class="px-3 py-3 sm:px-4">Foto</th>
                 <th class="px-3 py-3 sm:px-4">Chofer</th>
+                <th class="px-3 py-3 sm:px-4">Cuenta bancaria</th>
                 <th class="px-3 py-3 sm:px-4">Tonelaje/Categoria</th>
                 <th class="px-3 py-3 sm:px-4">M3</th>
                 <th class="px-3 py-3 sm:px-4">Estado</th>
@@ -78,6 +79,7 @@ import {
                   </ng-template>
                 </td>
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.choferDefault }}</td>
+                <td class="px-3 py-3 sm:px-4">{{ vehiculo.cuentaBancaria || 'No registrada' }}</td>
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.tonelajeCategoria }}</td>
                 <td class="px-3 py-3 sm:px-4">{{ vehiculo.m3 }}</td>
                 <td class="px-3 py-3 sm:px-4">
@@ -123,7 +125,7 @@ import {
                 </td>
               </tr>
               <tr *ngIf="vehiculos.length === 0">
-                <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400" colspan="7">No hay vehiculos para mostrar.</td>
+                <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400" colspan="8">No hay vehiculos para mostrar.</td>
               </tr>
             </tbody>
           </table>
@@ -158,6 +160,7 @@ import {
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-300"><strong>Placa:</strong> {{ selectedVehiculo.placa }}</p>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Chofer:</strong> {{ selectedVehiculo.choferDefault }}</p>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Documento:</strong> {{ selectedVehiculo.tipoDocumento }} {{ selectedVehiculo.documentoPersonal }}</p>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Cuenta bancaria:</strong> {{ selectedVehiculo.cuentaBancaria || 'No registrada' }}</p>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Caducidad licencia:</strong> {{ selectedVehiculo.fechaCaducidadLicencia || 'No registrada' }}</p>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><strong>Estado:</strong> {{ selectedVehiculo.estado }}</p>
             <div class="mt-3 flex flex-wrap gap-2">
@@ -243,6 +246,10 @@ import {
             <p class="form-error" *ngIf="showError('documentoPersonal', 'required')">
               Documento personal es obligatorio. Ingresa el numero del documento.
             </p>
+          </div>
+          <div class="min-w-0 xl:col-span-4">
+            <label class="form-label">Cuenta bancaria</label>
+            <input class="form-control" formControlName="cuentaBancaria" />
           </div>
           <div class="min-w-0 xl:col-span-4">
             <label class="form-label form-label-required">Tonelaje/Categoria</label>
@@ -376,6 +383,7 @@ export class VehiculosListComponent implements OnDestroy {
     fechaCaducidadLicencia: [''],
     tipoDocumento: ['CEDULA', [Validators.required]],
     documentoPersonal: ['', [Validators.required]],
+    cuentaBancaria: [''],
     tonelajeCategoria: ['', [Validators.required]],
     m3: [0, [Validators.required, Validators.min(0)]],
     estado: ['ACTIVO', [Validators.required]]
@@ -435,6 +443,7 @@ export class VehiculosListComponent implements OnDestroy {
       fechaCaducidadLicencia: '',
       tipoDocumento: 'CEDULA',
       documentoPersonal: '',
+      cuentaBancaria: '',
       tonelajeCategoria: '',
       m3: 0,
       estado: 'ACTIVO'
@@ -452,6 +461,7 @@ export class VehiculosListComponent implements OnDestroy {
       fechaCaducidadLicencia: vehiculo.fechaCaducidadLicencia ?? '',
       tipoDocumento: vehiculo.tipoDocumento,
       documentoPersonal: vehiculo.documentoPersonal,
+      cuentaBancaria: vehiculo.cuentaBancaria ?? '',
       tonelajeCategoria: vehiculo.tonelajeCategoria,
       m3: vehiculo.m3,
       estado: vehiculo.estado
@@ -492,6 +502,7 @@ export class VehiculosListComponent implements OnDestroy {
       fechaCaducidadLicencia: value.fechaCaducidadLicencia || null,
       tipoDocumento: (value.tipoDocumento ?? 'CEDULA') as TipoDocumento,
       documentoPersonal: value.documentoPersonal ?? '',
+      cuentaBancaria: value.cuentaBancaria ?? '',
       tonelajeCategoria: value.tonelajeCategoria ?? '',
       m3: Number(value.m3 ?? 0),
       estado: (value.estado ?? 'ACTIVO') as EstadoVehiculo
