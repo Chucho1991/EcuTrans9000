@@ -5,6 +5,9 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 
+/**
+ * Puerto de salida para persistencia del módulo clientes.
+ */
 public interface ClienteRepositoryPort {
 
   Cliente save(Cliente cliente);

@@ -2,12 +2,17 @@ package com.ecutrans9000.backend.adapters.out.persistence.entity;
 
 import com.ecutrans9000.backend.domain.cliente.TipoDocumentoCliente;
 import jakarta.persistence.Column;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +20,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Entidad JPA principal del módulo clientes.
+ */
 @Entity
 @Table(name = "clientes")
 @Getter
@@ -49,6 +57,13 @@ public class ClienteJpaEntity {
 
   @Column(name = "descripcion", length = 1000)
   private String descripcion;
+
+  @Column(name = "aplica_tabla_equivalencia", nullable = false)
+  private Boolean aplicaTablaEquivalencia;
+
+  @Builder.Default
+  @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  private List<ClienteEquivalenciaJpaEntity> equivalencias = new ArrayList<>();
 
   @Column(name = "logo_file_name", length = 255)
   private String logoFileName;

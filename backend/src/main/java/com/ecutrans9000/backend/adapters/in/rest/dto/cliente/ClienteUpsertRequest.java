@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * DTO de entrada para crear o editar clientes.
+ */
 @Getter
 @Setter
 @Builder
@@ -29,6 +32,9 @@ public class ClienteUpsertRequest {
   private String direccion;
 
   private String descripcion;
+
+  @NotNull
+  private Boolean aplicaTablaEquivalencia;
 
   @NotNull
   private Boolean activo;

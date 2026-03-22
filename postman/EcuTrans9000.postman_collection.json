@@ -1749,7 +1749,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tipoDocumento\": \"RUC\",\n  \"documento\": \"0999999999001\",\n  \"nombre\": \"Cliente Postman\",\n  \"nombreComercial\": \"Cliente PM\",\n  \"direccion\": \"Guayaquil\",\n  \"descripcion\": \"Registro de prueba\",\n  \"activo\": true\n}"
+              "raw": "{\n  \"tipoDocumento\": \"RUC\",\n  \"documento\": \"0999999999001\",\n  \"nombre\": \"Cliente Postman\",\n  \"nombreComercial\": \"Cliente PM\",\n  \"direccion\": \"Guayaquil\",\n  \"descripcion\": \"Registro de prueba\",\n  \"aplicaTablaEquivalencia\": true,\n  \"activo\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/clientes",
@@ -1826,7 +1826,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tipoDocumento\": \"RUC\",\n  \"documento\": \"0999999999001\",\n  \"nombre\": \"Cliente Postman Editado\",\n  \"nombreComercial\": \"Cliente PM Editado\",\n  \"direccion\": \"Quito\",\n  \"descripcion\": \"Actualizado desde Postman\",\n  \"activo\": true\n}"
+              "raw": "{\n  \"tipoDocumento\": \"RUC\",\n  \"documento\": \"0999999999001\",\n  \"nombre\": \"Cliente Postman Editado\",\n  \"nombreComercial\": \"Cliente PM Editado\",\n  \"direccion\": \"Quito\",\n  \"descripcion\": \"Actualizado desde Postman\",\n  \"aplicaTablaEquivalencia\": true,\n  \"activo\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/clientes/{{targetClienteId}}",
@@ -1987,6 +1987,138 @@
                 "import",
                 "template",
                 "example"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download Cliente Equivalencias Template",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/clientes/equivalencias/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "equivalencias",
+                "template"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download Cliente Equivalencias Template Example",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/clientes/equivalencias/template/example",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "equivalencias",
+                "template",
+                "example"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Replace Cliente Equivalencias",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"equivalencias\": [\n    {\n      \"destino\": \"GUAYAQUIL\",\n      \"valorDestino\": 145.5,\n      \"costoChofer\": 85\n    },\n    {\n      \"destino\": \"QUITO\",\n      \"valorDestino\": 160,\n      \"costoChofer\": 95\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{targetClienteId}}/equivalencias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{targetClienteId}}",
+                "equivalencias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Import Cliente Equivalencias Excel",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{targetClienteId}}/equivalencias/import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{targetClienteId}}",
+                "equivalencias",
+                "import"
               ]
             }
           },

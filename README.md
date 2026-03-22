@@ -58,6 +58,9 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - CRUD operativo + estados
 - Logo empresarial en base de datos
 - Importación masiva (`preview` y `import`) y plantillas
+- Flag `Aplica Tabla de Equivalencia` por cliente
+- Tabla de equivalencia por destino con carga Excel (`DESTINO`, `VALOR DESTINO`, `COSTO CHOFER`)
+- Edición manual de equivalencias desde el detalle del cliente
 
 ### Módulo Bitácora (`/api/bitacora/viajes`)
 - CRUD operativo + borrado lógico/restauración

@@ -1,9 +1,13 @@
 package com.ecutrans9000.backend.adapters.in.rest.clientes;
 
+import com.ecutrans9000.backend.adapters.in.rest.dto.cliente.ClienteEquivalenciaRequest;
+import com.ecutrans9000.backend.adapters.in.rest.dto.cliente.ClienteEquivalenciaResponse;
+import com.ecutrans9000.backend.adapters.in.rest.dto.cliente.ClienteEquivalenciasUpdateRequest;
 import com.ecutrans9000.backend.adapters.in.rest.dto.cliente.ClienteListResponse;
 import com.ecutrans9000.backend.adapters.in.rest.dto.cliente.ClienteResponse;
 import com.ecutrans9000.backend.adapters.in.rest.dto.cliente.ClienteUpsertRequest;
 import com.ecutrans9000.backend.application.cliente.ClienteApplicationService;
+import com.ecutrans9000.backend.application.usecase.cliente.ClienteEquivalenciaUpsertCommand;
 import com.ecutrans9000.backend.application.usecase.cliente.ClienteImportResult;
 import com.ecutrans9000.backend.application.usecase.cliente.ClienteUpsertCommand;
 import com.ecutrans9000.backend.application.usecase.cliente.CreateClienteUseCase;
@@ -19,11 +23,13 @@ import com.ecutrans9000.backend.application.usecase.cliente.SoftDeleteClienteUse
 import com.ecutrans9000.backend.application.usecase.cliente.ToggleActivoClienteUseCase;
 import com.ecutrans9000.backend.application.usecase.cliente.UpdateClienteUseCase;
 import com.ecutrans9000.backend.domain.cliente.Cliente;
+import com.ecutrans9000.backend.domain.cliente.ClienteEquivalencia;
 import com.ecutrans9000.backend.domain.cliente.TipoDocumentoCliente;
 import com.ecutrans9000.backend.service.BusinessException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +55,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Controlador REST del módulo clientes.
+ */
 @RestController
 @RequestMapping("/clientes")
 @RequiredArgsConstructor
@@ -109,6 +118,30 @@ public class ClienteController {
     return ResponseEntity.ok(toResponse(saved));
   }
 
+  @PutMapping("/{id}/equivalencias")
+  @Operation(summary = "Reemplazar tabla de equivalencia del cliente")
+  public ResponseEntity<ClienteResponse> replaceEquivalencias(
+      @PathVariable UUID id,
+      @Valid @RequestBody ClienteEquivalenciasUpdateRequest request,
+      Authentication auth) {
+    Cliente saved = clienteApplicationService.replaceEquivalencias(
+        id,
+        request.getEquivalencias().stream().map(this::toEquivalenciaCommand).toList(),
+        auth.getName(),
+        role(auth));
+    return ResponseEntity.ok(toResponse(saved));
+  }
+
+  @PostMapping(path = "/{id}/equivalencias/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @Operation(summary = "Importar tabla de equivalencia desde Excel")
+  public ResponseEntity<ClienteResponse> importEquivalencias(
+      @PathVariable UUID id,
+      @RequestPart("file") MultipartFile file,
+      Authentication auth) {
+    Cliente saved = clienteApplicationService.importEquivalenciasExcel(id, file, auth.getName(), role(auth));
+    return ResponseEntity.ok(toResponse(saved));
+  }
+
   @PatchMapping("/{id}/toggle-activo")
   @Operation(summary = "Alternar estado activo")
   public ResponseEntity<ClienteResponse> toggleActivo(@PathVariable UUID id, Authentication auth) {
@@ -165,6 +198,18 @@ public class ClienteController {
     return excelResponse(downloadClientesCsvTemplateUseCase.executeExample(), "clientes_template_ejemplo.xlsx");
   }
 
+  @GetMapping("/equivalencias/template")
+  @Operation(summary = "Descargar plantilla Excel de tabla de equivalencia")
+  public ResponseEntity<Resource> equivalenciasTemplate() {
+    return excelResponse(clienteApplicationService.downloadEquivalenciasTemplate(), "clientes_equivalencias_template.xlsx");
+  }
+
+  @GetMapping("/equivalencias/template/example")
+  @Operation(summary = "Descargar ejemplo Excel de tabla de equivalencia")
+  public ResponseEntity<Resource> equivalenciasTemplateExample() {
+    return excelResponse(clienteApplicationService.downloadEquivalenciasTemplateExample(), "clientes_equivalencias_template_ejemplo.xlsx");
+  }
+
   @PostMapping(path = "/import/preview", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Operation(summary = "Previsualizar importacion Excel")
   public ResponseEntity<ClienteImportResult> preview(
@@ -192,7 +237,16 @@ public class ClienteController {
         request.getNombreComercial(),
         request.getDireccion(),
         request.getDescripcion(),
+        request.getAplicaTablaEquivalencia(),
         request.getActivo());
+  }
+
+  private ClienteEquivalenciaUpsertCommand toEquivalenciaCommand(ClienteEquivalenciaRequest request) {
+    return new ClienteEquivalenciaUpsertCommand(
+        request.getId(),
+        request.getDestino(),
+        request.getValorDestino(),
+        request.getCostoChofer());
   }
 
   private TipoDocumentoCliente parseTipoDocumento(String tipoDocumento) {
@@ -216,6 +270,9 @@ public class ClienteController {
   }
 
   private ClienteResponse toResponse(Cliente cliente) {
+    List<ClienteEquivalenciaResponse> equivalencias = cliente.getEquivalencias() == null
+        ? List.of()
+        : cliente.getEquivalencias().stream().map(this::toEquivalenciaResponse).toList();
     return ClienteResponse.builder()
         .id(cliente.getId())
         .tipoDocumento(cliente.getTipoDocumento().name())
@@ -224,6 +281,8 @@ public class ClienteController {
         .nombreComercial(cliente.getNombreComercial())
         .direccion(cliente.getDireccion())
         .descripcion(cliente.getDescripcion())
+        .aplicaTablaEquivalencia(cliente.getAplicaTablaEquivalencia())
+        .equivalencias(equivalencias)
         .logoPath(cliente.getLogoFileName())
         .activo(cliente.getActivo())
         .deleted(cliente.getDeleted())
@@ -231,6 +290,17 @@ public class ClienteController {
         .deletedBy(cliente.getDeletedBy())
         .createdAt(cliente.getCreatedAt())
         .updatedAt(cliente.getUpdatedAt())
+        .build();
+  }
+
+  private ClienteEquivalenciaResponse toEquivalenciaResponse(ClienteEquivalencia equivalencia) {
+    return ClienteEquivalenciaResponse.builder()
+        .id(equivalencia.getId())
+        .destino(equivalencia.getDestino())
+        .valorDestino(equivalencia.getValorDestino())
+        .costoChofer(equivalencia.getCostoChofer())
+        .createdAt(equivalencia.getCreatedAt())
+        .updatedAt(equivalencia.getUpdatedAt())
         .build();
   }
 

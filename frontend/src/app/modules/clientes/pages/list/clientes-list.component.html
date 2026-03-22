@@ -1,0 +1,355 @@
+<section class="min-w-0 w-full space-y-6">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="page-title">Clientes</h1>
+      <p class="page-subtitle">Gestion del catalogo de clientes para Bitacora de Viajes.</p>
+    </div>
+    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row" *ngIf="canWrite()">
+      <button class="btn-outline-neutral px-4 py-2" type="button" (click)="openImportModal()">Importar Excel</button>
+      <button class="btn-primary-brand basis-full sm:basis-auto" type="button" (click)="startCreate()">Nuevo cliente</button>
+    </div>
+  </header>
+
+  <article class="panel-card min-w-0 w-full max-w-full p-4">
+    <form class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4" [formGroup]="filtersForm" (ngSubmit)="loadClientes(0)">
+      <input class="filter-control" formControlName="q" placeholder="Buscar documento o nombre" />
+      <select *ngIf="canAdmin()" class="filter-control" formControlName="includeDeleted">
+        <option value="false">No eliminados</option>
+        <option value="true">Incluir eliminados</option>
+      </select>
+      <div *ngIf="!canAdmin()"></div>
+      <button class="btn-outline-neutral h-10 w-full rounded-lg font-medium hover:bg-gray-100" type="submit">Filtrar</button>
+    </form>
+  </article>
+
+  <article class="panel-card min-w-0 w-full max-w-full overflow-hidden">
+    <div class="min-w-0 w-full max-w-full overflow-x-auto">
+      <table class="w-full table-auto min-w-[960px] text-left text-xs sm:text-sm lg:min-w-full">
+        <thead class="border-b border-gray-200 bg-gray-50 text-gray-600 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300">
+          <tr>
+            <th class="px-3 py-3 sm:px-4">Documento</th>
+            <th class="px-3 py-3 sm:px-4">Logo</th>
+            <th class="px-3 py-3 sm:px-4">Nombre</th>
+            <th class="px-3 py-3 sm:px-4">Direccion</th>
+            <th class="px-3 py-3 sm:px-4">Tabla Equivalencia</th>
+            <th class="px-3 py-3 sm:px-4">Estado</th>
+            <th class="px-3 py-3 sm:px-4">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-gray-100 dark:border-gray-800" *ngFor="let cliente of clientes">
+            <td class="px-3 py-3 sm:px-4">{{ cliente.tipoDocumento }} {{ cliente.documento }}</td>
+            <td class="px-3 py-3 sm:px-4">
+              <img
+                *ngIf="logoPreviewUrls[cliente.id]; else sinLogo"
+                [src]="logoPreviewUrls[cliente.id]"
+                alt="Logo cliente"
+                class="h-10 w-10 rounded-md border border-gray-200 object-cover dark:border-gray-700"
+              />
+              <ng-template #sinLogo>
+                <span class="text-xs text-gray-400">Sin logo</span>
+              </ng-template>
+            </td>
+            <td class="px-3 py-3 sm:px-4">{{ cliente.nombre }}</td>
+            <td class="px-3 py-3 sm:px-4">{{ cliente.direccion || '-' }}</td>
+            <td class="px-3 py-3 sm:px-4">
+              <span
+                *ngIf="cliente.aplicaTablaEquivalencia; else noAplicaTabla"
+                class="inline-flex rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:border-brand-900/40 dark:bg-brand-900/20 dark:text-brand-300"
+              >
+                {{ cliente.equivalencias.length }} registros
+              </span>
+              <ng-template #noAplicaTabla>
+                <span class="text-xs text-gray-400">No aplica</span>
+              </ng-template>
+            </td>
+            <td class="px-3 py-3 sm:px-4">
+              <span *ngIf="cliente.deleted" class="inline-flex rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:border-orange-900/40 dark:bg-orange-900/20 dark:text-orange-300">ELIMINADO</span>
+              <span *ngIf="!cliente.deleted && cliente.activo" class="inline-flex rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-300">ACTIVO</span>
+              <span *ngIf="!cliente.deleted && !cliente.activo" class="inline-flex rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">INACTIVO</span>
+            </td>
+            <td class="px-3 py-3 sm:px-4">
+              <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                <button class="icon-action-btn" type="button" aria-label="Ver" (click)="selectDetail(cliente)">
+                  <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+                  <span class="icon-action-tooltip">Ver</span>
+                </button>
+                <button *ngIf="canWrite() && !cliente.deleted" class="icon-action-btn" type="button" aria-label="Editar" (click)="startEdit(cliente)">
+                  <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="m3 21 3.8-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L3 21Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m13.5 6.5 3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  <span class="icon-action-tooltip">Editar</span>
+                </button>
+                <button *ngIf="canWrite() && !cliente.deleted" class="icon-action-btn" [class.text-green-600]="!cliente.activo" [class.text-red-600]="cliente.activo" type="button" aria-label="Cambiar estado" (click)="toggleActivo(cliente)">
+                  <svg *ngIf="!cliente.activo" viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  <svg *ngIf="cliente.activo" viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  <span class="icon-action-tooltip">{{ cliente.activo ? 'Inactivar' : 'Activar' }}</span>
+                </button>
+                <button *ngIf="canAdmin() && !cliente.deleted" class="icon-action-btn text-orange-600 hover:text-orange-700" type="button" aria-label="Eliminar" (click)="softDelete(cliente)">
+                  <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  <span class="icon-action-tooltip">Eliminar</span>
+                </button>
+                <button *ngIf="canAdmin() && cliente.deleted" class="icon-action-btn text-green-600 hover:text-green-700" type="button" aria-label="Restaurar" (click)="restore(cliente)">
+                  <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 12a9 9 0 1 0 2.6-6.4M3 4v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  <span class="icon-action-tooltip">Restaurar</span>
+                </button>
+                <button *ngIf="canAdmin() && cliente.deleted" class="icon-action-btn text-error-600 hover:text-error-700" type="button" aria-label="Eliminar fisico" (click)="forceDelete(cliente)">
+                  <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  <span class="icon-action-tooltip">Force delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="clientes.length === 0">
+            <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400" colspan="7">No hay clientes para mostrar.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="flex flex-wrap items-center justify-between gap-2 overflow-x-auto px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
+      <span class="basis-full sm:basis-auto">Pagina {{ page + 1 }} de {{ totalPages || 1 }}</span>
+      <div class="flex min-w-[220px] w-full gap-2 sm:w-auto sm:grow-0">
+        <button class="btn-outline-neutral flex-1 px-3 py-1 disabled:opacity-50 sm:flex-none" type="button" (click)="loadClientes(page - 1)" [disabled]="page === 0">Anterior</button>
+        <button class="btn-outline-neutral flex-1 px-3 py-1 disabled:opacity-50 sm:flex-none" type="button" (click)="loadClientes(page + 1)" [disabled]="page + 1 >= totalPages">Siguiente</button>
+      </div>
+    </div>
+  </article>
+
+  <article class="panel-card min-w-0 w-full max-w-full p-4 sm:p-6" *ngIf="selectedCliente">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Detalle de cliente</h2>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ selectedCliente.nombre }}</p>
+      </div>
+      <div class="flex flex-wrap gap-2" *ngIf="canWrite() && !selectedCliente.deleted && selectedCliente.aplicaTablaEquivalencia">
+        <button class="btn-outline-neutral px-3 py-2" type="button" (click)="downloadEquivalenciasTemplate()">Plantilla equivalencia</button>
+        <button class="btn-outline-neutral px-3 py-2" type="button" (click)="downloadEquivalenciasTemplateExample()">Ejemplo equivalencia</button>
+        <label class="btn-outline-neutral cursor-pointer px-3 py-2">
+          Importar Excel
+          <input class="hidden" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="onSelectedEquivalenciasFileChange($event)" />
+        </label>
+        <button class="btn-primary-brand px-3 py-2" type="button" [disabled]="!selectedEquivalenciasFile" (click)="importSelectedEquivalencias()">Cargar tabla</button>
+      </div>
+    </div>
+
+    <div class="mt-4 grid gap-4 lg:grid-cols-[auto,1fr]">
+      <div>
+        <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Logo</p>
+        <img
+          *ngIf="selectedLogoUrl; else sinLogoDetalle"
+          [src]="selectedLogoUrl"
+          alt="Logo cliente"
+          class="h-24 w-24 rounded-xl border border-gray-200 object-cover dark:border-gray-700"
+        />
+        <ng-template #sinLogoDetalle>
+          <div class="flex h-24 w-24 items-center justify-center rounded-xl border border-dashed border-gray-300 text-xs text-gray-400 dark:border-gray-700">
+            Sin logo
+          </div>
+        </ng-template>
+      </div>
+      <div class="grid gap-2 text-sm text-gray-600 dark:text-gray-300 md:grid-cols-2">
+        <p><strong>ID:</strong> {{ selectedCliente.id }}</p>
+        <p><strong>Tipo documento:</strong> {{ selectedCliente.tipoDocumento }}</p>
+        <p><strong>Documento:</strong> {{ selectedCliente.documento }}</p>
+        <p><strong>Nombre:</strong> {{ selectedCliente.nombre }}</p>
+        <p><strong>Direccion:</strong> {{ selectedCliente.direccion || '-' }}</p>
+        <p><strong>Descripcion:</strong> {{ selectedCliente.descripcion || '-' }}</p>
+        <p><strong>Aplica tabla de equivalencia:</strong> {{ selectedCliente.aplicaTablaEquivalencia ? 'SI' : 'NO' }}</p>
+        <p><strong>Total equivalencias:</strong> {{ selectedCliente.equivalencias.length }}</p>
+      </div>
+    </div>
+
+    <div class="mt-6 rounded-2xl border border-gray-200 p-4 dark:border-gray-800" *ngIf="selectedCliente.aplicaTablaEquivalencia; else noTablaDetalle">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 class="text-base font-semibold text-gray-900 dark:text-white">Tabla de equivalencia</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Visualiza, edita o agrega destinos desde este detalle.</p>
+        </div>
+        <div class="flex flex-wrap gap-2" *ngIf="canWrite() && !selectedCliente.deleted">
+          <button class="btn-outline-neutral px-3 py-2" type="button" *ngIf="!equivalenciasEditMode" (click)="startEquivalenciasEdit()">Editar tabla</button>
+          <button class="btn-outline-neutral px-3 py-2" type="button" *ngIf="equivalenciasEditMode" (click)="addEquivalenciaRow()">Agregar fila</button>
+          <button class="btn-outline-neutral px-3 py-2" type="button" *ngIf="equivalenciasEditMode" (click)="cancelEquivalenciasEdit()">Cancelar</button>
+          <button class="btn-primary-brand px-3 py-2" type="button" *ngIf="equivalenciasEditMode" (click)="saveEquivalencias()">Guardar tabla</button>
+        </div>
+      </div>
+
+      <div class="mt-4 overflow-x-auto" *ngIf="!equivalenciasEditMode">
+        <table class="w-full min-w-[540px] text-left text-sm">
+          <thead class="border-b border-gray-200 text-gray-500 dark:border-gray-800 dark:text-gray-400">
+            <tr>
+              <th class="px-3 py-2">Destino</th>
+              <th class="px-3 py-2">Valor destino</th>
+              <th class="px-3 py-2">Costo chofer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-gray-100 dark:border-gray-800" *ngFor="let equivalencia of selectedCliente.equivalencias">
+              <td class="px-3 py-2">{{ equivalencia.destino }}</td>
+              <td class="px-3 py-2">{{ equivalencia.valorDestino | number:'1.2-2' }}</td>
+              <td class="px-3 py-2">{{ equivalencia.costoChofer | number:'1.2-2' }}</td>
+            </tr>
+            <tr *ngIf="selectedCliente.equivalencias.length === 0">
+              <td class="px-3 py-3 text-sm text-gray-400" colspan="3">No hay registros cargados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-4 space-y-3" *ngIf="equivalenciasEditMode">
+        <div class="grid gap-3 rounded-2xl border border-gray-200 p-4 dark:border-gray-800 md:grid-cols-[minmax(0,1.4fr),minmax(0,1fr),minmax(0,1fr),auto]" *ngFor="let item of equivalenciasDraft; let i = index">
+          <div>
+            <label class="form-label form-label-required">Destino</label>
+            <input class="form-control" [(ngModel)]="item.destino" [ngModelOptions]="{standalone: true}" />
+          </div>
+          <div>
+            <label class="form-label form-label-required">Valor destino</label>
+            <input class="form-control" type="number" step="0.01" [(ngModel)]="item.valorDestino" [ngModelOptions]="{standalone: true}" />
+          </div>
+          <div>
+            <label class="form-label form-label-required">Costo chofer</label>
+            <input class="form-control" type="number" step="0.01" [(ngModel)]="item.costoChofer" [ngModelOptions]="{standalone: true}" />
+          </div>
+          <div class="flex items-end">
+            <button class="btn-outline-neutral w-full px-3 py-2 text-red-600" type="button" (click)="removeEquivalenciaRow(i)">Quitar</button>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 dark:text-gray-400" *ngIf="equivalenciasDraft.length === 0">Agrega al menos una fila para comenzar a cargar destinos.</p>
+      </div>
+    </div>
+
+    <ng-template #noTablaDetalle>
+      <div class="mt-6 rounded-2xl border border-dashed border-gray-300 p-4 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+        Este cliente no tiene habilitada la tabla de equivalencia.
+      </div>
+    </ng-template>
+  </article>
+
+  <article class="panel-card min-w-0 w-full max-w-full p-4 sm:p-6 lg:p-7" *ngIf="canWrite() && mode !== 'none'">
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ mode === 'create' ? 'Crear cliente' : 'Editar cliente' }}</h2>
+      <span class="text-xs text-gray-500 dark:text-gray-400">Completa los campos requeridos</span>
+    </div>
+    <form class="mt-5 min-w-0 w-full grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12" [formGroup]="clienteForm" (ngSubmit)="submitCliente()">
+      <div class="min-w-0 xl:col-span-3">
+        <label class="form-label form-label-required">Tipo Documento</label>
+        <select class="form-control" formControlName="tipoDocumento">
+          <option value="CEDULA">CEDULA</option>
+          <option value="RUC">RUC</option>
+          <option value="PASAPORTE">PASAPORTE</option>
+        </select>
+        <p class="form-error" *ngIf="showError('tipoDocumento', 'required')">Tipo de documento es obligatorio.</p>
+      </div>
+      <div class="min-w-0 xl:col-span-4">
+        <label class="form-label form-label-required">Documento</label>
+        <input class="form-control" formControlName="documento" />
+        <p class="form-error" *ngIf="showError('documento', 'required')">Documento es obligatorio.</p>
+      </div>
+      <div class="min-w-0 xl:col-span-5">
+        <label class="form-label form-label-required">Nombre</label>
+        <input class="form-control" formControlName="nombre" />
+        <p class="form-error" *ngIf="showError('nombre', 'required')">Nombre es obligatorio.</p>
+      </div>
+      <div class="min-w-0 xl:col-span-6">
+        <label class="form-label form-label-required">Activo</label>
+        <select class="form-control" formControlName="activo">
+          <option [ngValue]="true">SI</option>
+          <option [ngValue]="false">NO</option>
+        </select>
+      </div>
+      <div class="min-w-0 xl:col-span-6">
+        <label class="form-label">Direccion</label>
+        <input class="form-control" formControlName="direccion" />
+      </div>
+      <div class="min-w-0 xl:col-span-6">
+        <label class="form-label">Logo Empresa</label>
+        <input class="form-control" type="file" accept="image/png,image/jpeg,image/webp" (change)="onLogoFileChange($event)" />
+      </div>
+      <div class="min-w-0 xl:col-span-6">
+        <label class="form-label">Tabla de equivalencia</label>
+        <label class="flex min-h-[44px] items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:text-gray-200">
+          <input type="checkbox" formControlName="aplicaTablaEquivalencia" />
+          Aplica Tabla de Equivalencia
+        </label>
+      </div>
+      <div class="min-w-0 xl:col-span-12" *ngIf="clienteForm.controls.aplicaTablaEquivalencia.value">
+        <div class="rounded-2xl border border-brand-200/60 bg-brand-50/40 p-4 dark:border-brand-900/40 dark:bg-brand-950/20">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">Carga inicial por Excel</p>
+              <p class="text-xs text-gray-600 dark:text-gray-400">Sube la tabla con las columnas DESTINO, VALOR DESTINO y COSTO CHOFER.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button class="btn-outline-neutral px-3 py-2" type="button" (click)="downloadEquivalenciasTemplate()">Plantilla</button>
+              <button class="btn-outline-neutral px-3 py-2" type="button" (click)="downloadEquivalenciasTemplateExample()">Ejemplo</button>
+            </div>
+          </div>
+          <div class="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr),auto]">
+            <input class="form-control" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="onPendingEquivalenciasFileChange($event)" />
+            <div class="flex items-center rounded-xl border border-dashed border-gray-300 px-3 py-2 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
+              {{ pendingEquivalenciasFile?.name || 'Puedes cargar el archivo ahora o editar la tabla despues desde Ver.' }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="min-w-0 xl:col-span-12">
+        <label class="form-label">Descripcion</label>
+        <textarea class="form-control !h-24 !py-2" formControlName="descripcion"></textarea>
+      </div>
+      <div class="min-w-0 flex w-full flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end md:col-span-2 xl:col-span-12">
+        <button class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 sm:w-auto" type="button" (click)="cancelForm()">Cancelar</button>
+        <button class="w-full rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 sm:w-auto" type="submit">{{ mode === 'create' ? 'Crear' : 'Guardar cambios' }}</button>
+      </div>
+    </form>
+  </article>
+
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/70 p-4" *ngIf="showImportModal">
+    <article class="panel-card w-full max-w-3xl p-5 sm:p-6">
+      <div class="flex items-start justify-between gap-3">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Importar clientes Excel</h3>
+        <button class="btn-outline-neutral px-3 py-1" type="button" (click)="closeImportModal()">Cerrar</button>
+      </div>
+
+      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <button class="btn-outline-neutral inline-flex items-center justify-center gap-2 px-4 py-2" type="button" (click)="downloadTemplate()">
+          <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Descargar plantilla
+        </button>
+        <button class="btn-outline-neutral inline-flex items-center justify-center gap-2 px-4 py-2" type="button" (click)="downloadExampleTemplate()">
+          <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M8 3h8l5 5v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Descargar ejemplo Excel
+        </button>
+        <input class="form-control" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="onImportFileChange($event)" />
+        <select class="form-control" [(ngModel)]="importMode" [ngModelOptions]="{standalone: true}">
+          <option value="INSERT_ONLY">INSERT_ONLY</option>
+          <option value="UPSERT">UPSERT</option>
+        </select>
+        <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+          <input type="checkbox" [(ngModel)]="partialOk" [ngModelOptions]="{standalone: true}" />
+          partialOk
+        </label>
+      </div>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button class="btn-outline-neutral inline-flex items-center gap-2 px-4 py-2" type="button" (click)="previewImport()" [disabled]="!importFile">
+          <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+          Previsualizar
+        </button>
+        <button class="btn-primary-brand inline-flex items-center gap-2 px-4 py-2" type="button" (click)="executeImport()" [disabled]="!importFile">
+          <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 21V9m0 0 4 4m-4-4-4 4M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Importar
+        </button>
+      </div>
+
+      <div class="mt-4 rounded-lg border border-gray-200 p-4 text-sm dark:border-gray-800" *ngIf="importPreview">
+        <p><strong>Total filas:</strong> {{ importPreview.totalRows }}</p>
+        <p><strong>Procesadas:</strong> {{ importPreview.processed }}</p>
+        <p><strong>Insertadas:</strong> {{ importPreview.inserted }}</p>
+        <p><strong>Actualizadas:</strong> {{ importPreview.updated }}</p>
+        <p><strong>Saltadas:</strong> {{ importPreview.skipped }}</p>
+        <p><strong>Errores:</strong> {{ importPreview.errorsCount }}</p>
+        <div class="mt-3 max-h-36 overflow-auto" *ngIf="importPreview.errors.length > 0">
+          <p class="font-semibold">Errores:</p>
+          <p class="text-xs" *ngFor="let e of importPreview.errors">Fila {{ e.row }} - {{ e.message }}</p>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
