@@ -70,12 +70,14 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 
 ### Módulo Vehículos (`/api/vehiculos`)
 - CRUD operativo + estados
+- Listado de vehículos ordenado por chofer en orden alfabético
 - Campo adicional `cuentaBancaria` disponible en formulario, detalle, listado e importación Excel
 - Carga/lectura de foto, documento y licencia
 - Importación masiva (`preview` y `import`) y plantillas
 
 ### Módulo Clientes (`/clientes`)
 - CRUD operativo + estados
+- Listado de clientes ordenado por nombre en orden alfabético
 - Logo empresarial en base de datos
 - Importación masiva (`preview` y `import`) y plantillas
 - Flag `Aplica Tabla de Equivalencia` por cliente
@@ -84,6 +86,7 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 
 ### Módulo Bitácora (`/api/bitacora/viajes`)
 - CRUD operativo + borrado lógico/restauración
+- Listado y exportación ordenados por `numeroViaje` de forma descendente
 - Exportación Excel
 - Importación masiva con plantilla
 - Campo obligatorio `costoChofer` en creación, edición e importación Excel
@@ -92,6 +95,7 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 
 ### Módulo Placas (`/api/placas`)
 - Consulta por placa, código de viaje, estado de pago al chofer y rango de fechas
+- Resultados de consulta ordenados por número de bitácora (`numeroViaje`) de forma descendente
 - Exportación financiera por placa
 
 ## Soft delete y auditoría

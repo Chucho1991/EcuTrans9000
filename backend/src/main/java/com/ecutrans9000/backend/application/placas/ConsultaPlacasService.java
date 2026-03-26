@@ -141,7 +141,7 @@ public class ConsultaPlacasService {
         estadoPagoChofer,
         fechaDesde,
         fechaHasta);
-    return viajeRepository.findAll(specification, Sort.by(Sort.Direction.ASC, "fechaViaje", "numeroViaje"));
+    return viajeRepository.findAll(specification, Sort.by(Sort.Direction.DESC, "numeroViaje"));
   }
 
   private Specification<ViajeBitacoraJpaEntity> buildSpecification(

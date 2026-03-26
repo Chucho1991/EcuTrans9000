@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ClienteRepositoryAdapter implements ClienteRepositoryPort {
+  private static final Sort CLIENTE_DEFAULT_SORT = Sort.by(Sort.Order.asc("nombre"), Sort.Order.asc("documentoNorm"));
 
   private final ClienteJpaRepository clienteJpaRepository;
 
@@ -97,7 +99,7 @@ public class ClienteRepositoryAdapter implements ClienteRepositoryPort {
         predicates.add(cb.isFalse(root.get("deleted")));
       }
       return cb.and(predicates.toArray(Predicate[]::new));
-    }, PageRequest.of(Math.max(page, 0), size));
+    }, PageRequest.of(Math.max(page, 0), size, CLIENTE_DEFAULT_SORT));
 
     List<Cliente> content = results.getContent().stream().map(ClienteMapper::toDomain).toList();
     return new PageImpl<>(content, results.getPageable(), results.getTotalElements());

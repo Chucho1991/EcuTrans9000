@@ -43,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class ViajeBitacoraService {
+  private static final Sort BITACORA_DEFAULT_SORT = Sort.by(Sort.Order.desc("numeroViaje"));
   private static final int CHOFER_COLUMN_INDEX = 5;
   private static final int DESTINO_COLUMN_INDEX = 6;
   private static final int DETALLE_VIAJE_COLUMN_INDEX = 7;
@@ -77,7 +78,7 @@ public class ViajeBitacoraService {
       LocalDate fechaDesde,
       LocalDate fechaHasta,
       Boolean includeDeleted) {
-    Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1), Sort.by(Sort.Direction.DESC, "fechaViaje", "numeroViaje"));
+    Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1), BITACORA_DEFAULT_SORT);
     validateDateRange(fechaDesde, fechaHasta);
     Specification<ViajeBitacoraJpaEntity> specification = buildSpecification(q, vehiculoId, clienteId, fechaDesde, fechaHasta, includeDeleted);
     return viajeRepository.findAll(specification, pageable).map(this::toResponse);
@@ -188,8 +189,7 @@ public class ViajeBitacoraService {
   public byte[] exportExcel(String q, UUID vehiculoId, UUID clienteId, LocalDate fechaDesde, LocalDate fechaHasta) {
     validateDateRange(fechaDesde, fechaHasta);
     Specification<ViajeBitacoraJpaEntity> specification = buildSpecification(q, vehiculoId, clienteId, fechaDesde, fechaHasta, false);
-    Sort sort = Sort.by(Sort.Direction.ASC, "numeroViaje");
-    List<ViajeBitacoraResponse> viajes = viajeRepository.findAll(specification, sort).stream().map(this::toResponse).toList();
+    List<ViajeBitacoraResponse> viajes = viajeRepository.findAll(specification, BITACORA_DEFAULT_SORT).stream().map(this::toResponse).toList();
     int reportYear = resolveReportYear(fechaDesde, fechaHasta, viajes);
 
     try (
