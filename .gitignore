@@ -61,3 +61,4 @@ docker-compose.override.yml
 *.bz2
 *.rar
 /.m2
+/backend/.m2repo

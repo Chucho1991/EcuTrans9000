@@ -1,9 +1,11 @@
 package com.ecutrans9000.backend.application.bitacora;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.ecutrans9000.backend.adapters.in.rest.dto.bitacora.ViajeBitacoraResponse;
 import com.ecutrans9000.backend.adapters.out.persistence.entity.ClienteJpaEntity;
 import com.ecutrans9000.backend.adapters.out.persistence.entity.VehiculoJpaEntity;
 import com.ecutrans9000.backend.adapters.out.persistence.entity.ViajeBitacoraJpaEntity;
@@ -30,6 +32,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 /**
  * Pruebas unitarias de exportación Excel del módulo bitácora.
@@ -51,6 +56,16 @@ class ViajeBitacoraServiceTest {
 
   @InjectMocks
   private ViajeBitacoraService viajeBitacoraService;
+
+  @Test
+  void listShouldRequestDescendingSortByNumeroViaje() {
+    when(viajeRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), argThat(this::isSortedByNumeroViajeDesc)))
+        .thenReturn(new PageImpl<>(List.of()));
+
+    var response = viajeBitacoraService.list(0, 10, null, null, null, null, null, false);
+
+    assertEquals(List.<ViajeBitacoraResponse>of(), response.getContent());
+  }
 
   @Test
   void exportExcelShouldLeftAlignTextColumnsAndResizeThemUsingLongestValue() throws IOException {
@@ -108,7 +123,7 @@ class ViajeBitacoraServiceTest {
         .updatedAt(LocalDateTime.now())
         .build();
 
-    when(viajeRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), any(org.springframework.data.domain.Sort.class)))
+    when(viajeRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), argThat(this::isSortedByNumeroViajeDesc)))
         .thenReturn(List.of(viaje));
     when(vehiculoRepository.findById(vehiculoId)).thenReturn(Optional.of(vehiculo));
     when(clienteRepository.findById(clienteId)).thenReturn(Optional.of(cliente));
@@ -158,5 +173,14 @@ class ViajeBitacoraServiceTest {
       }
     }
     return 0;
+  }
+
+  private boolean isSortedByNumeroViajeDesc(Pageable pageable) {
+    return isSortedByNumeroViajeDesc(pageable.getSort());
+  }
+
+  private boolean isSortedByNumeroViajeDesc(Sort sort) {
+    Sort.Order order = sort.getOrderFor("numeroViaje");
+    return order != null && order.isDescending();
   }
 }

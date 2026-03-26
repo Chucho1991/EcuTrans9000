@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class VehiculoRepositoryAdapter implements VehiculoRepositoryPort {
+  private static final Sort VEHICULO_DEFAULT_SORT = Sort.by(Sort.Order.asc("choferDefault"), Sort.Order.asc("placaNorm"));
 
   private final VehiculoJpaRepository vehiculoJpaRepository;
 
@@ -94,7 +96,7 @@ public class VehiculoRepositoryAdapter implements VehiculoRepositoryPort {
         predicates.add(cb.isFalse(root.get("deleted")));
       }
       return cb.and(predicates.toArray(Predicate[]::new));
-    }, PageRequest.of(Math.max(page, 0), size));
+    }, PageRequest.of(Math.max(page, 0), size, VEHICULO_DEFAULT_SORT));
 
     List<Vehiculo> content = results.getContent().stream().map(VehiculoMapper::toDomain).toList();
     return new PageImpl<>(content, results.getPageable(), results.getTotalElements());
