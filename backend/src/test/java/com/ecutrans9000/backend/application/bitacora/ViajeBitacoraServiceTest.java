@@ -35,6 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * Pruebas unitarias de exportación Excel del módulo bitácora.
@@ -59,8 +60,8 @@ class ViajeBitacoraServiceTest {
 
   @Test
   void listShouldRequestDescendingSortByNumeroViaje() {
-    when(viajeRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), argThat(this::isSortedByNumeroViajeDesc)))
-        .thenReturn(new PageImpl<>(List.of()));
+    when(viajeRepository.findAll(anySpecification(), argThat((Pageable pageable) -> isSortedByNumeroViajeDesc(pageable))))
+        .thenReturn(new PageImpl<ViajeBitacoraJpaEntity>(List.of()));
 
     var response = viajeBitacoraService.list(0, 10, null, null, null, null, null, false);
 
@@ -123,7 +124,7 @@ class ViajeBitacoraServiceTest {
         .updatedAt(LocalDateTime.now())
         .build();
 
-    when(viajeRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), argThat(this::isSortedByNumeroViajeDesc)))
+    when(viajeRepository.findAll(anySpecification(), argThat((Sort sort) -> isSortedByNumeroViajeDesc(sort))))
         .thenReturn(List.of(viaje));
     when(vehiculoRepository.findById(vehiculoId)).thenReturn(Optional.of(vehiculo));
     when(clienteRepository.findById(clienteId)).thenReturn(Optional.of(cliente));
@@ -182,5 +183,10 @@ class ViajeBitacoraServiceTest {
   private boolean isSortedByNumeroViajeDesc(Sort sort) {
     Sort.Order order = sort.getOrderFor("numeroViaje");
     return order != null && order.isDescending();
+  }
+
+  @SuppressWarnings("unchecked")
+  private Specification<ViajeBitacoraJpaEntity> anySpecification() {
+    return any(Specification.class);
   }
 }
