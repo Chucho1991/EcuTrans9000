@@ -56,6 +56,7 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - Campo adicional `cuentaBancaria` disponible en formulario, detalle, listado e importación Excel
 - Carga/lectura de foto, documento y licencia
 - Importación masiva (`preview` y `import`) y plantillas
+- Si el chofer asociado tiene viajes pendientes de pago al transportista, no se permite inactivar ni eliminar el registro
 - Formularios de creación y edición presentados en popup modal del template
 
 ### Módulo Clientes (`/clientes`)
@@ -66,6 +67,7 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - Flag `Aplica Tabla de Equivalencia` por cliente
 - Tabla de equivalencia por destino con carga Excel (`DESTINO`, `VALOR DESTINO`, `COSTO CHOFER`)
 - Edición manual de equivalencias desde el detalle del cliente
+- Si el cliente tiene viajes con facturación o cobro pendientes, no se permite inactivarlo ni eliminarlo
 - Formularios de creación y edición presentados en popup modal del template
 
 ### Módulo Bitácora (`/api/bitacora/viajes`)

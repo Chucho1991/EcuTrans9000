@@ -1,5 +1,6 @@
 package com.ecutrans9000.backend.application.vehiculo;
 
+import com.ecutrans9000.backend.application.bitacora.ViajeBitacoraPendingValidationService;
 import com.ecutrans9000.backend.application.usecase.vehiculo.ImportMode;
 import com.ecutrans9000.backend.application.usecase.vehiculo.VehiculoImportError;
 import com.ecutrans9000.backend.application.usecase.vehiculo.VehiculoImportResult;
@@ -92,6 +93,7 @@ public class VehiculoApplicationService {
 
   private final VehiculoRepositoryPort vehiculoRepositoryPort;
   private final VehiculoArchivoRepositoryPort vehiculoArchivoRepositoryPort;
+  private final ViajeBitacoraPendingValidationService viajeBitacoraPendingValidationService;
   private final AuditService auditService;
 
   @Value("${app.vehiculos.max-image-bytes:5242880}")
@@ -138,6 +140,9 @@ public class VehiculoApplicationService {
     if (vehiculoRepositoryPort.existsByPlacaNormAndIdNot(placaNorm, id)) {
       throw new BusinessException(HttpStatus.CONFLICT, "La placa ya existe");
     }
+    if (vehiculo.getEstado() == EstadoVehiculo.ACTIVO && command.estado() == EstadoVehiculo.INACTIVO) {
+      validateVehiculoSinViajesPendientes(id, "inactivar");
+    }
 
     vehiculo.setPlaca(command.placa().trim());
     vehiculo.setPlacaNorm(placaNorm);
@@ -181,6 +186,7 @@ public class VehiculoApplicationService {
     if (Boolean.TRUE.equals(vehiculo.getDeleted())) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "El vehiculo ya esta eliminado logicamente");
     }
+    validateVehiculoSinViajesPendientes(id, "inactivar");
     vehiculo.setEstado(EstadoVehiculo.INACTIVO);
     vehiculoRepositoryPort.save(vehiculo);
     auditService.saveActionAudit(actorUsername, actorRole, "VEHICULOS", ActionType.EDICION, id.toString(), "vehiculos");
@@ -188,6 +194,7 @@ public class VehiculoApplicationService {
 
   public void softDelete(UUID id, String actorUsername, String actorRole) {
     Vehiculo vehiculo = getExisting(id);
+    validateVehiculoSinViajesPendientes(id, "eliminar");
     vehiculo.setDeleted(true);
     vehiculo.setDeletedAt(LocalDateTime.now());
     vehiculo.setEstado(EstadoVehiculo.INACTIVO);
@@ -705,5 +712,13 @@ public class VehiculoApplicationService {
   private Vehiculo getExisting(UUID id) {
     return vehiculoRepositoryPort.findById(id)
         .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Vehiculo no encontrado"));
+  }
+
+  private void validateVehiculoSinViajesPendientes(UUID vehiculoId, String accion) {
+    if (viajeBitacoraPendingValidationService.vehiculoTieneViajesPendientes(vehiculoId)) {
+      throw new BusinessException(
+          HttpStatus.CONFLICT,
+          "No se puede " + accion + " el chofer porque tiene viajes con estados pendientes asociados");
+    }
   }
 }

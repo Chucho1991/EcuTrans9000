@@ -1,5 +1,6 @@
 package com.ecutrans9000.backend.application.cliente;
 
+import com.ecutrans9000.backend.application.bitacora.ViajeBitacoraPendingValidationService;
 import com.ecutrans9000.backend.application.usecase.cliente.ClienteEquivalenciaUpsertCommand;
 import com.ecutrans9000.backend.application.usecase.cliente.ClienteImportError;
 import com.ecutrans9000.backend.application.usecase.cliente.ClienteImportResult;
@@ -79,6 +80,7 @@ public class ClienteApplicationService {
   private static final DataFormatter DATA_FORMATTER = new DataFormatter();
 
   private final ClienteRepositoryPort clienteRepositoryPort;
+  private final ViajeBitacoraPendingValidationService viajeBitacoraPendingValidationService;
   private final AuditService auditService;
 
   @Value("${app.clientes.import-batch-size:500}")
@@ -124,6 +126,9 @@ public class ClienteApplicationService {
     if (clienteRepositoryPort.existsByDocumentoNormAndIdNot(documentoNorm, id)) {
       throw new BusinessException(HttpStatus.CONFLICT, "El documento ya existe");
     }
+    if (Boolean.TRUE.equals(cliente.getActivo()) && Boolean.FALSE.equals(command.activo())) {
+      validateClienteSinViajesPendientes(id, "desactivar");
+    }
 
     cliente.setTipoDocumento(command.tipoDocumento());
     cliente.setDocumento(command.documento().trim());
@@ -157,6 +162,9 @@ public class ClienteApplicationService {
     if (Boolean.TRUE.equals(cliente.getDeleted())) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "No se puede cambiar estado de un cliente eliminado");
     }
+    if (Boolean.TRUE.equals(cliente.getActivo())) {
+      validateClienteSinViajesPendientes(id, "desactivar");
+    }
     cliente.setActivo(!Boolean.TRUE.equals(cliente.getActivo()));
     Cliente saved = clienteRepositoryPort.save(cliente);
     auditService.saveActionAudit(actorUsername, actorRole, "CLIENTES", ActionType.CAMBIO_ESTADO, saved.getId().toString(), "clientes");
@@ -165,6 +173,7 @@ public class ClienteApplicationService {
 
   public void softDelete(UUID id, String actorUsername, String actorRole) {
     Cliente cliente = getExisting(id);
+    validateClienteSinViajesPendientes(id, "eliminar");
     cliente.setDeleted(true);
     cliente.setActivo(false);
     cliente.setDeletedAt(LocalDateTime.now());
@@ -185,6 +194,7 @@ public class ClienteApplicationService {
 
   public void forceDelete(UUID id, String actorUsername, String actorRole) {
     getExisting(id);
+    validateClienteSinViajesPendientes(id, "eliminar");
     clienteRepositoryPort.deleteById(id);
     auditService.saveActionAudit(actorUsername, actorRole, "CLIENTES", ActionType.ELIMINADO_FISICO, id.toString(), "clientes");
   }
@@ -619,6 +629,14 @@ public class ClienteApplicationService {
   private Cliente getExisting(UUID id) {
     return clienteRepositoryPort.findById(id)
         .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Cliente no encontrado"));
+  }
+
+  private void validateClienteSinViajesPendientes(UUID clienteId, String accion) {
+    if (viajeBitacoraPendingValidationService.clienteTieneViajesPendientes(clienteId)) {
+      throw new BusinessException(
+          HttpStatus.CONFLICT,
+          "No se puede " + accion + " el cliente porque tiene viajes con estados pendientes asociados");
+    }
   }
 
   private List<ClienteEquivalencia> buildEquivalencias(

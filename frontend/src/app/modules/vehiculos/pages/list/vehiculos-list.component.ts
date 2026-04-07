@@ -564,7 +564,12 @@ export class VehiculosListComponent implements OnDestroy {
     if (!confirmed) {
       return;
     }
-    this.vehiculosService.activate(vehiculo.id).subscribe(() => this.loadVehiculos(this.page));
+    this.vehiculosService.activate(vehiculo.id).subscribe({
+      next: () => this.loadVehiculos(this.page),
+      error: (error) => {
+        void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
+      }
+    });
   }
 
   protected async deactivate(vehiculo: VehiculoResponse): Promise<void> {
@@ -572,7 +577,12 @@ export class VehiculosListComponent implements OnDestroy {
     if (!confirmed) {
       return;
     }
-    this.vehiculosService.deactivate(vehiculo.id).subscribe(() => this.loadVehiculos(this.page));
+    this.vehiculosService.deactivate(vehiculo.id).subscribe({
+      next: () => this.loadVehiculos(this.page),
+      error: (error) => {
+        void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
+      }
+    });
   }
 
   protected async softDelete(vehiculo: VehiculoResponse): Promise<void> {
@@ -580,7 +590,12 @@ export class VehiculosListComponent implements OnDestroy {
     if (!confirmed) {
       return;
     }
-    this.vehiculosService.softDelete(vehiculo.id).subscribe(() => this.loadVehiculos(this.page));
+    this.vehiculosService.softDelete(vehiculo.id).subscribe({
+      next: () => this.loadVehiculos(this.page),
+      error: (error) => {
+        void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
+      }
+    });
   }
 
   protected async restore(vehiculo: VehiculoResponse): Promise<void> {
@@ -588,7 +603,12 @@ export class VehiculosListComponent implements OnDestroy {
     if (!confirmed) {
       return;
     }
-    this.vehiculosService.restore(vehiculo.id).subscribe(() => this.loadVehiculos(this.page));
+    this.vehiculosService.restore(vehiculo.id).subscribe({
+      next: () => this.loadVehiculos(this.page),
+      error: (error) => {
+        void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
+      }
+    });
   }
 
   protected downloadDocumento(vehiculo: VehiculoResponse): void {

@@ -15,6 +15,7 @@ Comando ejecutado: `./scripts/validate-documentation.ps1`
 - README: OK.
   - Temas obligatorios detectados: completos.
   - README actualizado para reflejar `Configuración de accesos`, `Clientes`, `Vehículos`, `Bitácora`, `Descuentos de viajes` y `Consulta por placas`, incluyendo permisos dinámicos por rol, reglas de importación, almacenamiento binario, tabla de equivalencia por destino, descuentos por chofer, formularios de creación/edición en popup modal y exportación financiera por placa con retención opcional, descuentos por motivo y viajes seleccionados.
+  - Regla operativa documentada: clientes con viajes pendientes no pueden inactivarse/eliminarse y choferes con pago transportista pendiente tampoco pueden inactivarse/eliminarse.
 - Agent/OpenAPI: OK.
   - `AGENTS.md` refleja el estado actual de `CLIENTES`, `VEHICULOS`, `BITACORA`, `DESCUENTOS DE VIAJES` y `CONSULTA POR PLACAS`, además del patrón obligatorio de formularios de creación/edición en popup modal.
   - `OpenApiConfig` describe el alcance actual: configuración de accesos por rol, CRUD, soft delete, binarios en PostgreSQL, importación/exportación Excel operativa, descuentos por chofer y reportes por placa.
