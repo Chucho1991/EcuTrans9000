@@ -12,6 +12,9 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * DTO paginado de salida para listados del módulo bitácora.
+ */
 public class ViajeBitacoraListResponse {
   private List<ViajeBitacoraResponse> content;
   private int page;

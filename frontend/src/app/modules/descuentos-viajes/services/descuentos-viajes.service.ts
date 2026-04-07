@@ -11,6 +11,7 @@ export interface DescuentoViajeResponse {
   vehiculoChofer: string;
   descripcionMotivo: string;
   montoMotivo: number;
+  fechaAplicacion: string | null;
   activo: boolean;
   deleted: boolean;
   deletedAt: string | null;
@@ -31,6 +32,7 @@ export interface DescuentoViajeUpsertRequest {
   vehiculoId: string;
   descripcionMotivo: string;
   montoMotivo: number;
+  fechaAplicacion: string | null;
   activo: boolean;
 }
 

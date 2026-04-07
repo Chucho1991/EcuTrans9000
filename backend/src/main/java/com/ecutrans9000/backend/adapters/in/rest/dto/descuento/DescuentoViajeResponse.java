@@ -1,6 +1,7 @@
 package com.ecutrans9000.backend.adapters.in.rest.dto.descuento;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ public class DescuentoViajeResponse {
   private String vehiculoChofer;
   private String descripcionMotivo;
   private BigDecimal montoMotivo;
+  private LocalDate fechaAplicacion;
   private Boolean activo;
   private Boolean deleted;
   private LocalDateTime deletedAt;

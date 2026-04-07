@@ -12,6 +12,9 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * DTO paginado de salida para listados de clientes.
+ */
 public class ClienteListResponse {
   private List<ClienteResponse> content;
   private int page;

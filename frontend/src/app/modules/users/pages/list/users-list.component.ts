@@ -195,10 +195,17 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
         </p>
       </article>
 
-      <article class="panel-card min-w-0 w-full max-w-full p-4 sm:p-6 lg:p-7" *ngIf="mode !== 'none'">
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/70 p-4" *ngIf="mode !== 'none'">
+        <article class="panel-card w-full max-w-5xl p-5 sm:p-6 lg:p-7">
         <div class="flex flex-wrap items-start justify-between gap-2">
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ mode === 'create' ? 'Crear usuario' : 'Editar usuario' }}</h2>
-          <span class="text-xs text-gray-500 dark:text-gray-400">Completa los campos requeridos</span>
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ mode === 'create' ? 'Crear usuario' : 'Editar usuario' }}</h2>
+            <span class="text-xs text-gray-500 dark:text-gray-400">Completa los campos requeridos</span>
+          </div>
+          <button class="icon-action-btn" type="button" aria-label="Cerrar" (click)="cancelForm()">
+            <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+            <span class="icon-action-tooltip">Cerrar</span>
+          </button>
         </div>
         <form class="mt-5 min-w-0 w-full grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12" [formGroup]="userForm" (ngSubmit)="submitUser()">
           <div class="min-w-0 md:col-span-2 xl:col-span-12">
@@ -268,7 +275,8 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
             </button>
           </div>
         </form>
-      </article>
+        </article>
+      </div>
     </section>
   `
 })

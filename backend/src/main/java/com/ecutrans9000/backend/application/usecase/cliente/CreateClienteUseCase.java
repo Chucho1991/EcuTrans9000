@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Caso de uso para crear clientes.
+ */
 public class CreateClienteUseCase {
 
   private final ClienteApplicationService service;

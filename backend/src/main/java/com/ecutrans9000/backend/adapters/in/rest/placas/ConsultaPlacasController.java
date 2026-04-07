@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -37,35 +39,43 @@ public class ConsultaPlacasController {
   @GetMapping("/consulta")
   @Operation(summary = "Consultar bitacora por placa")
   public ResponseEntity<ConsultaPlacaResponse> consultar(
-      @RequestParam(required = false) String placa,
+      @RequestParam String placa,
       @RequestParam(required = false) String codigoViaje,
       @Parameter(description = "TODOS, PAGADOS o NO_PAGADOS")
       @RequestParam(required = false) String estadoPagoChofer,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta) {
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
+      @RequestParam(defaultValue = "true") boolean aplicarRetencion) {
     return ResponseEntity.ok(consultaPlacasService.consultar(
         placa,
         codigoViaje,
         parseEstadoPagoChofer(estadoPagoChofer),
         fechaDesde,
-        fechaHasta));
+        fechaHasta,
+        aplicarRetencion));
   }
 
   @GetMapping("/consulta/export")
   @Operation(summary = "Exportar consulta por placa a Excel")
   public ResponseEntity<byte[]> exportar(
-      @RequestParam(required = false) String placa,
+      @RequestParam String placa,
       @RequestParam(required = false) String codigoViaje,
       @Parameter(description = "TODOS, PAGADOS o NO_PAGADOS")
       @RequestParam(required = false) String estadoPagoChofer,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta) {
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
+      @RequestParam(defaultValue = "true") boolean aplicarRetencion,
+      @RequestParam(required = false) List<Long> descuentoIds,
+      @RequestParam(required = false) List<UUID> viajeIds) {
     byte[] report = consultaPlacasService.exportExcel(
         placa,
         codigoViaje,
         parseEstadoPagoChofer(estadoPagoChofer),
         fechaDesde,
-        fechaHasta);
+        fechaHasta,
+        aplicarRetencion,
+        descuentoIds,
+        viajeIds);
     String normalized = placa == null || placa.isBlank() ? "consulta_placas" : placa.trim().toUpperCase();
     return ResponseEntity.ok()
         .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))

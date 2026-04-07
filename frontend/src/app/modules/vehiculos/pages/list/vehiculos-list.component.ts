@@ -185,10 +185,17 @@ import {
         </div>
       </article>
 
-      <article class="panel-card min-w-0 w-full max-w-full p-4 sm:p-6 lg:p-7" *ngIf="mode !== 'none'">
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/70 p-4" *ngIf="mode !== 'none'">
+        <article class="panel-card w-full max-w-6xl p-5 sm:p-6 lg:p-7">
         <div class="flex flex-wrap items-start justify-between gap-2">
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ mode === 'create' ? 'Crear vehiculo' : 'Editar vehiculo' }}</h2>
-          <span class="text-xs text-gray-500 dark:text-gray-400">Campos obligatorios y subida de imagenes</span>
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ mode === 'create' ? 'Crear vehiculo' : 'Editar vehiculo' }}</h2>
+            <span class="text-xs text-gray-500 dark:text-gray-400">Campos obligatorios y subida de imagenes</span>
+          </div>
+          <button class="icon-action-btn" type="button" aria-label="Cerrar" (click)="cancelForm()">
+            <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+            <span class="icon-action-tooltip">Cerrar</span>
+          </button>
         </div>
 
         <form class="mt-5 min-w-0 w-full grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12" [formGroup]="vehiculoForm" (ngSubmit)="submitVehiculo()">
@@ -287,7 +294,8 @@ import {
             <button class="w-full rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 sm:w-auto" type="submit">{{ mode === 'create' ? 'Crear' : 'Guardar cambios' }}</button>
           </div>
         </form>
-      </article>
+        </article>
+      </div>
 
       <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/70 p-4" *ngIf="showImportModal">
         <article class="panel-card w-full max-w-3xl p-5 sm:p-6">

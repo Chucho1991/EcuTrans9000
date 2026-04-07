@@ -15,6 +15,8 @@ import com.ecutrans9000.backend.service.BusinessException;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.text.Normalizer;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +46,7 @@ public class DescuentoViajeExcelImportService {
       "placa",
       "descripcion motivo",
       "monto motivo",
+      "fecha aplicacion",
       "activo"
   );
 
@@ -104,7 +107,8 @@ public class DescuentoViajeExcelImportService {
         placaCell.setCellValue("ABC-1234");
         exampleRow.createCell(1).setCellValue("DESCUENTO POR PEAJE");
         exampleRow.createCell(2).setCellValue(15.50);
-        exampleRow.createCell(3).setCellValue("SI");
+        exampleRow.createCell(3).setCellValue("06/04/2026");
+        exampleRow.createCell(4).setCellValue("SI");
       }
       workbook.write(outputStream);
       return outputStream.toByteArray();
@@ -250,7 +254,8 @@ public class DescuentoViajeExcelImportService {
     String placa = requireText(row.getCell(0), "Placa");
     String descripcionMotivo = requireText(row.getCell(1), "Descripcion motivo");
     BigDecimal montoMotivo = parseRequiredDecimalCell(row.getCell(2), "Monto motivo");
-    boolean activo = parseBooleanCell(row.getCell(3));
+    LocalDate fechaAplicacion = parseOptionalDateCell(row.getCell(3));
+    boolean activo = parseBooleanCell(row.getCell(4));
     VehiculoJpaEntity vehiculo = vehiculosLookup.get(Vehiculo.normalizePlaca(placa));
     if (vehiculo == null) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "Vehiculo no encontrado para placa: " + placa);
@@ -259,6 +264,7 @@ public class DescuentoViajeExcelImportService {
         .vehiculoId(vehiculo.getId())
         .descripcionMotivo(descripcionMotivo)
         .montoMotivo(montoMotivo)
+        .fechaAplicacion(fechaAplicacion)
         .activo(activo)
         .build();
   }
@@ -360,9 +366,30 @@ public class DescuentoViajeExcelImportService {
       case "placa" -> "Placa";
       case "descripcion motivo" -> "Descripcion motivo";
       case "monto motivo" -> "Monto motivo";
+      case "fecha aplicacion" -> "Fecha aplicacion";
       case "activo" -> "Activo";
       default -> normalizedHeader;
     };
+  }
+
+  private LocalDate parseOptionalDateCell(Cell cell) {
+    if (cell == null || cell.getCellType() == CellType.BLANK) {
+      return null;
+    }
+    String value = readCellAsString(cell);
+    if (value == null || value.isBlank()) {
+      return null;
+    }
+    for (DateTimeFormatter formatter : List.of(
+        DateTimeFormatter.ofPattern("d/M/uuuu"),
+        DateTimeFormatter.ofPattern("dd/MM/uuuu"),
+        DateTimeFormatter.ISO_LOCAL_DATE)) {
+      try {
+        return LocalDate.parse(value, formatter);
+      } catch (Exception ignored) {
+      }
+    }
+    throw new BusinessException(HttpStatus.BAD_REQUEST, "Fecha aplicacion invalida");
   }
 
   private String normalizeText(String value) {

@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Caso de uso para alternar el estado activo de un cliente.
+ */
 public class ToggleActivoClienteUseCase {
 
   private final ClienteApplicationService service;

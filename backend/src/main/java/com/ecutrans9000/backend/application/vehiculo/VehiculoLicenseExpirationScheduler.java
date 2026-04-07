@@ -6,6 +6,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+/**
+ * Scheduler que desactiva licencias vencidas de vehículos.
+ */
 public class VehiculoLicenseExpirationScheduler {
 
   private final VehiculoApplicationService vehiculoApplicationService;

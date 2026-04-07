@@ -4,6 +4,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +31,8 @@ public class DescuentoViajeUpsertRequest {
   @NotNull
   @DecimalMin(value = "0", inclusive = true)
   private BigDecimal montoMotivo;
+
+  private LocalDate fechaAplicacion;
 
   @NotNull
   private Boolean activo;

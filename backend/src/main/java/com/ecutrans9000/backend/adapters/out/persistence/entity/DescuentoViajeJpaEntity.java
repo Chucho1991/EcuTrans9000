@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -43,6 +44,9 @@ public class DescuentoViajeJpaEntity {
 
   @Column(name = "monto_motivo", nullable = false, precision = 12, scale = 2)
   private BigDecimal montoMotivo;
+
+  @Column(name = "fecha_aplicacion")
+  private LocalDate fechaAplicacion;
 
   @Column(name = "activo", nullable = false)
   private Boolean activo;

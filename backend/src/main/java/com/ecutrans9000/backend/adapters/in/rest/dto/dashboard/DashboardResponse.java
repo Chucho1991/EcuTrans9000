@@ -15,6 +15,9 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * DTO principal de salida para el dashboard administrativo.
+ */
 public class DashboardResponse {
   private LocalDateTime generatedAt;
   private Overview overview;

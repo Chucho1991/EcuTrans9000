@@ -49,6 +49,7 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - Todo catálogo con alto volumen de registros usado en filtros o formularios debe incluir buscador integrado para filtrar al menos por nombre y documento; en vehículos, también por placa y chofer cuando aplique.
 - En creación, edición, cambio de estado y login, mostrar popup descriptivo de la acción.
 - Los popups deben implementarse con componentes del template (modal/dialog), no con popups nativos del navegador.
+- Los formularios de creación y edición deben renderizarse en popup modal, no embebidos inline dentro de la página.
 - Prohibido usar `window.alert`, `window.confirm` o `window.prompt`.
 
 ## Plantilla para agregar un nuevo módulo (hexagonal)
@@ -102,18 +103,19 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - [ ] Formularios con mensajes al pie por campo obligatorio (nombre + breve descripción).
 - [ ] Popups descriptivos implementados para creación, edición, cambio de estado y login.
 - [ ] Popups implementados con estilo del template (sin `window.alert`/`window.confirm`/`window.prompt`).
+- [ ] Formularios de creación y edición presentados como popup modal consistente con el patrón del sistema.
 - [ ] README actualizado.
 - [ ] Archivos `.md` aplicables actualizados según el alcance del cambio.
 - [ ] Colección Postman actualizada en `/postman`.
 - [ ] Build/test ejecutados correctamente.
 
 ## Estado actual del proyecto
-- Módulo `USERS`: implementado con CRUD, soft delete, estados, perfil y auditoría.
-- Módulo `VEHICULOS`: implementado con CRUD, activar/inactivar, soft delete/restore, carga de imágenes/documentos, almacenamiento de archivos en DB (`vehiculo_archivos`) y carga masiva Excel con `preview` e `import`.
-- Módulo `CLIENTES`: implementado con CRUD, activar/inactivar, soft delete/restore, logo empresarial almacenado en DB dentro de `clientes`, campo `direccion` y carga masiva Excel con `preview`, `import`, plantilla y ejemplo.
-- Módulo `BITACORA`: implementado con CRUD, soft delete/restore, filtros por rango de fechas, exportación Excel basada en plantilla corporativa e importación Excel con plantilla simple y ejemplo.
-- Módulo `DESCUENTOS DE VIAJES`: implementado con CRUD, activar/inactivar, soft delete/restore, asociación de chofer mediante vehículo, importación Excel por placa y habilitación operativa por acceso dinámico de módulo; el eliminado lógico sigue reservado a `SUPERADMINISTRADOR`.
-- Módulo `CONSULTA POR PLACAS`: implementado con filtros por placa y rango de fechas, lectura desde bitácora, resumen financiero calculado (retención 1%, comisión 6%, anticipos, pago total) y exportación Excel con logo y estilo corporativo.
+- Módulo `USERS`: implementado con CRUD, soft delete, estados, perfil y auditoría; formularios de creación/edición en popup modal.
+- Módulo `VEHICULOS`: implementado con CRUD, activar/inactivar, soft delete/restore, carga de imágenes/documentos, almacenamiento de archivos en DB (`vehiculo_archivos`), carga masiva Excel con `preview` e `import` y formularios de creación/edición en popup modal.
+- Módulo `CLIENTES`: implementado con CRUD, activar/inactivar, soft delete/restore, logo empresarial almacenado en DB dentro de `clientes`, campo `direccion`, carga masiva Excel con `preview`, `import`, plantilla y ejemplo, y formularios de creación/edición en popup modal.
+- Módulo `BITACORA`: implementado con CRUD, soft delete/restore, filtros por rango de fechas, exportación Excel basada en plantilla corporativa, importación Excel con plantilla simple y ejemplo, y formularios de creación/edición en popup modal.
+- Módulo `DESCUENTOS DE VIAJES`: implementado con CRUD, activar/inactivar, soft delete/restore, asociación de chofer mediante vehículo, importación Excel por placa, formularios de creación/edición en popup modal y habilitación operativa por acceso dinámico de módulo; el eliminado lógico sigue reservado a `SUPERADMINISTRADOR`.
+- Módulo `CONSULTA POR PLACAS`: implementado con selección obligatoria de chofer por placa, rango de fechas obligatorio, filtro para aplicar o no retención del 1%, selección de descuentos activos por motivo asociados al chofer, recalculo visual en vivo según viajes marcados y exportación Excel limitada a los viajes seleccionados con total descuentos y detalle `Fecha - Motivo - Monto`.
 - Swagger/OpenAPI y colección Postman deben mantenerse sincronizados ante cada cambio de endpoint o payload.
 
 ## Habilidades

@@ -6,6 +6,9 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+/**
+ * Repositorio JPA para viajes registrados en bitácora.
+ */
 public interface ViajeBitacoraJpaRepository extends JpaRepository<ViajeBitacoraJpaEntity, UUID>, JpaSpecificationExecutor<ViajeBitacoraJpaEntity> {
 
   boolean existsByNumeroViaje(Integer numeroViaje);

@@ -66,6 +66,7 @@ public class DescuentoViajeService {
         .descripcionMotivo(clean(request.getDescripcionMotivo()))
         .descripcionMotivoNorm(normalizeText(request.getDescripcionMotivo()))
         .montoMotivo(request.getMontoMotivo())
+        .fechaAplicacion(request.getFechaAplicacion())
         .activo(Boolean.TRUE.equals(request.getActivo()))
         .deleted(false)
         .deletedAt(null)
@@ -89,6 +90,7 @@ public class DescuentoViajeService {
     entity.setDescripcionMotivo(clean(request.getDescripcionMotivo()));
     entity.setDescripcionMotivoNorm(normalizeText(request.getDescripcionMotivo()));
     entity.setMontoMotivo(request.getMontoMotivo());
+    entity.setFechaAplicacion(request.getFechaAplicacion());
     entity.setActivo(Boolean.TRUE.equals(request.getActivo()));
     entity.setUpdatedAt(LocalDateTime.now());
     DescuentoViajeJpaEntity saved = descuentoRepository.save(entity);
@@ -219,6 +221,7 @@ public class DescuentoViajeService {
         .vehiculoChofer(vehiculo.getChoferDefault())
         .descripcionMotivo(entity.getDescripcionMotivo())
         .montoMotivo(entity.getMontoMotivo())
+        .fechaAplicacion(entity.getFechaAplicacion())
         .activo(entity.getActivo())
         .deleted(entity.getDeleted())
         .deletedAt(entity.getDeletedAt())
@@ -248,4 +251,5 @@ public class DescuentoViajeService {
         .trim()
         .toLowerCase(Locale.ROOT);
   }
+
 }

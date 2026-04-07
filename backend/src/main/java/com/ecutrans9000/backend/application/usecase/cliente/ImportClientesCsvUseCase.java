@@ -7,6 +7,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Caso de uso para ejecutar la importación Excel de clientes.
+ */
 public class ImportClientesCsvUseCase {
 
   private final ClienteApplicationService service;

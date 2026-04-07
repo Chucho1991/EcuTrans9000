@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { PopupService } from '../../../core/services/popup.service';
+import { DatePickerComponent } from '../../../shared/components/date-picker/date-picker.component';
 import { CatalogSearchOption, CatalogSearchSelectComponent } from '../../../shared/components/catalog-search-select/catalog-search-select.component';
 import { AuthService } from '../../auth/services/auth.service';
 import { VehiculoResponse, VehiculosService } from '../../vehiculos/services/vehiculos.service';
@@ -15,7 +16,7 @@ import {
 @Component({
   selector: 'app-descuentos-viajes-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, CatalogSearchSelectComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, CatalogSearchSelectComponent, DatePickerComponent],
   templateUrl: './descuentos-viajes-list.component.html'
 })
 export class DescuentosViajesListComponent {
@@ -53,6 +54,7 @@ export class DescuentosViajesListComponent {
     vehiculoId: ['', [Validators.required]],
     descripcionMotivo: ['', [Validators.required]],
     montoMotivo: [0, [Validators.required, Validators.min(0)]],
+    fechaAplicacion: [''],
     activo: [true]
   });
 
@@ -87,6 +89,7 @@ export class DescuentosViajesListComponent {
       vehiculoId: '',
       descripcionMotivo: '',
       montoMotivo: 0,
+      fechaAplicacion: '',
       activo: true
     });
     this.showFormModal = true;
@@ -98,6 +101,7 @@ export class DescuentosViajesListComponent {
       vehiculoId: descuento.vehiculoId,
       descripcionMotivo: descuento.descripcionMotivo,
       montoMotivo: descuento.montoMotivo,
+      fechaAplicacion: descuento.fechaAplicacion ?? '',
       activo: descuento.activo
     });
     this.showFormModal = true;
@@ -156,6 +160,7 @@ export class DescuentosViajesListComponent {
       vehiculoId: value.vehiculoId ?? '',
       descripcionMotivo: value.descripcionMotivo ?? '',
       montoMotivo: Number(value.montoMotivo ?? 0),
+      fechaAplicacion: value.fechaAplicacion ? String(value.fechaAplicacion) : null,
       activo: Boolean(value.activo)
     };
 
