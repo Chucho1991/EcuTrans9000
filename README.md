@@ -1,6 +1,6 @@
 # EcuTrans9000
 
-Plataforma para digitalizar la operación de transporte: control de usuarios, bitácora de viajes, catálogo de vehículos/clientes y consulta financiera por placa.
+Plataforma para digitalizar la operación de transporte: control de usuarios, bitácora de viajes, descuentos por chofer, catálogo de vehículos/clientes y consulta financiera por placa.
 
 ## Servicios
 - Frontend (Angular): `http://localhost:4200`
@@ -74,6 +74,15 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - Si el cliente seleccionado tiene tabla de equivalencia, el formulario cambia `Destino` a selección por opciones y autocompleta `valor` y `costoChofer`
 - En la plantilla de importación, la columna `E` (`Documento cliente`) se genera con formato texto para conservar ceros a la izquierda y documentos numéricos largos
 
+### Módulo Descuentos de viajes (`/api/descuentos-viajes`)
+- CRUD operativo por chofer/vehículo con combo buscable por placa, documento o chofer
+- Campo autoincremental `id`
+- Estado activo/inactivo con acción directa en listado
+- Borrado lógico y restauración reservados para `SUPERADMINISTRADOR`
+- Importación masiva Excel con `preview`, `import`, plantilla y ejemplo
+- En importación Excel, la columna `placa` resuelve la asociación al chofer usando el catálogo de vehículos
+- El acceso operativo para roles distintos de `SUPERADMINISTRADOR` se habilita desde `settings/module-access`
+
 ### Módulo Placas (`/api/placas`)
 - Consulta por placa, código de viaje, estado de pago al chofer y rango de fechas
 - Resultados de consulta ordenados por número de bitácora (`numeroViaje`) de forma descendente
@@ -87,7 +96,7 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 ## Colección Postman
 - Archivo oficial: `postman/EcuTrans9000.postman_collection.json`
 - Ejecutar primero `Auth > Login` para poblar token.
-- Variables incluidas: `baseUrl`, `token`, `targetUserId`, `targetVehiculoId`, `targetClienteId`, `targetBitacoraId`.
+- Variables incluidas: `baseUrl`, `token`, `targetUserId`, `targetVehiculoId`, `targetClienteId`, `targetBitacoraId`, `targetDescuentoViajeId`.
 
 ## Validación de documentación
 Script:

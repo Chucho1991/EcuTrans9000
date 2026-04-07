@@ -20,6 +20,7 @@ export const APP_ROUTES: Routes = [
       { path: 'vehiculos', canActivate: [moduleAccessGuard], data: { moduleKey: 'VEHICULOS' }, loadComponent: () => import('./modules/vehiculos/pages/list/vehiculos-list.component').then(m => m.VehiculosListComponent) },
       { path: 'clientes', canActivate: [moduleAccessGuard], data: { moduleKey: 'CLIENTES' }, loadComponent: () => import('./modules/clientes/pages/list/clientes-list.component').then(m => m.ClientesListComponent) },
       { path: 'bitacora', canActivate: [moduleAccessGuard], data: { moduleKey: 'BITACORA' }, loadComponent: () => import('./modules/bitacora/pages/bitacora-list.component').then(m => m.BitacoraListComponent) },
+      { path: 'descuentos-viajes', canActivate: [moduleAccessGuard], data: { moduleKey: 'DESCUENTOS_VIAJES' }, loadComponent: () => import('./modules/descuentos-viajes/pages/descuentos-viajes-list.component').then(m => m.DescuentosViajesListComponent) },
       { path: 'placas', canActivate: [moduleAccessGuard], data: { moduleKey: 'PLACAS' }, loadComponent: () => import('./modules/placas/pages/placas-placeholder.component').then(m => m.PlacasPlaceholderComponent) }
     ]
   },

@@ -112,6 +112,7 @@ Los lineamientos base están en `Inicio.md` y son obligatorios.
 - Módulo `VEHICULOS`: implementado con CRUD, activar/inactivar, soft delete/restore, carga de imágenes/documentos, almacenamiento de archivos en DB (`vehiculo_archivos`) y carga masiva Excel con `preview` e `import`.
 - Módulo `CLIENTES`: implementado con CRUD, activar/inactivar, soft delete/restore, logo empresarial almacenado en DB dentro de `clientes`, campo `direccion` y carga masiva Excel con `preview`, `import`, plantilla y ejemplo.
 - Módulo `BITACORA`: implementado con CRUD, soft delete/restore, filtros por rango de fechas, exportación Excel basada en plantilla corporativa e importación Excel con plantilla simple y ejemplo.
+- Módulo `DESCUENTOS DE VIAJES`: implementado con CRUD, activar/inactivar, soft delete/restore, asociación de chofer mediante vehículo, importación Excel por placa y habilitación operativa por acceso dinámico de módulo; el eliminado lógico sigue reservado a `SUPERADMINISTRADOR`.
 - Módulo `CONSULTA POR PLACAS`: implementado con filtros por placa y rango de fechas, lectura desde bitácora, resumen financiero calculado (retención 1%, comisión 6%, anticipos, pago total) y exportación Excel con logo y estilo corporativo.
 - Swagger/OpenAPI y colección Postman deben mantenerse sincronizados ante cada cambio de endpoint o payload.
 

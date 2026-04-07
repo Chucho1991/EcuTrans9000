@@ -40,10 +40,10 @@ import {
             <option value="ACTIVO">ACTIVO</option>
             <option value="INACTIVO">INACTIVO</option>
           </select>
-          <select *ngIf="canAdmin()" class="filter-control" formControlName="includeDeleted">
-            <option value="false">No eliminados</option>
-            <option value="true">Incluir eliminados</option>
-          </select>
+          <label *ngIf="canAdmin()" class="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+            <input class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" type="checkbox" formControlName="includeDeleted" />
+            Incluir eliminados
+          </label>
           <div *ngIf="!canAdmin()"></div>
           <button class="btn-outline-neutral h-10 w-full rounded-lg font-medium hover:bg-gray-100" type="submit">Filtrar</button>
         </form>
@@ -305,15 +305,18 @@ import {
               <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M8 3h8l5 5v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
               Descargar ejemplo Excel
             </button>
-            <input class="form-control" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="onImportFileChange($event)" />
-            <select class="form-control" [(ngModel)]="importMode" [ngModelOptions]="{standalone: true}">
-              <option value="INSERT_ONLY">INSERT_ONLY</option>
-              <option value="UPSERT">UPSERT</option>
-            </select>
-            <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-              <input type="checkbox" [(ngModel)]="partialOk" [ngModelOptions]="{standalone: true}" />
-              partialOk
+            <label class="space-y-2">
+              <span class="form-label">Modo</span>
+              <select class="form-control" [(ngModel)]="importMode" [ngModelOptions]="{standalone: true}">
+                <option value="INSERT_ONLY">Solo insertar</option>
+                <option value="UPSERT">Insertar o actualizar</option>
+              </select>
             </label>
+            <label class="mt-8 inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+              <input type="checkbox" [(ngModel)]="partialOk" [ngModelOptions]="{standalone: true}" />
+              Continuar con filas validas
+            </label>
+            <input class="form-control md:col-span-2" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="onImportFileChange($event)" />
           </div>
 
           <div class="mt-4 flex flex-wrap gap-2">
@@ -373,7 +376,7 @@ export class VehiculosListComponent implements OnDestroy {
   protected readonly filtersForm = this.fb.nonNullable.group({
     q: [''],
     estado: [''],
-    includeDeleted: ['false']
+    includeDeleted: [false]
   });
 
   protected readonly vehiculoForm = this.fb.group({
@@ -412,7 +415,7 @@ export class VehiculosListComponent implements OnDestroy {
         size: this.size,
         q: filters.q || undefined,
         estado: filters.estado || undefined,
-        includeDeleted: this.canAdmin() && filters.includeDeleted === 'true'
+        includeDeleted: this.canAdmin() && Boolean(filters.includeDeleted)
       })
       .subscribe({
         next: (response) => {

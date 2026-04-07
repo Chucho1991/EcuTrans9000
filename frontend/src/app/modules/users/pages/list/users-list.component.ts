@@ -46,11 +46,10 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
             <option value="true">Activos</option>
             <option value="false">Inactivos</option>
           </select>
-          <select class="filter-control" formControlName="deleted">
-            <option value="">Eliminacion: todos</option>
-            <option value="false">No eliminados</option>
-            <option value="true">Eliminados</option>
-          </select>
+          <label class="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+            <input class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" type="checkbox" formControlName="includeDeleted" />
+            Incluir eliminados
+          </label>
           <button class="btn-outline-neutral h-10 w-full rounded-lg font-medium hover:bg-gray-100" type="submit">Filtrar</button>
         </form>
       </article>
@@ -289,7 +288,7 @@ export class UsersListComponent {
   protected readonly filtersForm = this.fb.nonNullable.group({
     rol: [''],
     activo: [''],
-    deleted: ['']
+    includeDeleted: [false]
   });
 
   protected readonly userForm = this.fb.group({
@@ -317,7 +316,7 @@ export class UsersListComponent {
         size: this.size,
         rol: filters.rol || undefined,
         activo: filters.activo === '' ? null : filters.activo === 'true',
-        deleted: filters.deleted === '' ? null : filters.deleted === 'true'
+        deleted: filters.includeDeleted ? null : false
       })
       .subscribe({
         next: (response) => {
