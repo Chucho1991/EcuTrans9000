@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Caso de uso para descargar plantillas Excel del módulo clientes.
+ */
 public class DownloadClientesCsvTemplateUseCase {
 
   private final ClienteApplicationService service;

@@ -2,19 +2,25 @@ package com.ecutrans9000.backend.application.cliente;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.ecutrans9000.backend.application.bitacora.ViajeBitacoraPendingValidationService;
 import com.ecutrans9000.backend.application.usecase.cliente.ClienteEquivalenciaUpsertCommand;
+import com.ecutrans9000.backend.application.usecase.cliente.ClienteUpsertCommand;
 import com.ecutrans9000.backend.domain.audit.ActionType;
 import com.ecutrans9000.backend.domain.cliente.Cliente;
 import com.ecutrans9000.backend.domain.cliente.TipoDocumentoCliente;
 import java.math.BigDecimal;
 import com.ecutrans9000.backend.ports.out.cliente.ClienteRepositoryPort;
 import com.ecutrans9000.backend.service.AuditService;
+import com.ecutrans9000.backend.service.BusinessException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -41,13 +47,16 @@ class ClienteApplicationServiceTest {
   @Mock
   private AuditService auditService;
 
+  @Mock
+  private ViajeBitacoraPendingValidationService viajeBitacoraPendingValidationService;
+
   @InjectMocks
   private ClienteApplicationService clienteApplicationService;
 
   @BeforeEach
   void setUp() {
     ReflectionTestUtils.setField(clienteApplicationService, "maxLogoBytes", 5_242_880L);
-    when(clienteRepositoryPort.save(any(Cliente.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    lenient().when(clienteRepositoryPort.save(any(Cliente.class))).thenAnswer(invocation -> invocation.getArgument(0));
   }
 
   @Test
@@ -123,6 +132,44 @@ class ClienteApplicationServiceTest {
     assertEquals("QUITO", result.getEquivalencias().get(0).getDestino());
     assertEquals(new BigDecimal("150"), result.getEquivalencias().get(0).getValorDestino());
     assertEquals(new BigDecimal("90"), result.getEquivalencias().get(0).getCostoChofer());
+  }
+
+  @Test
+  void toggleActivoShouldRejectWhenClienteHasPendingTrips() {
+    UUID clienteId = UUID.randomUUID();
+    when(clienteRepositoryPort.findById(clienteId)).thenReturn(Optional.of(buildCliente(clienteId)));
+    when(viajeBitacoraPendingValidationService.clienteTieneViajesPendientes(clienteId)).thenReturn(true);
+
+    BusinessException exception = assertThrows(
+        BusinessException.class,
+        () -> clienteApplicationService.toggleActivo(clienteId, "admin", "ROLE_SUPERADMINISTRADOR"));
+
+    assertEquals("No se puede desactivar el cliente porque tiene viajes con estados pendientes asociados", exception.getMessage());
+    verify(clienteRepositoryPort, never()).save(any(Cliente.class));
+  }
+
+  @Test
+  void updateShouldRejectWhenTryingToDeactivateClienteWithPendingTrips() {
+    UUID clienteId = UUID.randomUUID();
+    when(clienteRepositoryPort.findById(clienteId)).thenReturn(Optional.of(buildCliente(clienteId)));
+    when(viajeBitacoraPendingValidationService.clienteTieneViajesPendientes(clienteId)).thenReturn(true);
+
+    ClienteUpsertCommand command = new ClienteUpsertCommand(
+        TipoDocumentoCliente.RUC,
+        "1799999999001",
+        "Cliente Demo",
+        null,
+        "Direccion",
+        "Descripcion",
+        false,
+        false);
+
+    BusinessException exception = assertThrows(
+        BusinessException.class,
+        () -> clienteApplicationService.update(clienteId, command, "admin", "ROLE_SUPERADMINISTRADOR"));
+
+    assertEquals("No se puede desactivar el cliente porque tiene viajes con estados pendientes asociados", exception.getMessage());
+    verify(clienteRepositoryPort, never()).save(any(Cliente.class));
   }
 
   private Cliente buildCliente(UUID id) {

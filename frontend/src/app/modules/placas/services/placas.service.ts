@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/config/api.config';
 
 export interface ConsultaPlacaDetalleResponse {
+  id: string;
   ordenCompra: string;
   valor: number;
   fecha: string | null;
@@ -18,12 +19,14 @@ export interface ConsultaPlacaDetalleResponse {
 }
 
 export interface ConsultaPlacaResponse {
+  aplicaRetencion: boolean;
   placa: string | null;
   chofer: string | null;
   fechaDesde: string | null;
   fechaHasta: string | null;
   registros: ConsultaPlacaDetalleResponse[];
   valorFacturaTotal: number;
+  totalDescuentos: number;
   retencionUnoPorciento: number;
   comisionAdministrativaSeisPorciento: number;
   anticiposTotal: number;
@@ -36,56 +39,56 @@ export class PlacasService {
   private readonly baseUrl = `${API_BASE_URL}/placas/consulta`;
 
   consultar(params: {
-    placa?: string;
+    placa: string;
     codigoViaje?: string;
     estadoPagoChofer?: string;
-    fechaDesde?: string;
-    fechaHasta?: string;
+    fechaDesde: string;
+    fechaHasta: string;
+    aplicarRetencion: boolean;
   }): Observable<ConsultaPlacaResponse> {
-    let httpParams = new HttpParams();
+    let httpParams = new HttpParams()
+      .set('placa', params.placa)
+      .set('fechaDesde', params.fechaDesde)
+      .set('fechaHasta', params.fechaHasta)
+      .set('aplicarRetencion', params.aplicarRetencion);
 
-    if (params.placa) {
-      httpParams = httpParams.set('placa', params.placa);
-    }
     if (params.codigoViaje) {
       httpParams = httpParams.set('codigoViaje', params.codigoViaje);
     }
     if (params.estadoPagoChofer) {
       httpParams = httpParams.set('estadoPagoChofer', params.estadoPagoChofer);
-    }
-    if (params.fechaDesde) {
-      httpParams = httpParams.set('fechaDesde', params.fechaDesde);
-    }
-    if (params.fechaHasta) {
-      httpParams = httpParams.set('fechaHasta', params.fechaHasta);
     }
 
     return this.http.get<ConsultaPlacaResponse>(this.baseUrl, { params: httpParams });
   }
 
   exportar(params: {
-    placa?: string;
+    placa: string;
     codigoViaje?: string;
     estadoPagoChofer?: string;
-    fechaDesde?: string;
-    fechaHasta?: string;
+    fechaDesde: string;
+    fechaHasta: string;
+    aplicarRetencion: boolean;
+    descuentoIds?: number[];
+    viajeIds?: string[];
   }): Observable<Blob> {
-    let httpParams = new HttpParams();
+    let httpParams = new HttpParams()
+      .set('placa', params.placa)
+      .set('fechaDesde', params.fechaDesde)
+      .set('fechaHasta', params.fechaHasta)
+      .set('aplicarRetencion', params.aplicarRetencion);
 
-    if (params.placa) {
-      httpParams = httpParams.set('placa', params.placa);
-    }
     if (params.codigoViaje) {
       httpParams = httpParams.set('codigoViaje', params.codigoViaje);
     }
     if (params.estadoPagoChofer) {
       httpParams = httpParams.set('estadoPagoChofer', params.estadoPagoChofer);
     }
-    if (params.fechaDesde) {
-      httpParams = httpParams.set('fechaDesde', params.fechaDesde);
+    for (const descuentoId of params.descuentoIds ?? []) {
+      httpParams = httpParams.append('descuentoIds', descuentoId);
     }
-    if (params.fechaHasta) {
-      httpParams = httpParams.set('fechaHasta', params.fechaHasta);
+    for (const viajeId of params.viajeIds ?? []) {
+      httpParams = httpParams.append('viajeIds', viajeId);
     }
 
     return this.http.get(`${this.baseUrl}/export`, { params: httpParams, responseType: 'blob' });

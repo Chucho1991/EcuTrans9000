@@ -56,6 +56,10 @@ import { ThemeService } from '../core/services/theme.service';
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M6 3h12a2 2 0 0 1 2 2v14l-4-2-4 2-4-2-4 2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
               <span>Bitacora</span>
             </a>
+            <a *ngIf="hasModuleAccess('DESCUENTOS_VIAJES')" routerLink="/descuentos-viajes" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M7 7h10M7 12h6m-6 5h8M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Descuentos viajes</span>
+            </a>
             <a *ngIf="hasModuleAccess('PLACAS')" routerLink="/placas" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive">
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M4 7h16v10H4V7Zm4 3h8m-8 4h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span>Consulta por placas</span>
@@ -111,6 +115,10 @@ import { ThemeService } from '../core/services/theme.service';
             <a *ngIf="hasModuleAccess('BITACORA')" routerLink="/bitacora" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M6 3h12a2 2 0 0 1 2 2v14l-4-2-4 2-4-2-4 2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
               <span>Bitacora</span>
+            </a>
+            <a *ngIf="hasModuleAccess('DESCUENTOS_VIAJES')" routerLink="/descuentos-viajes" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M7 7h10M7 12h6m-6 5h8M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Descuentos viajes</span>
             </a>
             <a *ngIf="hasModuleAccess('PLACAS')" routerLink="/placas" routerLinkActive="menu-item-active" class="menu-item menu-item-inactive" (click)="closeMobileSidebar()">
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5"><path d="M4 7h16v10H4V7Zm4 3h8m-8 4h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>

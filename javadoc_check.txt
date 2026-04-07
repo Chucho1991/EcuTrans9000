@@ -1,0 +1,33 @@
+=== VALIDACION DE DOCUMENTACION ===
+Fecha: 2026-04-06 20:31:17
+
+[JAVADOCS]
+Tipos publicos sin Javadoc: 27
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\vehiculo\VehiculoLicenseExpirationScheduler.java:9
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\dashboard\DashboardQueryService.java:28
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\adapters\out\persistence\repository\ViajeBitacoraJpaRepository.java:9
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\adapters\out\persistence\repository\VehiculoArchivoJpaRepository.java:9
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\adapters\out\persistence\repository\ClienteJpaRepository.java:10
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\adapters\out\persistence\postgres\VehiculoArchivoRepositoryAdapter.java:17
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\UpdateClienteUseCase.java:11
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\ToggleActivoClienteUseCase.java:11
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\SoftDeleteClienteUseCase.java:11
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\RestoreClienteUseCase.java:11
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\PreviewClientesCsvUseCase.java:10
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\ListClientesUseCase.java:11
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\ImportMode.java:3
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\ImportClientesCsvUseCase.java:10
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\GetClienteByIdUseCase.java:11
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\ForceDeleteClienteUseCase.java:11
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\DownloadClientesCsvTemplateUseCase.java:9
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\CreateClienteUseCase.java:11
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\ClienteImportResult.java:10
+ - C:\Personal\SistemaTrafico\EcuTrans9000\backend\src\main\java\com\ecutrans9000\backend\application\usecase\cliente\ClienteImportError.java:3
+ - ... y 7 mas
+
+[POSTMAN]
+Variables faltantes: 0
+Endpoints faltantes: 0
+
+[README]
+Temas faltantes: 0

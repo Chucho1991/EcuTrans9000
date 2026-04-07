@@ -12,6 +12,9 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * DTO resumen de resultado para la importación Excel de bitácora.
+ */
 public class ViajeBitacoraImportResult {
   private int totalRows;
   private int processed;

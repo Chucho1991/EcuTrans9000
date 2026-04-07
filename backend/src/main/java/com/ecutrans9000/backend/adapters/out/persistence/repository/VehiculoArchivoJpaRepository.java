@@ -6,6 +6,9 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+/**
+ * Repositorio JPA para archivos binarios asociados a vehículos.
+ */
 public interface VehiculoArchivoJpaRepository extends JpaRepository<VehiculoArchivoJpaEntity, UUID> {
   Optional<VehiculoArchivoJpaEntity> findByVehiculoIdAndTipo(UUID vehiculoId, TipoArchivoVehiculo tipo);
 }

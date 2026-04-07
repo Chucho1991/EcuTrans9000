@@ -2,11 +2,16 @@ package com.ecutrans9000.backend.application.vehiculo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.ecutrans9000.backend.application.bitacora.ViajeBitacoraPendingValidationService;
+import com.ecutrans9000.backend.application.usecase.vehiculo.VehiculoUpsertCommand;
 import com.ecutrans9000.backend.domain.audit.ActionType;
 import com.ecutrans9000.backend.domain.vehiculo.EstadoVehiculo;
 import com.ecutrans9000.backend.domain.vehiculo.TipoArchivoVehiculo;
@@ -16,6 +21,7 @@ import com.ecutrans9000.backend.domain.vehiculo.VehiculoArchivo;
 import com.ecutrans9000.backend.ports.out.vehiculo.VehiculoArchivoRepositoryPort;
 import com.ecutrans9000.backend.ports.out.vehiculo.VehiculoRepositoryPort;
 import com.ecutrans9000.backend.service.AuditService;
+import com.ecutrans9000.backend.service.BusinessException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -46,14 +52,17 @@ class VehiculoApplicationServiceTest {
   @Mock
   private AuditService auditService;
 
+  @Mock
+  private ViajeBitacoraPendingValidationService viajeBitacoraPendingValidationService;
+
   @InjectMocks
   private VehiculoApplicationService vehiculoApplicationService;
 
   @BeforeEach
   void setUp() {
     ReflectionTestUtils.setField(vehiculoApplicationService, "maxImageBytes", 5_242_880L);
-    when(vehiculoRepositoryPort.save(any(Vehiculo.class))).thenAnswer(invocation -> invocation.getArgument(0));
-    when(vehiculoArchivoRepositoryPort.save(any(VehiculoArchivo.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    lenient().when(vehiculoRepositoryPort.save(any(Vehiculo.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    lenient().when(vehiculoArchivoRepositoryPort.save(any(VehiculoArchivo.class))).thenAnswer(invocation -> invocation.getArgument(0));
   }
 
   @Test
@@ -86,6 +95,46 @@ class VehiculoApplicationServiceTest {
     assertEquals("matricula.PDF", result.getDocPath());
     assertEquals("matricula.PDF", archivoGuardado.getFileName());
     assertEquals("application/pdf", archivoGuardado.getContentType());
+  }
+
+  @Test
+  void deactivateShouldRejectWhenChoferHasPendingTrips() {
+    UUID vehiculoId = UUID.randomUUID();
+    when(vehiculoRepositoryPort.findById(vehiculoId)).thenReturn(Optional.of(buildVehiculo(vehiculoId)));
+    when(viajeBitacoraPendingValidationService.vehiculoTieneViajesPendientes(vehiculoId)).thenReturn(true);
+
+    BusinessException exception = assertThrows(
+        BusinessException.class,
+        () -> vehiculoApplicationService.deactivate(vehiculoId, "admin", "ROLE_SUPERADMINISTRADOR"));
+
+    assertEquals("No se puede inactivar el chofer porque tiene viajes con estados pendientes asociados", exception.getMessage());
+    verify(vehiculoRepositoryPort, never()).save(any(Vehiculo.class));
+  }
+
+  @Test
+  void updateShouldRejectWhenTryingToDeactivateChoferWithPendingTrips() {
+    UUID vehiculoId = UUID.randomUUID();
+    when(vehiculoRepositoryPort.findById(vehiculoId)).thenReturn(Optional.of(buildVehiculo(vehiculoId)));
+    when(viajeBitacoraPendingValidationService.vehiculoTieneViajesPendientes(vehiculoId)).thenReturn(true);
+
+    VehiculoUpsertCommand command = new VehiculoUpsertCommand(
+        "ABC-123",
+        "Chofer",
+        "LIC-1",
+        null,
+        TipoDocumento.CEDULA,
+        "0102030405",
+        "Banco Pichincha - 1234567890",
+        "PESADO",
+        BigDecimal.ONE,
+        EstadoVehiculo.INACTIVO);
+
+    BusinessException exception = assertThrows(
+        BusinessException.class,
+        () -> vehiculoApplicationService.update(vehiculoId, command, "admin", "ROLE_SUPERADMINISTRADOR"));
+
+    assertEquals("No se puede inactivar el chofer porque tiene viajes con estados pendientes asociados", exception.getMessage());
+    verify(vehiculoRepositoryPort, never()).save(any(Vehiculo.class));
   }
 
   private Vehiculo buildVehiculo(UUID id) {

@@ -11,7 +11,8 @@ public enum SystemModule {
   VEHICULOS("Vehiculos"),
   CLIENTES("Clientes"),
   BITACORA("Bitacora"),
-  PLACAS("Consulta por placas");
+  PLACAS("Consulta por placas"),
+  DESCUENTOS_VIAJES("Descuentos viajes");
 
   private final String label;
 

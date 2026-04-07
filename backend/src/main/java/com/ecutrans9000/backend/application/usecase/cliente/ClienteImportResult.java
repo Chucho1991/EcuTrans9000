@@ -7,6 +7,9 @@ import lombok.Getter;
 
 @Getter
 @Builder
+/**
+ * Resultado consolidado de una importación masiva de clientes.
+ */
 public class ClienteImportResult {
   private int totalRows;
   private int processed;

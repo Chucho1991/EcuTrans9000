@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Caso de uso para restaurar clientes eliminados lógicamente.
+ */
 public class RestoreClienteUseCase {
 
   private final ClienteApplicationService service;

@@ -40,10 +40,10 @@ import {
             <option value="ACTIVO">ACTIVO</option>
             <option value="INACTIVO">INACTIVO</option>
           </select>
-          <select *ngIf="canAdmin()" class="filter-control" formControlName="includeDeleted">
-            <option value="false">No eliminados</option>
-            <option value="true">Incluir eliminados</option>
-          </select>
+          <label *ngIf="canAdmin()" class="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+            <input class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" type="checkbox" formControlName="includeDeleted" />
+            Incluir eliminados
+          </label>
           <div *ngIf="!canAdmin()"></div>
           <button class="btn-outline-neutral h-10 w-full rounded-lg font-medium hover:bg-gray-100" type="submit">Filtrar</button>
         </form>
@@ -185,10 +185,17 @@ import {
         </div>
       </article>
 
-      <article class="panel-card min-w-0 w-full max-w-full p-4 sm:p-6 lg:p-7" *ngIf="mode !== 'none'">
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/70 p-4" *ngIf="mode !== 'none'">
+        <article class="panel-card w-full max-w-6xl p-5 sm:p-6 lg:p-7">
         <div class="flex flex-wrap items-start justify-between gap-2">
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ mode === 'create' ? 'Crear vehiculo' : 'Editar vehiculo' }}</h2>
-          <span class="text-xs text-gray-500 dark:text-gray-400">Campos obligatorios y subida de imagenes</span>
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ mode === 'create' ? 'Crear vehiculo' : 'Editar vehiculo' }}</h2>
+            <span class="text-xs text-gray-500 dark:text-gray-400">Campos obligatorios y subida de imagenes</span>
+          </div>
+          <button class="icon-action-btn" type="button" aria-label="Cerrar" (click)="cancelForm()">
+            <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+            <span class="icon-action-tooltip">Cerrar</span>
+          </button>
         </div>
 
         <form class="mt-5 min-w-0 w-full grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12" [formGroup]="vehiculoForm" (ngSubmit)="submitVehiculo()">
@@ -287,7 +294,8 @@ import {
             <button class="w-full rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 sm:w-auto" type="submit">{{ mode === 'create' ? 'Crear' : 'Guardar cambios' }}</button>
           </div>
         </form>
-      </article>
+        </article>
+      </div>
 
       <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/70 p-4" *ngIf="showImportModal">
         <article class="panel-card w-full max-w-3xl p-5 sm:p-6">
@@ -305,15 +313,18 @@ import {
               <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M8 3h8l5 5v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
               Descargar ejemplo Excel
             </button>
-            <input class="form-control" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="onImportFileChange($event)" />
-            <select class="form-control" [(ngModel)]="importMode" [ngModelOptions]="{standalone: true}">
-              <option value="INSERT_ONLY">INSERT_ONLY</option>
-              <option value="UPSERT">UPSERT</option>
-            </select>
-            <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-              <input type="checkbox" [(ngModel)]="partialOk" [ngModelOptions]="{standalone: true}" />
-              partialOk
+            <label class="space-y-2">
+              <span class="form-label">Modo</span>
+              <select class="form-control" [(ngModel)]="importMode" [ngModelOptions]="{standalone: true}">
+                <option value="INSERT_ONLY">Solo insertar</option>
+                <option value="UPSERT">Insertar o actualizar</option>
+              </select>
             </label>
+            <label class="mt-8 inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+              <input type="checkbox" [(ngModel)]="partialOk" [ngModelOptions]="{standalone: true}" />
+              Continuar con filas validas
+            </label>
+            <input class="form-control md:col-span-2" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="onImportFileChange($event)" />
           </div>
 
           <div class="mt-4 flex flex-wrap gap-2">
@@ -373,7 +384,7 @@ export class VehiculosListComponent implements OnDestroy {
   protected readonly filtersForm = this.fb.nonNullable.group({
     q: [''],
     estado: [''],
-    includeDeleted: ['false']
+    includeDeleted: [false]
   });
 
   protected readonly vehiculoForm = this.fb.group({
@@ -412,7 +423,7 @@ export class VehiculosListComponent implements OnDestroy {
         size: this.size,
         q: filters.q || undefined,
         estado: filters.estado || undefined,
-        includeDeleted: this.canAdmin() && filters.includeDeleted === 'true'
+        includeDeleted: this.canAdmin() && Boolean(filters.includeDeleted)
       })
       .subscribe({
         next: (response) => {
@@ -553,7 +564,12 @@ export class VehiculosListComponent implements OnDestroy {
     if (!confirmed) {
       return;
     }
-    this.vehiculosService.activate(vehiculo.id).subscribe(() => this.loadVehiculos(this.page));
+    this.vehiculosService.activate(vehiculo.id).subscribe({
+      next: () => this.loadVehiculos(this.page),
+      error: (error) => {
+        void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
+      }
+    });
   }
 
   protected async deactivate(vehiculo: VehiculoResponse): Promise<void> {
@@ -561,7 +577,12 @@ export class VehiculosListComponent implements OnDestroy {
     if (!confirmed) {
       return;
     }
-    this.vehiculosService.deactivate(vehiculo.id).subscribe(() => this.loadVehiculos(this.page));
+    this.vehiculosService.deactivate(vehiculo.id).subscribe({
+      next: () => this.loadVehiculos(this.page),
+      error: (error) => {
+        void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
+      }
+    });
   }
 
   protected async softDelete(vehiculo: VehiculoResponse): Promise<void> {
@@ -569,7 +590,12 @@ export class VehiculosListComponent implements OnDestroy {
     if (!confirmed) {
       return;
     }
-    this.vehiculosService.softDelete(vehiculo.id).subscribe(() => this.loadVehiculos(this.page));
+    this.vehiculosService.softDelete(vehiculo.id).subscribe({
+      next: () => this.loadVehiculos(this.page),
+      error: (error) => {
+        void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
+      }
+    });
   }
 
   protected async restore(vehiculo: VehiculoResponse): Promise<void> {
@@ -577,7 +603,12 @@ export class VehiculosListComponent implements OnDestroy {
     if (!confirmed) {
       return;
     }
-    this.vehiculosService.restore(vehiculo.id).subscribe(() => this.loadVehiculos(this.page));
+    this.vehiculosService.restore(vehiculo.id).subscribe({
+      next: () => this.loadVehiculos(this.page),
+      error: (error) => {
+        void this.popupService.info({ title: 'Error', message: this.getErrorMessage(error) });
+      }
+    });
   }
 
   protected downloadDocumento(vehiculo: VehiculoResponse): void {

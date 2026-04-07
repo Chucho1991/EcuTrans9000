@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Caso de uso para aplicar borrado lógico sobre clientes.
+ */
 public class SoftDeleteClienteUseCase {
 
   private final ClienteApplicationService service;

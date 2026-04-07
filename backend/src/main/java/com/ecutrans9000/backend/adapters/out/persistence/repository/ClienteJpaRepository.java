@@ -7,6 +7,9 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+/**
+ * Repositorio JPA para clientes operativos.
+ */
 public interface ClienteJpaRepository extends JpaRepository<ClienteJpaEntity, UUID>, JpaSpecificationExecutor<ClienteJpaEntity> {
 
   boolean existsByDocumentoNorm(String documentoNorm);

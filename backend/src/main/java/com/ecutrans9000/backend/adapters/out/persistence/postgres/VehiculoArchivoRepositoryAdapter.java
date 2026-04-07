@@ -14,6 +14,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+/**
+ * Adaptador de persistencia para almacenar y consultar archivos de vehículos en PostgreSQL.
+ */
 public class VehiculoArchivoRepositoryAdapter implements VehiculoArchivoRepositoryPort {
 
   private final VehiculoArchivoJpaRepository repository;

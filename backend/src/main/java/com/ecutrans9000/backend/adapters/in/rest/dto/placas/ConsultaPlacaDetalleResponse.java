@@ -2,6 +2,7 @@ package com.ecutrans9000.backend.adapters.in.rest.dto.placas;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +18,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConsultaPlacaDetalleResponse {
+  private UUID id;
   private String ordenCompra;
   private BigDecimal valor;
   private LocalDate fecha;

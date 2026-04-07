@@ -29,6 +29,10 @@
     {
       "key": "targetClienteId",
       "value": ""
+    },
+    {
+      "key": "targetDescuentoViajeId",
+      "value": ""
     }
   ],
   "item": [
@@ -1691,6 +1695,419 @@
       ]
     },
     {
+      "name": "Descuentos Viajes",
+      "item": [
+        {
+          "name": "List Descuentos Viajes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/descuentos-viajes?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "descuentos-viajes"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Descuento Viaje",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehiculoId\": \"{{targetVehiculoId}}\",\n  \"descripcionMotivo\": \"DESCUENTO POR PEAJE\",\n  \"montoMotivo\": 15.5,\n  \"activo\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/descuentos-viajes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "descuentos-viajes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var json = pm.response.json();",
+                  "  if (json && json.id) {",
+                  "    pm.collectionVariables.set('targetDescuentoViajeId', json.id);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Get Descuento Viaje By Id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/descuentos-viajes/{{targetDescuentoViajeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "descuentos-viajes",
+                "{{targetDescuentoViajeId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Descuento Viaje",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehiculoId\": \"{{targetVehiculoId}}\",\n  \"descripcionMotivo\": \"DESCUENTO AJUSTADO\",\n  \"montoMotivo\": 18.75,\n  \"activo\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/descuentos-viajes/{{targetDescuentoViajeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "descuentos-viajes",
+                "{{targetDescuentoViajeId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Descuento Viaje",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/descuentos-viajes/{{targetDescuentoViajeId}}/activate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "descuentos-viajes",
+                "{{targetDescuentoViajeId}}",
+                "activate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Descuento Viaje",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/descuentos-viajes/{{targetDescuentoViajeId}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "descuentos-viajes",
+                "{{targetDescuentoViajeId}}",
+                "deactivate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Soft Delete Descuento Viaje",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/descuentos-viajes/{{targetDescuentoViajeId}}/soft-delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "descuentos-viajes",
+                "{{targetDescuentoViajeId}}",
+                "soft-delete"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Restore Descuento Viaje",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/descuentos-viajes/{{targetDescuentoViajeId}}/restore",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "descuentos-viajes",
+                "{{targetDescuentoViajeId}}",
+                "restore"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download Descuentos Template",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/descuentos-viajes/import/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "descuentos-viajes",
+                "import",
+                "template"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download Descuentos Template Example",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/descuentos-viajes/import/template/example",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "descuentos-viajes",
+                "import",
+                "template",
+                "example"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Preview Import Descuentos Viajes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/descuentos-viajes/import/preview?mode=INSERT_ONLY&partialOk=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "descuentos-viajes",
+                "import",
+                "preview"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Import Descuentos Viajes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/descuentos-viajes/import?mode=INSERT_ONLY&partialOk=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "descuentos-viajes",
+                "import"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Clientes",
       "item": [
         {
@@ -2322,7 +2739,7 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/placas/consulta?placa=PAE4249&codigoViaje=120&estadoPagoChofer=NO_PAGADOS&fechaDesde=2026-01-01&fechaHasta=2026-12-31",
+              "raw": "{{baseUrl}}/api/placas/consulta?placa=PAE4249&codigoViaje=120&estadoPagoChofer=NO_PAGADOS&fechaDesde=2026-01-01&fechaHasta=2026-12-31&aplicarRetencion=true",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2351,6 +2768,10 @@
                 {
                   "key": "fechaHasta",
                   "value": "2026-12-31"
+                },
+                {
+                  "key": "aplicarRetencion",
+                  "value": "true"
                 }
               ]
             }
@@ -2372,7 +2793,7 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/placas/consulta/export?placa=PAE4249&codigoViaje=120&estadoPagoChofer=NO_PAGADOS&fechaDesde=2026-01-01&fechaHasta=2026-12-31",
+              "raw": "{{baseUrl}}/api/placas/consulta/export?placa=PAE4249&codigoViaje=120&estadoPagoChofer=NO_PAGADOS&fechaDesde=2026-01-01&fechaHasta=2026-12-31&aplicarRetencion=true&descuentoIds=1&descuentoIds=2&viajeIds=11111111-1111-1111-1111-111111111111",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2402,6 +2823,22 @@
                 {
                   "key": "fechaHasta",
                   "value": "2026-12-31"
+                },
+                {
+                  "key": "aplicarRetencion",
+                  "value": "true"
+                },
+                {
+                  "key": "descuentoIds",
+                  "value": "1"
+                },
+                {
+                  "key": "descuentoIds",
+                  "value": "2"
+                },
+                {
+                  "key": "viajeIds",
+                  "value": "11111111-1111-1111-1111-111111111111"
                 }
               ]
             }
@@ -2412,3 +2849,4 @@
     }
   ]
 }
+

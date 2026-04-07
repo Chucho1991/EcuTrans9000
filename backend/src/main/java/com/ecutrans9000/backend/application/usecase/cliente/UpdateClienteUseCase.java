@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Caso de uso para actualizar clientes existentes.
+ */
 public class UpdateClienteUseCase {
 
   private final ClienteApplicationService service;

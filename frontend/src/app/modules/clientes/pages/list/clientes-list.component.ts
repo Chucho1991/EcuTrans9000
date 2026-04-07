@@ -58,7 +58,7 @@ export class ClientesListComponent implements OnDestroy {
 
   protected readonly filtersForm = this.fb.nonNullable.group({
     q: [''],
-    includeDeleted: ['false']
+    includeDeleted: [false]
   });
 
   protected readonly clienteForm = this.fb.group({
@@ -97,7 +97,7 @@ export class ClientesListComponent implements OnDestroy {
         page: safePage,
         size: this.size,
         q: filters.q || undefined,
-        includeDeleted: this.canAdmin() && filters.includeDeleted === 'true'
+        includeDeleted: this.canAdmin() && Boolean(filters.includeDeleted)
       })
       .subscribe({
         next: (response) => {

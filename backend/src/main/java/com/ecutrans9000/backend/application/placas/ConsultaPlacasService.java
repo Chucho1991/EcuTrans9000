@@ -3,9 +3,11 @@ package com.ecutrans9000.backend.application.placas;
 import com.ecutrans9000.backend.adapters.in.rest.dto.placas.ConsultaPlacaDetalleResponse;
 import com.ecutrans9000.backend.adapters.in.rest.dto.placas.ConsultaPlacaResponse;
 import com.ecutrans9000.backend.adapters.out.persistence.entity.ClienteJpaEntity;
+import com.ecutrans9000.backend.adapters.out.persistence.entity.DescuentoViajeJpaEntity;
 import com.ecutrans9000.backend.adapters.out.persistence.entity.VehiculoJpaEntity;
 import com.ecutrans9000.backend.adapters.out.persistence.entity.ViajeBitacoraJpaEntity;
 import com.ecutrans9000.backend.adapters.out.persistence.repository.ClienteJpaRepository;
+import com.ecutrans9000.backend.adapters.out.persistence.repository.DescuentoViajeJpaRepository;
 import com.ecutrans9000.backend.adapters.out.persistence.repository.VehiculoJpaRepository;
 import com.ecutrans9000.backend.adapters.out.persistence.repository.ViajeBitacoraJpaRepository;
 import com.ecutrans9000.backend.domain.bitacora.EstadoPagoChoferFiltro;
@@ -20,8 +22,11 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -59,14 +64,17 @@ public class ConsultaPlacasService {
   private final ViajeBitacoraJpaRepository viajeRepository;
   private final VehiculoJpaRepository vehiculoRepository;
   private final ClienteJpaRepository clienteRepository;
+  private final DescuentoViajeJpaRepository descuentoRepository;
 
   public ConsultaPlacasService(
       ViajeBitacoraJpaRepository viajeRepository,
       VehiculoJpaRepository vehiculoRepository,
-      ClienteJpaRepository clienteRepository) {
+      ClienteJpaRepository clienteRepository,
+      DescuentoViajeJpaRepository descuentoRepository) {
     this.viajeRepository = viajeRepository;
     this.vehiculoRepository = vehiculoRepository;
     this.clienteRepository = clienteRepository;
+    this.descuentoRepository = descuentoRepository;
   }
 
   @Transactional(readOnly = true)
@@ -75,17 +83,18 @@ public class ConsultaPlacasService {
       String codigoViaje,
       EstadoPagoChoferFiltro estadoPagoChofer,
       LocalDate fechaDesde,
-      LocalDate fechaHasta) {
-    validateDateRange(fechaDesde, fechaHasta);
+      LocalDate fechaHasta,
+      boolean aplicarRetencion) {
+    validateFilters(placa, fechaDesde, fechaHasta);
 
-    Optional<VehiculoJpaEntity> vehiculo = resolveVehiculo(placa);
+    VehiculoJpaEntity vehiculo = resolveVehiculo(placa);
     List<ViajeBitacoraJpaEntity> viajes = loadViajes(
-        vehiculo.orElse(null),
+        vehiculo,
         codigoViaje,
         estadoPagoChofer == null ? EstadoPagoChoferFiltro.TODOS : estadoPagoChofer,
         fechaDesde,
         fechaHasta);
-    return buildResponse(placa, vehiculo.orElse(null), fechaDesde, fechaHasta, viajes);
+    return buildResponse(vehiculo, fechaDesde, fechaHasta, viajes, aplicarRetencion, List.of());
   }
 
   @Transactional(readOnly = true)
@@ -94,8 +103,21 @@ public class ConsultaPlacasService {
       String codigoViaje,
       EstadoPagoChoferFiltro estadoPagoChofer,
       LocalDate fechaDesde,
-      LocalDate fechaHasta) {
-    ConsultaPlacaResponse response = consultar(placa, codigoViaje, estadoPagoChofer, fechaDesde, fechaHasta);
+      LocalDate fechaHasta,
+      boolean aplicarRetencion,
+      List<Long> descuentoIds,
+      List<UUID> viajeIds) {
+    validateFilters(placa, fechaDesde, fechaHasta);
+
+    VehiculoJpaEntity vehiculo = resolveVehiculo(placa);
+    List<ViajeBitacoraJpaEntity> viajes = filterSelectedViajes(loadViajes(
+        vehiculo,
+        codigoViaje,
+        estadoPagoChofer == null ? EstadoPagoChoferFiltro.TODOS : estadoPagoChofer,
+        fechaDesde,
+        fechaHasta), viajeIds);
+    List<DescuentoViajeJpaEntity> descuentos = loadSelectedDescuentos(vehiculo, descuentoIds);
+    ConsultaPlacaResponse response = buildResponse(vehiculo, fechaDesde, fechaHasta, viajes, aplicarRetencion, descuentos);
 
     try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
       XSSFSheet sheet = workbook.createSheet("Consulta Placas");
@@ -106,7 +128,9 @@ public class ConsultaPlacasService {
       addLogo(workbook, sheet);
       writeHeaderBlock(sheet, styles, response);
       writeTable(sheet, styles, response.getRegistros());
-      writeSummary(sheet, styles, response, 8 + response.getRegistros().size() + 2);
+      int summaryStart = 8 + response.getRegistros().size() + 2;
+      int nextRow = writeSummary(sheet, styles, response, summaryStart);
+      writeDiscountsBlock(sheet, styles, descuentos, nextRow + 1);
 
       workbook.write(outputStream);
       return outputStream.toByteArray();
@@ -115,11 +139,9 @@ public class ConsultaPlacasService {
     }
   }
 
-  private Optional<VehiculoJpaEntity> resolveVehiculo(String placa) {
-    if (placa == null || placa.isBlank()) {
-      return Optional.empty();
-    }
-    return vehiculoRepository.findByPlacaNorm(Vehiculo.normalizePlaca(placa));
+  private VehiculoJpaEntity resolveVehiculo(String placa) {
+    return vehiculoRepository.findByPlacaNorm(Vehiculo.normalizePlaca(placa))
+        .orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST, "La placa seleccionada no existe"));
   }
 
   private List<ViajeBitacoraJpaEntity> loadViajes(
@@ -128,13 +150,6 @@ public class ConsultaPlacasService {
       EstadoPagoChoferFiltro estadoPagoChofer,
       LocalDate fechaDesde,
       LocalDate fechaHasta) {
-    if (vehiculo == null
-        && isBlank(codigoViaje)
-        && fechaDesde == null
-        && fechaHasta == null
-        && estadoPagoChofer == EstadoPagoChoferFiltro.TODOS) {
-      return List.of();
-    }
     Specification<ViajeBitacoraJpaEntity> specification = buildSpecification(
         vehiculo,
         codigoViaje,
@@ -176,28 +191,32 @@ public class ConsultaPlacasService {
   }
 
   private ConsultaPlacaResponse buildResponse(
-      String placaFilter,
       VehiculoJpaEntity vehiculo,
       LocalDate fechaDesde,
       LocalDate fechaHasta,
-      List<ViajeBitacoraJpaEntity> viajes) {
+      List<ViajeBitacoraJpaEntity> viajes,
+      boolean aplicarRetencion,
+      List<DescuentoViajeJpaEntity> descuentos) {
     List<ConsultaPlacaDetalleResponse> registros = viajes.stream()
         .map(this::toDetalleResponse)
         .toList();
 
     BigDecimal valorFacturaTotal = scale(sum(viajes, ViajeBitacoraJpaEntity::getValor));
-    BigDecimal retencion = scale(valorFacturaTotal.multiply(ONE_PERCENT));
+    BigDecimal totalDescuentos = scale(sumDescuentos(descuentos));
+    BigDecimal retencion = aplicarRetencion ? scale(valorFacturaTotal.multiply(ONE_PERCENT)) : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
     BigDecimal comision = scale(valorFacturaTotal.multiply(SIX_PERCENT));
     BigDecimal anticipos = scale(sum(viajes, ViajeBitacoraJpaEntity::getAnticipo));
-    BigDecimal pagoTotal = scale(valorFacturaTotal.subtract(retencion).subtract(comision).subtract(anticipos));
+    BigDecimal pagoTotal = scale(valorFacturaTotal.subtract(retencion).subtract(comision).subtract(anticipos).subtract(totalDescuentos));
 
     return ConsultaPlacaResponse.builder()
-        .placa(vehiculo != null ? vehiculo.getPlaca() : cleanText(placaFilter))
-        .chofer(vehiculo != null ? vehiculo.getChoferDefault() : null)
+        .aplicaRetencion(aplicarRetencion)
+        .placa(vehiculo.getPlaca())
+        .chofer(vehiculo.getChoferDefault())
         .fechaDesde(fechaDesde)
         .fechaHasta(fechaHasta)
         .registros(registros)
         .valorFacturaTotal(valorFacturaTotal)
+        .totalDescuentos(totalDescuentos)
         .retencionUnoPorciento(retencion)
         .comisionAdministrativaSeisPorciento(comision)
         .anticiposTotal(anticipos)
@@ -210,6 +229,7 @@ public class ConsultaPlacasService {
         .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Cliente relacionado no encontrado"));
 
     return ConsultaPlacaDetalleResponse.builder()
+        .id(viaje.getId())
         .ordenCompra(String.valueOf(viaje.getNumeroViaje()))
         .valor(scale(viaje.getValor()))
         .fecha(viaje.getFechaViaje())
@@ -303,12 +323,14 @@ public class ConsultaPlacasService {
     sheet.setAutoFilter(new CellRangeAddress(headerRowIndex, headerRowIndex, 0, columns.length - 1));
   }
 
-  private void writeSummary(XSSFSheet sheet, Styles styles, ConsultaPlacaResponse response, int startRowIndex) {
+  private int writeSummary(XSSFSheet sheet, Styles styles, ConsultaPlacaResponse response, int startRowIndex) {
     writeSummaryRow(sheet, startRowIndex, "Valor Factura", response.getValorFacturaTotal(), styles, false);
     writeSummaryRow(sheet, startRowIndex + 1, "Retencion 1%", response.getRetencionUnoPorciento(), styles, false);
     writeSummaryRow(sheet, startRowIndex + 2, "Ecutran comision", response.getComisionAdministrativaSeisPorciento(), styles, false);
     writeSummaryRow(sheet, startRowIndex + 3, "Anticipos", response.getAnticiposTotal(), styles, false);
-    writeSummaryRow(sheet, startRowIndex + 4, "Pago Total", response.getPagoTotal(), styles, true);
+    writeSummaryRow(sheet, startRowIndex + 4, "Total descuentos", response.getTotalDescuentos(), styles, false);
+    writeSummaryRow(sheet, startRowIndex + 5, "Pago Total", response.getPagoTotal(), styles, true);
+    return startRowIndex + 6;
   }
 
   private void writeSummaryRow(
@@ -471,9 +493,6 @@ public class ConsultaPlacasService {
   }
 
   private String buildPeriodLabel(LocalDate fechaDesde, LocalDate fechaHasta) {
-    if (fechaDesde == null && fechaHasta == null) {
-      return null;
-    }
     String desde = fechaDesde == null ? "-" : formatDate(fechaDesde);
     String hasta = fechaHasta == null ? "-" : formatDate(fechaHasta);
     return "Periodo: " + desde + " a " + hasta;
@@ -483,9 +502,76 @@ public class ConsultaPlacasService {
     return value == null ? "-" : DISPLAY_DATE_FORMATTER.format(value);
   }
 
-  private void validateDateRange(LocalDate fechaDesde, LocalDate fechaHasta) {
+  private void validateFilters(String placa, LocalDate fechaDesde, LocalDate fechaHasta) {
+    if (isBlank(placa)) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "La placa es obligatoria");
+    }
+    if (fechaDesde == null) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "La fecha desde es obligatoria");
+    }
+    if (fechaHasta == null) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "La fecha hasta es obligatoria");
+    }
     if (fechaDesde != null && fechaHasta != null && fechaDesde.isAfter(fechaHasta)) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "La fecha desde no puede ser mayor a la fecha hasta");
+    }
+  }
+
+  private List<ViajeBitacoraJpaEntity> filterSelectedViajes(List<ViajeBitacoraJpaEntity> viajes, List<UUID> viajeIds) {
+    if (viajeIds == null || viajeIds.isEmpty()) {
+      return viajes;
+    }
+    Set<UUID> selectedIds = viajeIds.stream().filter(id -> id != null).collect(Collectors.toSet());
+    List<ViajeBitacoraJpaEntity> filtered = viajes.stream()
+        .filter(viaje -> selectedIds.contains(viaje.getId()))
+        .toList();
+    if (filtered.isEmpty()) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "Debes seleccionar al menos un viaje valido para exportar");
+    }
+    return filtered;
+  }
+
+  private List<DescuentoViajeJpaEntity> loadSelectedDescuentos(VehiculoJpaEntity vehiculo, List<Long> descuentoIds) {
+    if (descuentoIds == null || descuentoIds.isEmpty()) {
+      return List.of();
+    }
+    List<DescuentoViajeJpaEntity> descuentos = descuentoRepository.findAllById(descuentoIds).stream()
+        .filter(descuento -> Boolean.TRUE.equals(descuento.getActivo()) && !Boolean.TRUE.equals(descuento.getDeleted()))
+        .filter(descuento -> vehiculo.getId().equals(descuento.getVehiculoId()))
+        .sorted(Comparator
+            .comparing(DescuentoViajeJpaEntity::getFechaAplicacion, Comparator.nullsLast(Comparator.naturalOrder()))
+            .thenComparing(DescuentoViajeJpaEntity::getDescripcionMotivo, Comparator.nullsLast(String::compareToIgnoreCase)))
+        .toList();
+    if (descuentos.size() != descuentoIds.stream().filter(id -> id != null).collect(Collectors.toSet()).size()) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "Los descuentos seleccionados no son validos para la placa indicada");
+    }
+    return descuentos;
+  }
+
+  private BigDecimal sumDescuentos(List<DescuentoViajeJpaEntity> descuentos) {
+    return descuentos.stream()
+        .map(DescuentoViajeJpaEntity::getMontoMotivo)
+        .filter(value -> value != null)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+  }
+
+  private void writeDiscountsBlock(XSSFSheet sheet, Styles styles, List<DescuentoViajeJpaEntity> descuentos, int startRowIndex) {
+    Row titleRow = getOrCreateRow(sheet, startRowIndex);
+    writeTextCell(titleRow, 0, "Descuentos aplicados", styles.summaryLabelStrong);
+
+    if (descuentos.isEmpty()) {
+      Row emptyRow = getOrCreateRow(sheet, startRowIndex + 1);
+      writeTextCell(emptyRow, 0, "No se aplicaron descuentos", styles.summaryLabel);
+      return;
+    }
+
+    int rowIndex = startRowIndex + 1;
+    for (DescuentoViajeJpaEntity descuento : descuentos) {
+      Row row = getOrCreateRow(sheet, rowIndex++);
+      String fecha = formatDate(descuento.getFechaAplicacion());
+      String motivo = cleanTextOrDash(descuento.getDescripcionMotivo());
+      writeTextCell(row, 0, fecha + " - " + motivo, styles.summaryLabel);
+      writeMoneyCell(row, 1, descuento.getMontoMotivo(), styles.summaryValue);
     }
   }
 

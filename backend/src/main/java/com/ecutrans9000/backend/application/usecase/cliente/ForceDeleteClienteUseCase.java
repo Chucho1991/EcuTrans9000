@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Caso de uso para eliminar físicamente clientes cuando la operación está autorizada.
+ */
 public class ForceDeleteClienteUseCase {
 
   private final ClienteApplicationService service;

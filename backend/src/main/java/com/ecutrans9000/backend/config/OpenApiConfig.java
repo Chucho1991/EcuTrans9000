@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
     info = @Info(
         title = "EcuTrans9000 API",
         version = "v1",
-        description = "Documentacion centralizada de la API para autenticacion, administracion de usuarios, configuracion por modulos y operaciones principales de clientes, vehiculos, bitacora y consulta por placas.",
+        description = "Documentacion centralizada de la API para autenticacion, administracion de usuarios, configuracion por modulos y operaciones principales de clientes, vehiculos, bitacora, descuentos de viajes y consulta por placas.",
         contact = @Contact(name = "EcuTrans9000", email = "soporte@ecutrans9000.local"),
         license = @License(name = "Proprietary")
     ),

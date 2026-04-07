@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Caso de uso para consultar el detalle de un cliente por identificador.
+ */
 public class GetClienteByIdUseCase {
 
   private final ClienteApplicationService service;

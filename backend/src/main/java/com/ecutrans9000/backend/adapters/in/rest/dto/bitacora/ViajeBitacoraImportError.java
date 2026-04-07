@@ -11,6 +11,9 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * DTO de error por fila para la importación Excel de bitácora.
+ */
 public class ViajeBitacoraImportError {
   private int row;
   private String column;

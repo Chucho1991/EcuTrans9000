@@ -22,6 +22,9 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * Entidad JPA para binarios y metadatos asociados a vehículos.
+ */
 public class VehiculoArchivoJpaEntity {
 
   @Id

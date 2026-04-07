@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Caso de uso para listar clientes con filtros paginados.
+ */
 public class ListClientesUseCase {
 
   private final ClienteApplicationService service;

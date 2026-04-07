@@ -18,12 +18,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConsultaPlacaResponse {
+  private Boolean aplicaRetencion;
   private String placa;
   private String chofer;
   private LocalDate fechaDesde;
   private LocalDate fechaHasta;
   private List<ConsultaPlacaDetalleResponse> registros;
   private BigDecimal valorFacturaTotal;
+  private BigDecimal totalDescuentos;
   private BigDecimal retencionUnoPorciento;
   private BigDecimal comisionAdministrativaSeisPorciento;
   private BigDecimal anticiposTotal;

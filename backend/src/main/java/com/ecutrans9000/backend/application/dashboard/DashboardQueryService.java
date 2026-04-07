@@ -25,6 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+/**
+ * Servicio de consulta para consolidar la información del dashboard administrativo.
+ */
 public class DashboardQueryService {
 
   private static final Locale DASHBOARD_LOCALE = Locale.forLanguageTag("es-EC");

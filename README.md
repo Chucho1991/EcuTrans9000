@@ -1,6 +1,6 @@
 # EcuTrans9000
 
-Plataforma para digitalizar la operación de transporte: control de usuarios, bitácora de viajes, catálogo de vehículos/clientes y consulta financiera por placa.
+Plataforma para digitalizar la operación de transporte: control de usuarios, bitácora de viajes, descuentos por chofer, catálogo de vehículos/clientes y consulta financiera por placa.
 
 ## Servicios
 - Frontend (Nginx + Angular compilado): `http://localhost`
@@ -62,6 +62,7 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - CRUD administrativo (sin hard delete)
 - Estados: activar, desactivar, soft-delete, restore
 - Perfil autenticado: `GET /users/me`, `PUT /users/me`
+- Formularios de creación y edición presentados en popup modal del template
 
 ### Configuración de accesos por rol (`/settings/module-access`)
 - `GET /settings/module-access/me`
@@ -74,6 +75,8 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - Campo adicional `cuentaBancaria` disponible en formulario, detalle, listado e importación Excel
 - Carga/lectura de foto, documento y licencia
 - Importación masiva (`preview` y `import`) y plantillas
+- Si el chofer asociado tiene viajes pendientes de pago al transportista, no se permite inactivar ni eliminar el registro
+- Formularios de creación y edición presentados en popup modal del template
 
 ### Módulo Clientes (`/clientes`)
 - CRUD operativo + estados
@@ -83,6 +86,8 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - Flag `Aplica Tabla de Equivalencia` por cliente
 - Tabla de equivalencia por destino con carga Excel (`DESTINO`, `VALOR DESTINO`, `COSTO CHOFER`)
 - Edición manual de equivalencias desde el detalle del cliente
+- Si el cliente tiene viajes con facturación o cobro pendientes, no se permite inactivarlo ni eliminarlo
+- Formularios de creación y edición presentados en popup modal del template
 
 ### Módulo Bitácora (`/api/bitacora/viajes`)
 - CRUD operativo + borrado lógico/restauración
@@ -92,9 +97,22 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - Campo obligatorio `costoChofer` en creación, edición e importación Excel
 - Si el cliente seleccionado tiene tabla de equivalencia, el formulario cambia `Destino` a selección por opciones y autocompleta `valor` y `costoChofer`
 - En la plantilla de importación, la columna `E` (`Documento cliente`) se genera con formato texto para conservar ceros a la izquierda y documentos numéricos largos
+- Formularios de creación y edición presentados en popup modal del template
+
+### Módulo Descuentos de viajes (`/api/descuentos-viajes`)
+- CRUD operativo por chofer/vehículo con combo buscable por placa, documento o chofer
+- Campo autoincremental `id`
+- Campo informativo `fechaAplicacion` con selector de fecha en formulario
+- Estado activo/inactivo con acción directa en listado
+- Borrado lógico y restauración reservados para `SUPERADMINISTRADOR`
+- Importación masiva Excel con `preview`, `import`, plantilla y ejemplo
+- En importación Excel, la columna `placa` resuelve la asociación al chofer usando el catálogo de vehículos
+- El acceso operativo para roles distintos de `SUPERADMINISTRADOR` se habilita desde `settings/module-access`
 
 ### Módulo Placas (`/api/placas`)
-- Consulta por placa, código de viaje, estado de pago al chofer y rango de fechas
+- Consulta financiera con placa/chofer obligatorio, fechas inicio-fin obligatorias, filtro de estado de pago al chofer y filtro para aplicar o no retención del 1%
+- Soporta selección de descuentos activos por motivo para el chofer asociado a la placa
+- La exportación Excel permite incluir solo los viajes marcados y aplicar los descuentos seleccionados
 - Resultados de consulta ordenados por número de bitácora (`numeroViaje`) de forma descendente
 - Exportación financiera por placa
 
@@ -111,7 +129,7 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 ## Colección Postman
 - Archivo oficial: `postman/EcuTrans9000.postman_collection.json`
 - Ejecutar primero `Auth > Login` para poblar token.
-- Variables incluidas: `baseUrl`, `token`, `targetUserId`, `targetVehiculoId`, `targetClienteId`, `targetBitacoraId`.
+- Variables incluidas: `baseUrl`, `token`, `targetUserId`, `targetVehiculoId`, `targetClienteId`, `targetBitacoraId`, `targetDescuentoViajeId`.
 
 ## Validación de documentación
 Script:
@@ -124,6 +142,7 @@ Valida Javadocs públicos, cobertura base de Postman y secciones obligatorias de
 - Diseño responsive en móvil/tablet/escritorio.
 - Tema oscuro por defecto con toggle persistente.
 - Uso de popups visuales del template (sin `window.alert/confirm/prompt`).
+- Los formularios de creación y edición se muestran como popup modal consistente en los módulos operativos.
 - Estados visuales consistentes (`ACTIVO`, `INACTIVO`, `ELIMINADO`).
 - Los catálogos grandes usados en filtros y formularios deben ofrecer buscador integrado.
 - En clientes, el buscador de catálogo debe permitir filtrar por documento y nombre.
