@@ -55,7 +55,7 @@ export interface DescuentoViajeImportResult {
 @Injectable({ providedIn: 'root' })
 export class DescuentosViajesService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${API_BASE_URL}/descuentos-viajes`;
+  private readonly baseUrl = `${API_BASE_URL}/api/descuentos-viajes`;
 
   list(params: {
     page: number;
