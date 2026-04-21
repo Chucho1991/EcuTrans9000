@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { API_BASE_URL } from '../../../core/config/api.config';
+import { buildApiUrl } from '../../../core/config/api.config';
 
 export interface ViajeBitacoraResponse {
   id: string;
@@ -81,7 +81,7 @@ export interface ViajeBitacoraImportResult {
 @Injectable({ providedIn: 'root' })
 export class BitacoraService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${API_BASE_URL}/api/bitacora/viajes`;
+  private readonly baseUrl = buildApiUrl('/api/bitacora/viajes');
 
   list(params: {
     page: number;

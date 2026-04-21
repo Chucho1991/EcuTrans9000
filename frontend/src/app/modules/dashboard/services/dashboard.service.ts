@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { API_BASE_URL } from '../../../core/config/api.config';
+import { buildApiUrl } from '../../../core/config/api.config';
 
 export interface DashboardOverview {
   usuariosActivos: number;
@@ -83,6 +83,6 @@ export class DashboardService {
   private readonly http = inject(HttpClient);
 
   getMetrics(): Observable<DashboardResponse> {
-    return this.http.get<DashboardResponse>(`${API_BASE_URL}/dashboard`);
+    return this.http.get<DashboardResponse>(buildApiUrl('/dashboard'));
   }
 }

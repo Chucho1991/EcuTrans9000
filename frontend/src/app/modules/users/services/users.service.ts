@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { API_BASE_URL } from '../../../core/config/api.config';
+import { buildApiUrl } from '../../../core/config/api.config';
 
 export interface UserResponse {
   id: string;
@@ -53,6 +53,7 @@ export interface UpdateMyProfileRequest {
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   private readonly http = inject(HttpClient);
+  private readonly baseUrl = buildApiUrl('/users');
 
   list(params: {
     page: number;
@@ -73,46 +74,46 @@ export class UsersService {
     if (params.deleted !== null && params.deleted !== undefined) {
       httpParams = httpParams.set('deleted', params.deleted);
     }
-    return this.http.get<UserListResponse>(`${API_BASE_URL}/users`, { params: httpParams });
+    return this.http.get<UserListResponse>(this.baseUrl, { params: httpParams });
   }
 
   getById(id: string): Observable<UserResponse> {
-    return this.http.get<UserResponse>(`${API_BASE_URL}/users/${id}`);
+    return this.http.get<UserResponse>(`${this.baseUrl}/${id}`);
   }
 
   create(payload: CreateUserRequest): Observable<UserResponse> {
-    return this.http.post<UserResponse>(`${API_BASE_URL}/users`, payload);
+    return this.http.post<UserResponse>(this.baseUrl, payload);
   }
 
   update(id: string, payload: UpdateUserRequest): Observable<UserResponse> {
-    return this.http.put<UserResponse>(`${API_BASE_URL}/users/${id}`, payload);
+    return this.http.put<UserResponse>(`${this.baseUrl}/${id}`, payload);
   }
 
   softDelete(id: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${API_BASE_URL}/users/${id}/soft-delete`, {});
+    return this.http.post<{ message: string }>(`${this.baseUrl}/${id}/soft-delete`, {});
   }
 
   restore(id: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${API_BASE_URL}/users/${id}/restore`, {});
+    return this.http.post<{ message: string }>(`${this.baseUrl}/${id}/restore`, {});
   }
 
   activate(id: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${API_BASE_URL}/users/${id}/activate`, {});
+    return this.http.post<{ message: string }>(`${this.baseUrl}/${id}/activate`, {});
   }
 
   deactivate(id: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${API_BASE_URL}/users/${id}/deactivate`, {});
+    return this.http.post<{ message: string }>(`${this.baseUrl}/${id}/deactivate`, {});
   }
 
   hardDelete(id: string): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${API_BASE_URL}/users/${id}`);
+    return this.http.delete<{ message: string }>(`${this.baseUrl}/${id}`);
   }
 
   me(): Observable<UserResponse> {
-    return this.http.get<UserResponse>(`${API_BASE_URL}/users/me`);
+    return this.http.get<UserResponse>(`${this.baseUrl}/me`);
   }
 
   updateMe(payload: UpdateMyProfileRequest): Observable<UserResponse> {
-    return this.http.put<UserResponse>(`${API_BASE_URL}/users/me`, payload);
+    return this.http.put<UserResponse>(`${this.baseUrl}/me`, payload);
   }
 }

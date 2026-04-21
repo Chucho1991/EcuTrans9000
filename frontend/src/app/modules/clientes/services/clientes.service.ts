@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { API_BASE_URL } from '../../../core/config/api.config';
+import { buildApiUrl } from '../../../core/config/api.config';
 
 export type TipoDocumentoCliente = 'CEDULA' | 'RUC' | 'PASAPORTE';
 
@@ -78,7 +78,7 @@ export interface ClienteImportResult {
 @Injectable({ providedIn: 'root' })
 export class ClientesService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${API_BASE_URL}/clientes`;
+  private readonly baseUrl = buildApiUrl('/clientes');
 
   list(params: {
     page: number;
