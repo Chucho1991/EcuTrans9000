@@ -27,6 +27,11 @@ cp .env.example .env
 docker compose up --build
 ```
 
+## Seguridad de PostgreSQL
+- PostgreSQL se publica solo en `127.0.0.1:5432`, por lo que no acepta conexiones remotas desde otras máquinas de la red.
+- El backend se conecta internamente por la red de Docker usando `postgres:5432`, así que no requiere exposición pública del puerto.
+- Si no necesitas acceder con herramientas locales como DBeaver o `psql` desde tu PC, puedes endurecer aún más la configuración eliminando por completo la publicación del puerto `5432` en `docker-compose.yml`.
+
 ## Usuario inicial
 El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - Username: `admin`
