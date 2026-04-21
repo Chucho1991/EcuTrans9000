@@ -16,6 +16,7 @@ type EstadoPagoChoferOption = 'TODOS' | 'PAGADOS' | 'NO_PAGADOS';
 
 type ConsultaResumen = {
   valorFacturaTotal: number;
+  valorBitacoraTotal: number;
   retencionUnoPorciento: number;
   comisionAdministrativaSeisPorciento: number;
   anticiposTotal: number;
@@ -179,10 +180,14 @@ type ConsultaResumen = {
         <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-6">
           <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
             <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Valor factura</p>
+            <p class="mt-1 text-[11px] font-medium text-gray-500 dark:text-gray-400">Costo chofer</p>
             <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{{ resumenActual.valorFacturaTotal | number: '1.2-2' }}</p>
           </div>
           <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
             <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Retencion 1%</p>
+            <p class="mt-1 text-[11px] font-medium text-gray-500 dark:text-gray-400">
+              de total valor bitacora ({{ resumenActual.valorBitacoraTotal | number: '1.2-2' }})
+            </p>
             <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{{ resumenActual.retencionUnoPorciento | number: '1.2-2' }}</p>
           </div>
           <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
@@ -238,7 +243,8 @@ type ConsultaResumen = {
                 </th>
                 <th class="px-3 py-3 font-semibold">Orden de compra</th>
                 <th class="px-3 py-3 font-semibold">Pago chofer</th>
-                <th class="px-3 py-3 font-semibold">Valor</th>
+                <th class="px-3 py-3 font-semibold">Costo viaje</th>
+                <th class="px-3 py-3 font-semibold">Valor chofer</th>
                 <th class="px-3 py-3 font-semibold">Fecha</th>
                 <th class="px-3 py-3 font-semibold">Factura</th>
                 <th class="px-3 py-3 font-semibold">Anticipos</th>
@@ -267,6 +273,7 @@ type ConsultaResumen = {
                     {{ registro.pagadoTransportista ? 'Pagado' : 'Pendiente' }}
                   </span>
                 </td>
+                <td class="px-3 py-3">{{ registro.valorBitacora | number: '1.2-2' }}</td>
                 <td class="px-3 py-3">{{ registro.valor | number: '1.2-2' }}</td>
                 <td class="px-3 py-3">{{ formatFecha(registro.fecha) }}</td>
                 <td class="px-3 py-3">{{ displayText(registro.factura) }}</td>
@@ -277,7 +284,7 @@ type ConsultaResumen = {
                 <td class="px-3 py-3">{{ displayText(registro.origenDestino) }}</td>
               </tr>
               <tr *ngIf="registros.length === 0">
-                <td class="px-4 py-8 text-center text-gray-500 dark:text-gray-400" colspan="11">
+                <td class="px-4 py-8 text-center text-gray-500 dark:text-gray-400" colspan="12">
                   {{ searched ? 'No hay registros para los filtros seleccionados.' : 'La lista esta vacia. Selecciona placa, fechas y filtra para consultar la bitacora.' }}
                 </td>
               </tr>
@@ -352,22 +359,26 @@ export class PlacasPlaceholderComponent {
   protected get resumenActual(): ConsultaResumen {
     const viajesSeleccionados = this.registros.filter((registro) => this.selectedViajeIds.has(registro.id));
     const valorFacturaTotal = this.round(viajesSeleccionados.reduce((sum, registro) => sum + Number(registro.valor ?? 0), 0));
+    const valorBitacoraTotal = this.round(viajesSeleccionados.reduce((sum, registro) => sum + Number(registro.valorBitacora ?? 0), 0));
+    const estibaTotal = this.round(viajesSeleccionados.reduce((sum, registro) => sum + Number(registro.estiba ?? 0), 0));
     const anticiposTotal = this.round(viajesSeleccionados.reduce((sum, registro) => sum + Number(registro.anticipo ?? 0), 0));
     const totalDescuentos = this.round(this.descuentosSeleccionados.reduce((sum, descuento) => sum + Number(descuento.montoMotivo ?? 0), 0));
     const retencionUnoPorciento = this.filtersForm.controls.aplicarRetencion.getRawValue()
-      ? this.round(valorFacturaTotal * 0.01)
+      ? this.round(valorBitacoraTotal * 0.01)
       : 0;
     const comisionAdministrativaSeisPorciento = this.round(valorFacturaTotal * 0.06);
     const pagoTotal = this.round(
       valorFacturaTotal
+      + estibaTotal
+      - totalDescuentos
       - retencionUnoPorciento
       - comisionAdministrativaSeisPorciento
       - anticiposTotal
-      - totalDescuentos
     );
 
     return {
       valorFacturaTotal,
+      valorBitacoraTotal,
       retencionUnoPorciento,
       comisionAdministrativaSeisPorciento,
       anticiposTotal,

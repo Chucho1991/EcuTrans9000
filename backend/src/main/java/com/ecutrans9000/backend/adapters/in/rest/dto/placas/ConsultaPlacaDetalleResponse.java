@@ -21,6 +21,7 @@ public class ConsultaPlacaDetalleResponse {
   private UUID id;
   private String ordenCompra;
   private BigDecimal valor;
+  private BigDecimal valorBitacora;
   private LocalDate fecha;
   private String factura;
   private BigDecimal anticipo;
