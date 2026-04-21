@@ -341,9 +341,17 @@ public class ConsultaPlacasService {
     writeSummaryRow(sheet, startRowIndex + 1, "Retencion 1%", response.getRetencionUnoPorciento(), styles, false);
     writeSummaryRow(sheet, startRowIndex + 2, "Ecutran comision", response.getComisionAdministrativaSeisPorciento(), styles, false);
     writeSummaryRow(sheet, startRowIndex + 3, "Anticipos", response.getAnticiposTotal(), styles, false);
-    writeSummaryRow(sheet, startRowIndex + 4, "Total descuentos", response.getTotalDescuentos(), styles, false);
-    writeSummaryRow(sheet, startRowIndex + 5, "Pago Total", response.getPagoTotal(), styles, true);
-    return startRowIndex + 6;
+    writeSummaryRow(sheet, startRowIndex + 4, "Estiba", sumEstiba(response.getRegistros()), styles, false);
+    writeSummaryRow(sheet, startRowIndex + 5, "Total descuentos", response.getTotalDescuentos(), styles, false);
+    writeSummaryRow(sheet, startRowIndex + 6, "Pago Total", response.getPagoTotal(), styles, true);
+    return startRowIndex + 7;
+  }
+
+  private BigDecimal sumEstiba(List<ConsultaPlacaDetalleResponse> registros) {
+    return scale(registros.stream()
+        .map(ConsultaPlacaDetalleResponse::getEstiba)
+        .filter(value -> value != null)
+        .reduce(BigDecimal.ZERO, BigDecimal::add));
   }
 
   private void writeSummaryRow(
