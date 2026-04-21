@@ -2,7 +2,7 @@ import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
-import { buildApiUrl } from '../../../core/config/api.config';
+import { API_BASE_URL } from '../../../core/config/api.config';
 
 export type EstadoVehiculo = 'ACTIVO' | 'INACTIVO';
 export type TipoDocumento = 'CEDULA' | 'RUC' | 'PASAPORTE';
@@ -74,7 +74,7 @@ export interface VehiculoFileDownload {
 @Injectable({ providedIn: 'root' })
 export class VehiculosService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = buildApiUrl('/api/vehiculos');
+  private readonly baseUrl = `${API_BASE_URL}/api/vehiculos`;
 
   list(params: {
     page: number;

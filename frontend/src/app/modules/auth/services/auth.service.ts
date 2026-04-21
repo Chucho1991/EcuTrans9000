@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
-import { buildApiUrl } from '../../../core/config/api.config';
+import { API_BASE_URL } from '../../../core/config/api.config';
 import { ModuleAccessService } from '../../../core/services/module-access.service';
 const TOKEN_KEY = 'ecutrans9000_token';
 const USER_KEY = 'ecutrans9000_user';
@@ -28,7 +28,7 @@ export class AuthService {
   private readonly moduleAccessService = inject(ModuleAccessService);
 
   login(payload: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(buildApiUrl('/auth/login'), payload).pipe(
+    return this.http.post<LoginResponse>(`${API_BASE_URL}/auth/login`, payload).pipe(
       tap((response) => {
         this.moduleAccessService.clearCache();
         localStorage.setItem(TOKEN_KEY, response.token);

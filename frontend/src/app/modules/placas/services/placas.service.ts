@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { buildApiUrl } from '../../../core/config/api.config';
+import { API_BASE_URL } from '../../../core/config/api.config';
 
 export interface ConsultaPlacaDetalleResponse {
   id: string;
@@ -36,7 +36,7 @@ export interface ConsultaPlacaResponse {
 @Injectable({ providedIn: 'root' })
 export class PlacasService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = buildApiUrl('/api/placas/consulta');
+  private readonly baseUrl = `${API_BASE_URL}/api/placas/consulta`;
 
   consultar(params: {
     placa: string;

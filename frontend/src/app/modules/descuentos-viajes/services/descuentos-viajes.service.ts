@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { buildApiUrl } from '../../../core/config/api.config';
+import { API_BASE_URL } from '../../../core/config/api.config';
 
 export interface DescuentoViajeResponse {
   id: number;
@@ -55,7 +55,7 @@ export interface DescuentoViajeImportResult {
 @Injectable({ providedIn: 'root' })
 export class DescuentosViajesService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = buildApiUrl('/api/descuentos-viajes');
+  private readonly baseUrl = `${API_BASE_URL}/api/descuentos-viajes`;
 
   list(params: {
     page: number;

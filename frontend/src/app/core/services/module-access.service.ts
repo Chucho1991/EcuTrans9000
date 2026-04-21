@@ -3,7 +3,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
 
-import { buildApiUrl } from '../config/api.config';
+import { API_BASE_URL } from '../config/api.config';
 
 const USER_KEY = 'ecutrans9000_user';
 const CONFIGURABLE_MODULE_KEYS = ['DASHBOARD', 'VEHICULOS', 'CLIENTES', 'BITACORA', 'PLACAS'] as const;
@@ -49,7 +49,7 @@ export class ModuleAccessService {
     }
 
     if (!this.pendingRequest$ || force) {
-      this.pendingRequest$ = this.http.get<CurrentModuleAccessResponse>(buildApiUrl('/settings/module-access/me')).pipe(
+      this.pendingRequest$ = this.http.get<CurrentModuleAccessResponse>(`${API_BASE_URL}/settings/module-access/me`).pipe(
         map((response) => new Set(response.allowedModules ?? [])),
         tap((modules) => {
           this.accessState.set(modules);
