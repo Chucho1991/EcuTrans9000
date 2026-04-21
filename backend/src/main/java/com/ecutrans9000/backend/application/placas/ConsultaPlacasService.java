@@ -201,12 +201,22 @@ public class ConsultaPlacasService {
         .map(this::toDetalleResponse)
         .toList();
 
-    BigDecimal valorFacturaTotal = scale(sum(viajes, ViajeBitacoraJpaEntity::getValor));
+    BigDecimal valorFacturaTotal = scale(sum(viajes, ViajeBitacoraJpaEntity::getCostoChofer));
+    BigDecimal valorBitacoraTotal = scale(sum(viajes, ViajeBitacoraJpaEntity::getValor));
+    BigDecimal estibaTotal = scale(sum(viajes, ViajeBitacoraJpaEntity::getEstiba));
     BigDecimal totalDescuentos = scale(sumDescuentos(descuentos));
-    BigDecimal retencion = aplicarRetencion ? scale(valorFacturaTotal.multiply(ONE_PERCENT)) : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+    BigDecimal retencion = aplicarRetencion
+        ? scale(valorBitacoraTotal.multiply(ONE_PERCENT))
+        : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
     BigDecimal comision = scale(valorFacturaTotal.multiply(SIX_PERCENT));
     BigDecimal anticipos = scale(sum(viajes, ViajeBitacoraJpaEntity::getAnticipo));
-    BigDecimal pagoTotal = scale(valorFacturaTotal.subtract(retencion).subtract(comision).subtract(anticipos).subtract(totalDescuentos));
+    BigDecimal pagoTotal = scale(
+        valorFacturaTotal
+            .add(estibaTotal)
+            .subtract(totalDescuentos)
+            .subtract(comision)
+            .subtract(anticipos)
+            .subtract(retencion));
 
     return ConsultaPlacaResponse.builder()
         .aplicaRetencion(aplicarRetencion)
@@ -231,7 +241,8 @@ public class ConsultaPlacasService {
     return ConsultaPlacaDetalleResponse.builder()
         .id(viaje.getId())
         .ordenCompra(String.valueOf(viaje.getNumeroViaje()))
-        .valor(scale(viaje.getValor()))
+        .valor(scale(viaje.getCostoChofer()))
+        .valorBitacora(scale(viaje.getValor()))
         .fecha(viaje.getFechaViaje())
         .factura(cleanTextOrDash(viaje.getNumeroFactura()))
         .anticipo(scale(viaje.getAnticipo()))
@@ -281,7 +292,8 @@ public class ConsultaPlacasService {
     Row header = getOrCreateRow(sheet, headerRowIndex);
     String[] columns = {
         "Orden de compra",
-        "Valor",
+        "Valor viaje",
+        "Valor chofer",
         "Fecha",
         "Factura",
         "Anticipos",
@@ -301,15 +313,16 @@ public class ConsultaPlacasService {
     for (ConsultaPlacaDetalleResponse registro : registros) {
       Row row = getOrCreateRow(sheet, rowIndex++);
       writeTextCell(row, 0, registro.getOrdenCompra(), styles.textCell);
-      writeMoneyCell(row, 1, registro.getValor(), styles.moneyCell);
-      writeTextCell(row, 2, formatDate(registro.getFecha()), styles.centerCell);
-      writeTextCell(row, 3, registro.getFactura(), styles.centerCell);
-      writeMoneyCell(row, 4, registro.getAnticipo(), styles.moneyCell);
-      writeMoneyCell(row, 5, registro.getEstiba(), styles.moneyCell);
-      writeTextCell(row, 6, registro.getDespacho(), styles.textCell);
-      writeTextCell(row, 7, registro.getCliente(), styles.textCell);
-      writeTextCell(row, 8, registro.getOrigenDestino(), styles.textCell);
-      writeTextCell(row, 9, Boolean.TRUE.equals(registro.getPagadoTransportista()) ? "Pagado" : "Pendiente", styles.centerCell);
+      writeMoneyCell(row, 1, registro.getValorBitacora(), styles.moneyCell);
+      writeMoneyCell(row, 2, registro.getValor(), styles.moneyCell);
+      writeTextCell(row, 3, formatDate(registro.getFecha()), styles.centerCell);
+      writeTextCell(row, 4, registro.getFactura(), styles.centerCell);
+      writeMoneyCell(row, 5, registro.getAnticipo(), styles.moneyCell);
+      writeMoneyCell(row, 6, registro.getEstiba(), styles.moneyCell);
+      writeTextCell(row, 7, registro.getDespacho(), styles.textCell);
+      writeTextCell(row, 8, registro.getCliente(), styles.textCell);
+      writeTextCell(row, 9, registro.getOrigenDestino(), styles.textCell);
+      writeTextCell(row, 10, Boolean.TRUE.equals(registro.getPagadoTransportista()) ? "Pagado" : "Pendiente", styles.centerCell);
     }
 
     if (registros.isEmpty()) {
@@ -324,7 +337,7 @@ public class ConsultaPlacasService {
   }
 
   private int writeSummary(XSSFSheet sheet, Styles styles, ConsultaPlacaResponse response, int startRowIndex) {
-    writeSummaryRow(sheet, startRowIndex, "Valor Factura", response.getValorFacturaTotal(), styles, false);
+    writeSummaryRow(sheet, startRowIndex, "Valor consulta", response.getValorFacturaTotal(), styles, false);
     writeSummaryRow(sheet, startRowIndex + 1, "Retencion 1%", response.getRetencionUnoPorciento(), styles, false);
     writeSummaryRow(sheet, startRowIndex + 2, "Ecutran comision", response.getComisionAdministrativaSeisPorciento(), styles, false);
     writeSummaryRow(sheet, startRowIndex + 3, "Anticipos", response.getAnticiposTotal(), styles, false);
@@ -469,7 +482,7 @@ public class ConsultaPlacasService {
   }
 
   private void configureColumns(XSSFSheet sheet) {
-    int[] widths = {20, 15, 16, 14, 14, 14, 16, 24, 30, 16};
+    int[] widths = {20, 15, 15, 16, 14, 14, 14, 16, 24, 30, 16};
     for (int i = 0; i < widths.length; i++) {
       sheet.setColumnWidth(i, widths[i] * 256);
     }

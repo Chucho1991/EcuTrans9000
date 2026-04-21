@@ -8,6 +8,7 @@ export interface ConsultaPlacaDetalleResponse {
   id: string;
   ordenCompra: string;
   valor: number;
+  valorBitacora: number;
   fecha: string | null;
   factura: string;
   anticipo: number;
