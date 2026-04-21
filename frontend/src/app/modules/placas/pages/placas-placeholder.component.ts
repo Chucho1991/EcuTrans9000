@@ -20,6 +20,7 @@ type ConsultaResumen = {
   retencionUnoPorciento: number;
   comisionAdministrativaSeisPorciento: number;
   anticiposTotal: number;
+  estibaTotal: number;
   totalDescuentos: number;
   pagoTotal: number;
 };
@@ -177,34 +178,46 @@ type ConsultaResumen = {
           </div>
         </div>
 
-        <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-6">
-          <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+        <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-7">
+          <div class="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-4">
             <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Valor factura</p>
-            <p class="mt-1 text-[11px] font-medium text-gray-500 dark:text-gray-400">Costo chofer</p>
-            <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{{ resumenActual.valorFacturaTotal | number: '1.2-2' }}</p>
+            <p class="mt-1 text-[11px] font-medium text-emerald-200/80">Costo chofer</p>
+            <p class="mt-1 text-lg font-semibold text-emerald-100">{{ resumenActual.valorFacturaTotal | number: '1.2-2' }}</p>
           </div>
-          <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+          <div class="rounded-xl border border-rose-500/25 bg-rose-500/10 p-4">
             <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Retencion 1%</p>
-            <p class="mt-1 text-[11px] font-medium text-gray-500 dark:text-gray-400">
+            <p class="mt-1 text-[11px] font-medium text-rose-200/80">
               de total valor bitacora ({{ resumenActual.valorBitacoraTotal | number: '1.2-2' }})
             </p>
-            <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{{ resumenActual.retencionUnoPorciento | number: '1.2-2' }}</p>
+            <p class="mt-1 text-lg font-semibold text-rose-100">{{ resumenActual.retencionUnoPorciento | number: '1.2-2' }}</p>
           </div>
-          <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+          <div class="rounded-xl border border-rose-500/25 bg-rose-500/10 p-4">
             <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Comision 6%</p>
-            <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{{ resumenActual.comisionAdministrativaSeisPorciento | number: '1.2-2' }}</p>
+            <p class="mt-1 text-lg font-semibold text-rose-100">{{ resumenActual.comisionAdministrativaSeisPorciento | number: '1.2-2' }}</p>
           </div>
-          <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+          <div class="rounded-xl border border-rose-500/25 bg-rose-500/10 p-4">
             <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Anticipos</p>
-            <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{{ resumenActual.anticiposTotal | number: '1.2-2' }}</p>
+            <p class="mt-1 text-lg font-semibold text-rose-100">{{ resumenActual.anticiposTotal | number: '1.2-2' }}</p>
           </div>
-          <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+          <div class="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-4">
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Estiba</p>
+            <p class="mt-1 text-lg font-semibold text-emerald-100">{{ resumenActual.estibaTotal | number: '1.2-2' }}</p>
+          </div>
+          <div class="rounded-xl border border-rose-500/25 bg-rose-500/10 p-4">
             <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Total descuentos</p>
-            <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{{ resumenActual.totalDescuentos | number: '1.2-2' }}</p>
+            <p class="mt-1 text-lg font-semibold text-rose-100">{{ resumenActual.totalDescuentos | number: '1.2-2' }}</p>
           </div>
-          <div class="rounded-xl border border-gray-200 bg-brand-500/5 p-4 dark:border-gray-800">
+          <div
+            class="rounded-xl border p-4"
+            [ngClass]="resumenActual.pagoTotal >= 0
+              ? 'border-emerald-500/25 bg-emerald-500/10'
+              : 'border-rose-500/25 bg-rose-500/10'">
             <p class="text-xs uppercase tracking-[0.2em] text-gray-500">Pago total</p>
-            <p class="mt-1 text-lg font-semibold text-brand-700 dark:text-brand-300">{{ resumenActual.pagoTotal | number: '1.2-2' }}</p>
+            <p
+              class="mt-1 text-lg font-semibold"
+              [ngClass]="resumenActual.pagoTotal >= 0 ? 'text-emerald-100' : 'text-rose-100'">
+              {{ resumenActual.pagoTotal | number: '1.2-2' }}
+            </p>
           </div>
         </div>
 
@@ -382,6 +395,7 @@ export class PlacasPlaceholderComponent {
       retencionUnoPorciento,
       comisionAdministrativaSeisPorciento,
       anticiposTotal,
+      estibaTotal,
       totalDescuentos,
       pagoTotal
     };
