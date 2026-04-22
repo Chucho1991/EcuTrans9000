@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -249,7 +250,8 @@ public class ClienteApplicationService {
 
   public Cliente importEquivalenciasExcel(UUID id, MultipartFile file, String actorUsername, String actorRole) {
     Cliente cliente = getExisting(id);
-    List<ClienteEquivalenciaUpsertCommand> equivalencias = parseEquivalenciasExcel(file);
+    List<ClienteEquivalenciaUpsertCommand> equivalencias =
+        mergeImportedEquivalencias(cliente, parseEquivalenciasExcel(file));
     cliente.setAplicaTablaEquivalencia(true);
     cliente.setEquivalencias(buildEquivalencias(cliente, equivalencias));
     validate(cliente);
@@ -512,7 +514,6 @@ public class ClienteApplicationService {
         }
         commands.add(parseEquivalenciaCommand(row, rowIndex + 1));
       }
-      validateEquivalenciaCommands(commands);
       return commands;
     } catch (IOException ex) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "No se pudo leer el archivo Excel");
@@ -665,6 +666,47 @@ public class ClienteApplicationService {
           .build());
     }
     return result;
+  }
+
+  private List<ClienteEquivalenciaUpsertCommand> mergeImportedEquivalencias(
+      Cliente cliente,
+      List<ClienteEquivalenciaUpsertCommand> importedCommands) {
+    Map<String, ClienteEquivalencia> existingByDestino = cliente.getEquivalencias() == null
+        ? Map.of()
+        : cliente.getEquivalencias().stream()
+            .collect(Collectors.toMap(
+                item -> normalizeDestino(item.getDestino()),
+                Function.identity(),
+                (left, right) -> right,
+                LinkedHashMap::new));
+
+    Map<String, ClienteEquivalenciaUpsertCommand> mergedByDestino = new LinkedHashMap<>();
+
+    if (cliente.getEquivalencias() != null) {
+      for (ClienteEquivalencia item : cliente.getEquivalencias()) {
+        mergedByDestino.put(
+            normalizeDestino(item.getDestino()),
+            new ClienteEquivalenciaUpsertCommand(
+                item.getId(),
+                item.getDestino(),
+                item.getValorDestino(),
+                item.getCostoChofer()));
+      }
+    }
+
+    for (ClienteEquivalenciaUpsertCommand imported : importedCommands) {
+      String destinoNorm = normalizeDestino(imported.destino());
+      ClienteEquivalencia existing = existingByDestino.get(destinoNorm);
+      mergedByDestino.put(
+          destinoNorm,
+          new ClienteEquivalenciaUpsertCommand(
+              existing != null ? existing.getId() : null,
+              imported.destino(),
+              imported.valorDestino(),
+              imported.costoChofer()));
+    }
+
+    return new ArrayList<>(mergedByDestino.values());
   }
 
   private void validate(Cliente cliente) {

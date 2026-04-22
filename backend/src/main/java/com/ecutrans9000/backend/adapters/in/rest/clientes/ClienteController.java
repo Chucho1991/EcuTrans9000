@@ -133,7 +133,7 @@ public class ClienteController {
   }
 
   @PostMapping(path = "/{id}/equivalencias/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @Operation(summary = "Importar tabla de equivalencia desde Excel")
+  @Operation(summary = "Importar tabla de equivalencia desde Excel actualizando destinos duplicados")
   public ResponseEntity<ClienteResponse> importEquivalencias(
       @PathVariable UUID id,
       @RequestPart("file") MultipartFile file,
