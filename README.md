@@ -65,7 +65,7 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - Logo empresarial en base de datos
 - Importación masiva (`preview` y `import`) y plantillas
 - Flag `Aplica Tabla de Equivalencia` por cliente
-- Tabla de equivalencia por destino con carga Excel (`DESTINO`, `VALOR DESTINO`, `COSTO CHOFER`)
+- Tabla de equivalencia por destino con carga Excel (`DESTINO`, `VALOR DESTINO`, `COSTO CHOFER`); al importar, los destinos duplicados se actualizan en lugar de duplicarse
 - Edición manual de equivalencias desde el detalle del cliente
 - Si el cliente tiene viajes con facturación o cobro pendientes, no se permite inactivarlo ni eliminarlo
 - Formularios de creación y edición presentados en popup modal del template

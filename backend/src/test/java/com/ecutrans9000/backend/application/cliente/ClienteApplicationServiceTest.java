@@ -16,11 +16,12 @@ import com.ecutrans9000.backend.application.usecase.cliente.ClienteEquivalenciaU
 import com.ecutrans9000.backend.application.usecase.cliente.ClienteUpsertCommand;
 import com.ecutrans9000.backend.domain.audit.ActionType;
 import com.ecutrans9000.backend.domain.cliente.Cliente;
+import com.ecutrans9000.backend.domain.cliente.ClienteEquivalencia;
 import com.ecutrans9000.backend.domain.cliente.TipoDocumentoCliente;
-import java.math.BigDecimal;
 import com.ecutrans9000.backend.ports.out.cliente.ClienteRepositoryPort;
 import com.ecutrans9000.backend.service.AuditService;
 import com.ecutrans9000.backend.service.BusinessException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -135,6 +136,60 @@ class ClienteApplicationServiceTest {
   }
 
   @Test
+  void importEquivalenciasExcelShouldUpdateDuplicatedDestinationsAndPreserveOthers() {
+    UUID clienteId = UUID.randomUUID();
+    UUID guayaquilId = UUID.randomUUID();
+    UUID mantaId = UUID.randomUUID();
+    when(clienteRepositoryPort.findById(clienteId)).thenReturn(Optional.of(buildClienteWithEquivalencias(
+        clienteId,
+        List.of(
+            buildEquivalencia(guayaquilId, "GUAYAQUIL", "100", "60"),
+            buildEquivalencia(mantaId, "MANTA", "80", "45")))));
+
+    MultipartFile file = new MockMultipartFile(
+        "file",
+        "equivalencias.xlsx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        buildEquivalenciasWorkbook(
+            List.of(
+                new Object[]{"guayaquil", 125, 77},
+                new Object[]{"GUAYAQUIL", 130, 82},
+                new Object[]{"QUITO", 150, 90})));
+
+    Cliente result = clienteApplicationService.importEquivalenciasExcel(
+        clienteId,
+        file,
+        "admin",
+        "ROLE_SUPERADMINISTRADOR");
+
+    assertTrue(Boolean.TRUE.equals(result.getAplicaTablaEquivalencia()));
+    assertEquals(3, result.getEquivalencias().size());
+
+    ClienteEquivalencia updatedGuayaquil = result.getEquivalencias().stream()
+        .filter(item -> "GUAYAQUIL".equalsIgnoreCase(item.getDestino()))
+        .findFirst()
+        .orElseThrow();
+    assertEquals(guayaquilId, updatedGuayaquil.getId());
+    assertEquals(new BigDecimal("130"), updatedGuayaquil.getValorDestino());
+    assertEquals(new BigDecimal("82"), updatedGuayaquil.getCostoChofer());
+
+    ClienteEquivalencia preservedManta = result.getEquivalencias().stream()
+        .filter(item -> "MANTA".equalsIgnoreCase(item.getDestino()))
+        .findFirst()
+        .orElseThrow();
+    assertEquals(mantaId, preservedManta.getId());
+    assertEquals(new BigDecimal("80"), preservedManta.getValorDestino());
+    assertEquals(new BigDecimal("45"), preservedManta.getCostoChofer());
+
+    ClienteEquivalencia insertedQuito = result.getEquivalencias().stream()
+        .filter(item -> "QUITO".equalsIgnoreCase(item.getDestino()))
+        .findFirst()
+        .orElseThrow();
+    assertEquals(new BigDecimal("150"), insertedQuito.getValorDestino());
+    assertEquals(new BigDecimal("90"), insertedQuito.getCostoChofer());
+  }
+
+  @Test
   void toggleActivoShouldRejectWhenClienteHasPendingTrips() {
     UUID clienteId = UUID.randomUUID();
     when(clienteRepositoryPort.findById(clienteId)).thenReturn(Optional.of(buildCliente(clienteId)));
@@ -186,7 +241,30 @@ class ClienteApplicationServiceTest {
         .build();
   }
 
+  private Cliente buildClienteWithEquivalencias(UUID id, List<ClienteEquivalencia> equivalencias) {
+    Cliente cliente = buildCliente(id);
+    cliente.setAplicaTablaEquivalencia(true);
+    cliente.setEquivalencias(equivalencias);
+    return cliente;
+  }
+
+  private ClienteEquivalencia buildEquivalencia(UUID id, String destino, String valorDestino, String costoChofer) {
+    LocalDateTime now = LocalDateTime.now();
+    return ClienteEquivalencia.builder()
+        .id(id)
+        .destino(destino)
+        .valorDestino(new BigDecimal(valorDestino))
+        .costoChofer(new BigDecimal(costoChofer))
+        .createdAt(now.minusDays(1))
+        .updatedAt(now.minusHours(1))
+        .build();
+  }
+
   private byte[] buildEquivalenciasWorkbook() {
+    return buildEquivalenciasWorkbook(List.<Object[]>of(new Object[]{"QUITO", 150, 90}));
+  }
+
+  private byte[] buildEquivalenciasWorkbook(List<Object[]> rows) {
     try (var workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
          var output = new java.io.ByteArrayOutputStream()) {
       var sheet = workbook.createSheet("Tabla");
@@ -194,10 +272,13 @@ class ClienteApplicationServiceTest {
       header.createCell(0).setCellValue("DESTINO");
       header.createCell(1).setCellValue("VALOR DESTINO");
       header.createCell(2).setCellValue("COSTO CHOFER");
-      var row = sheet.createRow(1);
-      row.createCell(0).setCellValue("QUITO");
-      row.createCell(1).setCellValue(150);
-      row.createCell(2).setCellValue(90);
+      for (int index = 0; index < rows.size(); index++) {
+        Object[] values = rows.get(index);
+        var row = sheet.createRow(index + 1);
+        row.createCell(0).setCellValue(String.valueOf(values[0]));
+        row.createCell(1).setCellValue(((Number) values[1]).doubleValue());
+        row.createCell(2).setCellValue(((Number) values[2]).doubleValue());
+      }
       workbook.write(output);
       return output.toByteArray();
     } catch (Exception ex) {

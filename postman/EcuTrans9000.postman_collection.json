@@ -2503,8 +2503,9 @@
           "response": []
         },
         {
-          "name": "Import Cliente Equivalencias Excel",
+          "name": "Import Cliente Equivalencias Excel (Upsert por destino)",
           "request": {
+            "description": "Importa la tabla de equivalencia del cliente desde Excel. Si el destino ya existe para el cliente, la fila se actualiza; si no existe, se crea.",
             "auth": {
               "type": "bearer",
               "bearer": [
