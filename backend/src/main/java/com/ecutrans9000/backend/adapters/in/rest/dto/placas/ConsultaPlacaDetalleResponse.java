@@ -26,6 +26,7 @@ public class ConsultaPlacaDetalleResponse {
   private String factura;
   private BigDecimal anticipo;
   private BigDecimal estiba;
+  private Boolean aplicaRetencion;
   private String despacho;
   private String cliente;
   private String origenDestino;

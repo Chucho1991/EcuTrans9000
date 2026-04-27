@@ -44,15 +44,13 @@ public class ConsultaPlacasController {
       @Parameter(description = "TODOS, PAGADOS o NO_PAGADOS")
       @RequestParam(required = false) String estadoPagoChofer,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
-      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
-      @RequestParam(defaultValue = "true") boolean aplicarRetencion) {
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta) {
     return ResponseEntity.ok(consultaPlacasService.consultar(
         placa,
         codigoViaje,
         parseEstadoPagoChofer(estadoPagoChofer),
         fechaDesde,
-        fechaHasta,
-        aplicarRetencion));
+        fechaHasta));
   }
 
   @GetMapping("/consulta/export")
@@ -64,7 +62,6 @@ public class ConsultaPlacasController {
       @RequestParam(required = false) String estadoPagoChofer,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
-      @RequestParam(defaultValue = "true") boolean aplicarRetencion,
       @RequestParam(required = false) List<Long> descuentoIds,
       @RequestParam(required = false) List<UUID> viajeIds) {
     byte[] report = consultaPlacasService.exportExcel(
@@ -73,7 +70,6 @@ public class ConsultaPlacasController {
         parseEstadoPagoChofer(estadoPagoChofer),
         fechaDesde,
         fechaHasta,
-        aplicarRetencion,
         descuentoIds,
         viajeIds);
     String normalized = placa == null || placa.isBlank() ? "consulta_placas" : placa.trim().toUpperCase();

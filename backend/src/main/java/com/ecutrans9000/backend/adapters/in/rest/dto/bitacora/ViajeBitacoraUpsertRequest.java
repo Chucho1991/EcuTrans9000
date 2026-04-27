@@ -56,6 +56,9 @@ public class ViajeBitacoraUpsertRequest {
   private BigDecimal anticipo;
 
   @NotNull
+  private Boolean aplicaRetencion;
+
+  @NotNull
   private Boolean facturadoCliente;
 
   private String numeroFactura;

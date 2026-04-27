@@ -17,6 +17,7 @@ type EstadoPagoChoferOption = 'TODOS' | 'PAGADOS' | 'NO_PAGADOS';
 type ConsultaResumen = {
   valorFacturaTotal: number;
   valorBitacoraTotal: number;
+  valorBitacoraRetencionTotal: number;
   retencionUnoPorciento: number;
   comisionAdministrativaSeisPorciento: number;
   anticiposTotal: number;
@@ -42,7 +43,7 @@ type ConsultaResumen = {
       </header>
 
       <article class="panel-card min-w-0 w-full max-w-full p-4">
-        <form class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-7" [formGroup]="filtersForm" (ngSubmit)="filtrar()">
+        <form class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6" [formGroup]="filtersForm" (ngSubmit)="filtrar()">
           <label class="space-y-2">
             <span class="form-label form-label-required">Chofer por placa</span>
             <app-catalog-search-select
@@ -70,14 +71,6 @@ type ConsultaResumen = {
               <option *ngFor="let option of estadoPagoChoferOptions" [value]="option.value">
                 {{ option.label }}
               </option>
-            </select>
-          </label>
-
-          <label class="space-y-2">
-            <span class="form-label">Retencion 1%</span>
-            <select class="filter-control" formControlName="aplicarRetencion">
-              <option [ngValue]="true">Aplicar retencion</option>
-              <option [ngValue]="false">No aplicar retencion</option>
             </select>
           </label>
 
@@ -180,42 +173,42 @@ type ConsultaResumen = {
 
         <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-7">
           <div class="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-4">
-            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Valor factura</p>
-            <p class="mt-1 text-[11px] font-medium text-emerald-200/80">Costo chofer</p>
-            <p class="mt-1 text-lg font-semibold text-emerald-100">{{ resumenActual.valorFacturaTotal | number: '1.2-2' }}</p>
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Valor factura</p>
+            <p class="mt-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-200/80">Costo chofer</p>
+            <p class="mt-1 text-lg font-semibold text-gray-950 dark:text-emerald-100">{{ resumenActual.valorFacturaTotal | number: '1.2-2' }}</p>
           </div>
           <div class="rounded-xl border border-rose-500/25 bg-rose-500/10 p-4">
-            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Retencion 1%</p>
-            <p class="mt-1 text-[11px] font-medium text-rose-200/80">
-              de total valor bitacora ({{ resumenActual.valorBitacoraTotal | number: '1.2-2' }})
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Retencion 1%</p>
+            <p class="mt-1 text-[11px] font-medium text-rose-700 dark:text-rose-200/80">
+              de viajes marcados ({{ resumenActual.valorBitacoraRetencionTotal | number: '1.2-2' }})
             </p>
-            <p class="mt-1 text-lg font-semibold text-rose-100">{{ resumenActual.retencionUnoPorciento | number: '1.2-2' }}</p>
+            <p class="mt-1 text-lg font-semibold text-gray-950 dark:text-rose-100">{{ resumenActual.retencionUnoPorciento | number: '1.2-2' }}</p>
           </div>
           <div class="rounded-xl border border-rose-500/25 bg-rose-500/10 p-4">
-            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Comision 6%</p>
-            <p class="mt-1 text-lg font-semibold text-rose-100">{{ resumenActual.comisionAdministrativaSeisPorciento | number: '1.2-2' }}</p>
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Comision 6%</p>
+            <p class="mt-1 text-lg font-semibold text-gray-950 dark:text-rose-100">{{ resumenActual.comisionAdministrativaSeisPorciento | number: '1.2-2' }}</p>
           </div>
           <div class="rounded-xl border border-rose-500/25 bg-rose-500/10 p-4">
-            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Anticipos</p>
-            <p class="mt-1 text-lg font-semibold text-rose-100">{{ resumenActual.anticiposTotal | number: '1.2-2' }}</p>
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Anticipos</p>
+            <p class="mt-1 text-lg font-semibold text-gray-950 dark:text-rose-100">{{ resumenActual.anticiposTotal | number: '1.2-2' }}</p>
           </div>
           <div class="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-4">
-            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Estiba</p>
-            <p class="mt-1 text-lg font-semibold text-emerald-100">{{ resumenActual.estibaTotal | number: '1.2-2' }}</p>
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Estiba</p>
+            <p class="mt-1 text-lg font-semibold text-gray-950 dark:text-emerald-100">{{ resumenActual.estibaTotal | number: '1.2-2' }}</p>
           </div>
           <div class="rounded-xl border border-rose-500/25 bg-rose-500/10 p-4">
-            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Total descuentos</p>
-            <p class="mt-1 text-lg font-semibold text-rose-100">{{ resumenActual.totalDescuentos | number: '1.2-2' }}</p>
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Total descuentos</p>
+            <p class="mt-1 text-lg font-semibold text-gray-950 dark:text-rose-100">{{ resumenActual.totalDescuentos | number: '1.2-2' }}</p>
           </div>
           <div
             class="rounded-xl border p-4"
             [ngClass]="resumenActual.pagoTotal >= 0
               ? 'border-emerald-500/25 bg-emerald-500/10'
               : 'border-rose-500/25 bg-rose-500/10'">
-            <p class="text-xs uppercase tracking-[0.2em] text-gray-500">Pago total</p>
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Pago total</p>
             <p
               class="mt-1 text-lg font-semibold"
-              [ngClass]="resumenActual.pagoTotal >= 0 ? 'text-emerald-100' : 'text-rose-100'">
+              [ngClass]="resumenActual.pagoTotal >= 0 ? 'text-gray-950 dark:text-emerald-100' : 'text-gray-950 dark:text-rose-100'">
               {{ resumenActual.pagoTotal | number: '1.2-2' }}
             </p>
           </div>
@@ -258,6 +251,7 @@ type ConsultaResumen = {
                 <th class="px-3 py-3 font-semibold">Pago chofer</th>
                 <th class="px-3 py-3 font-semibold">Costo viaje</th>
                 <th class="px-3 py-3 font-semibold">Valor chofer</th>
+                <th class="px-3 py-3 font-semibold">Retencion 1%</th>
                 <th class="px-3 py-3 font-semibold">Fecha</th>
                 <th class="px-3 py-3 font-semibold">Factura</th>
                 <th class="px-3 py-3 font-semibold">Anticipos</th>
@@ -288,6 +282,15 @@ type ConsultaResumen = {
                 </td>
                 <td class="px-3 py-3">{{ registro.valorBitacora | number: '1.2-2' }}</td>
                 <td class="px-3 py-3">{{ registro.valor | number: '1.2-2' }}</td>
+                <td class="px-3 py-3">
+                  <span
+                    class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold"
+                    [class]="registro.aplicaRetencion
+                      ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-300'
+                      : 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300'">
+                    {{ registro.aplicaRetencion ? 'SI' : 'NO' }}
+                  </span>
+                </td>
                 <td class="px-3 py-3">{{ formatFecha(registro.fecha) }}</td>
                 <td class="px-3 py-3">{{ displayText(registro.factura) }}</td>
                 <td class="px-3 py-3">{{ displayAmountOrDash(registro.anticipo) }}</td>
@@ -297,7 +300,7 @@ type ConsultaResumen = {
                 <td class="px-3 py-3">{{ displayText(registro.origenDestino) }}</td>
               </tr>
               <tr *ngIf="registros.length === 0">
-                <td class="px-4 py-8 text-center text-gray-500 dark:text-gray-400" colspan="12">
+                <td class="px-4 py-8 text-center text-gray-500 dark:text-gray-400" colspan="13">
                   {{ searched ? 'No hay registros para los filtros seleccionados.' : 'La lista esta vacia. Selecciona placa, fechas y filtra para consultar la bitacora.' }}
                 </td>
               </tr>
@@ -338,7 +341,6 @@ export class PlacasPlaceholderComponent {
     placa: ['', Validators.required],
     codigoViaje: [''],
     estadoPagoChofer: ['TODOS' as EstadoPagoChoferOption],
-    aplicarRetencion: [true],
     fechaDesde: ['', Validators.required],
     fechaHasta: ['', Validators.required]
   });
@@ -373,12 +375,13 @@ export class PlacasPlaceholderComponent {
     const viajesSeleccionados = this.registros.filter((registro) => this.selectedViajeIds.has(registro.id));
     const valorFacturaTotal = this.round(viajesSeleccionados.reduce((sum, registro) => sum + Number(registro.valor ?? 0), 0));
     const valorBitacoraTotal = this.round(viajesSeleccionados.reduce((sum, registro) => sum + Number(registro.valorBitacora ?? 0), 0));
+    const valorBitacoraRetencionTotal = this.round(viajesSeleccionados
+      .filter((registro) => registro.aplicaRetencion)
+      .reduce((sum, registro) => sum + Number(registro.valorBitacora ?? 0), 0));
     const estibaTotal = this.round(viajesSeleccionados.reduce((sum, registro) => sum + Number(registro.estiba ?? 0), 0));
     const anticiposTotal = this.round(viajesSeleccionados.reduce((sum, registro) => sum + Number(registro.anticipo ?? 0), 0));
     const totalDescuentos = this.round(this.descuentosSeleccionados.reduce((sum, descuento) => sum + Number(descuento.montoMotivo ?? 0), 0));
-    const retencionUnoPorciento = this.filtersForm.controls.aplicarRetencion.getRawValue()
-      ? this.round(valorBitacoraTotal * 0.01)
-      : 0;
+    const retencionUnoPorciento = this.round(valorBitacoraRetencionTotal * 0.01);
     const comisionAdministrativaSeisPorciento = this.round(valorFacturaTotal * 0.06);
     const pagoTotal = this.round(
       valorFacturaTotal
@@ -392,6 +395,7 @@ export class PlacasPlaceholderComponent {
     return {
       valorFacturaTotal,
       valorBitacoraTotal,
+      valorBitacoraRetencionTotal,
       retencionUnoPorciento,
       comisionAdministrativaSeisPorciento,
       anticiposTotal,
@@ -421,8 +425,7 @@ export class PlacasPlaceholderComponent {
       codigoViaje: filters.codigoViaje || undefined,
       estadoPagoChofer: filters.estadoPagoChofer || undefined,
       fechaDesde: filters.fechaDesde,
-      fechaHasta: filters.fechaHasta,
-      aplicarRetencion: Boolean(filters.aplicarRetencion)
+      fechaHasta: filters.fechaHasta
     }).subscribe({
       next: (response) => {
         this.consulta = response;
@@ -445,7 +448,6 @@ export class PlacasPlaceholderComponent {
       placa: '',
       codigoViaje: '',
       estadoPagoChofer: 'TODOS',
-      aplicarRetencion: true,
       fechaDesde: '',
       fechaHasta: ''
     });
@@ -475,7 +477,6 @@ export class PlacasPlaceholderComponent {
       estadoPagoChofer: filters.estadoPagoChofer || undefined,
       fechaDesde: filters.fechaDesde,
       fechaHasta: filters.fechaHasta,
-      aplicarRetencion: Boolean(filters.aplicarRetencion),
       descuentoIds: this.selectedDescuentoIds,
       viajeIds: Array.from(this.selectedViajeIds)
     }).subscribe({

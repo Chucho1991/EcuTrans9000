@@ -60,6 +60,9 @@ public class ViajeBitacoraJpaEntity {
   @Column(name = "anticipo", nullable = false, precision = 12, scale = 2)
   private BigDecimal anticipo;
 
+  @Column(name = "aplica_retencion", nullable = false)
+  private Boolean aplicaRetencion;
+
   @Column(name = "facturado_cliente", nullable = false)
   private Boolean facturadoCliente;
 

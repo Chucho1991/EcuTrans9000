@@ -90,6 +90,7 @@ class ViajeBitacoraExcelImportServiceTest {
     ArgumentCaptor<ViajeBitacoraUpsertRequest> requestCaptor = ArgumentCaptor.forClass(ViajeBitacoraUpsertRequest.class);
     verify(viajeBitacoraService).validateForCreate(requestCaptor.capture());
     assertEquals(new BigDecimal("110"), requestCaptor.getValue().getCostoChofer());
+    assertEquals(true, requestCaptor.getValue().getAplicaRetencion());
     verify(viajeBitacoraService, never()).create(any());
   }
 
@@ -168,11 +169,12 @@ class ViajeBitacoraExcelImportServiceTest {
       header.createCell(6).setCellValue("Costo Chofer");
       header.createCell(7).setCellValue("Estiba");
       header.createCell(8).setCellValue("Anticipo");
-      header.createCell(9).setCellValue("Pagado cliente");
-      header.createCell(10).setCellValue("N° Factura");
-      header.createCell(11).setCellValue("Fecha factura");
-      header.createCell(12).setCellValue("Fecha pago cliente a Ecutrans");
-      header.createCell(13).setCellValue("Pagado transportista");
+      header.createCell(9).setCellValue("Aplica retencion 1%");
+      header.createCell(10).setCellValue("Pagado cliente");
+      header.createCell(11).setCellValue("N° Factura");
+      header.createCell(12).setCellValue("Fecha factura");
+      header.createCell(13).setCellValue("Fecha pago cliente a Ecutrans");
+      header.createCell(14).setCellValue("Pagado transportista");
 
       var row = sheet.createRow(1);
       row.createCell(0).setCellValue("02/03/2026");
@@ -185,10 +187,11 @@ class ViajeBitacoraExcelImportServiceTest {
       row.createCell(7).setCellValue(15d);
       row.createCell(8).setCellValue(25d);
       row.createCell(9).setCellValue("SI");
-      row.createCell(10).setCellValue("FAC-001");
-      row.createCell(11).setCellValue("03/03/2026");
-      row.createCell(12).setCellValue("05/03/2026");
-      row.createCell(13).setCellValue("NO");
+      row.createCell(10).setCellValue("SI");
+      row.createCell(11).setCellValue("FAC-001");
+      row.createCell(12).setCellValue("03/03/2026");
+      row.createCell(13).setCellValue("05/03/2026");
+      row.createCell(14).setCellValue("NO");
 
       workbook.write(outputStream);
       return outputStream.toByteArray();

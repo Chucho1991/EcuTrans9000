@@ -18,7 +18,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConsultaPlacaResponse {
-  private Boolean aplicaRetencion;
   private String placa;
   private String chofer;
   private LocalDate fechaDesde;

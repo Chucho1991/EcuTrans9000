@@ -1,0 +1,2 @@
+ALTER TABLE viajes_bitacora
+  ADD COLUMN IF NOT EXISTS aplica_retencion BOOLEAN NOT NULL DEFAULT FALSE;

@@ -14,7 +14,7 @@ Comando ejecutado: `./scripts/validate-documentation.ps1`
   - Cobertura operativa incluida: `Configuración de accesos`, `Clientes` con logo/importación/tabla de equivalencia y `Consulta por placas`.
 - README: OK.
   - Temas obligatorios detectados: completos.
-  - README actualizado para reflejar `Configuración de accesos`, `Clientes`, `Vehículos`, `Bitácora`, `Descuentos de viajes` y `Consulta por placas`, incluyendo permisos dinámicos por rol, reglas de importación, almacenamiento binario, tabla de equivalencia por destino, descuentos por chofer, formularios de creación/edición en popup modal y exportación financiera por placa con retención opcional, descuentos por motivo y viajes seleccionados.
+  - README actualizado para reflejar `Configuración de accesos`, `Clientes`, `Vehículos`, `Bitácora`, `Descuentos de viajes` y `Consulta por placas`, incluyendo permisos dinámicos por rol, reglas de importación, almacenamiento binario, tabla de equivalencia por destino, descuentos por chofer, formularios de creación/edición en popup modal y exportación financiera por placa con retención definida por viaje, descuentos por motivo y viajes seleccionados.
   - Regla operativa documentada: clientes con viajes pendientes no pueden inactivarse/eliminarse y choferes con pago transportista pendiente tampoco pueden inactivarse/eliminarse.
 - Agent/OpenAPI: OK.
   - `AGENTS.md` refleja el estado actual de `CLIENTES`, `VEHICULOS`, `BITACORA`, `DESCUENTOS DE VIAJES` y `CONSULTA POR PLACAS`, además del patrón obligatorio de formularios de creación/edición en popup modal.

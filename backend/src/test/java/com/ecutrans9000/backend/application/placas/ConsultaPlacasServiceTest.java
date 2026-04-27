@@ -52,7 +52,7 @@ class ConsultaPlacasServiceTest {
   private ConsultaPlacasService consultaPlacasService;
 
   @Test
-  void consultarShouldUseCostoChoferAsValorAndValorBitacoraForRetencion() {
+  void consultarShouldUseCostoChoferAsValorAndMarkedValorBitacoraForRetencion() {
     UUID vehiculoId = UUID.randomUUID();
     UUID clienteId = UUID.randomUUID();
 
@@ -87,6 +87,7 @@ class ConsultaPlacasServiceTest {
         .costoChofer(new BigDecimal("80.00"))
         .estiba(new BigDecimal("5.00"))
         .anticipo(new BigDecimal("10.00"))
+        .aplicaRetencion(true)
         .numeroFactura("FAC-120")
         .pagadoTransportista(false)
         .deleted(false)
@@ -103,8 +104,7 @@ class ConsultaPlacasServiceTest {
         null,
         EstadoPagoChoferFiltro.TODOS,
         LocalDate.of(2026, 4, 1),
-        LocalDate.of(2026, 4, 30),
-        true);
+        LocalDate.of(2026, 4, 30));
 
     assertEquals(new BigDecimal("80.00"), response.getValorFacturaTotal());
     assertEquals(new BigDecimal("4.80"), response.getComisionAdministrativaSeisPorciento());
@@ -112,6 +112,7 @@ class ConsultaPlacasServiceTest {
     assertEquals(new BigDecimal("69.20"), response.getPagoTotal());
     assertEquals(new BigDecimal("80.00"), response.getRegistros().get(0).getValor());
     assertEquals(new BigDecimal("100.00"), response.getRegistros().get(0).getValorBitacora());
+    assertEquals(true, response.getRegistros().get(0).getAplicaRetencion());
   }
 
   private boolean isSortedByNumeroViajeDesc(Sort sort) {

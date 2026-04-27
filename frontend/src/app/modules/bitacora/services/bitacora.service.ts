@@ -22,6 +22,7 @@ export interface ViajeBitacoraResponse {
   costoChofer: number;
   estiba: number;
   anticipo: number;
+  aplicaRetencion: boolean;
   facturadoCliente: boolean;
   numeroFactura: string | null;
   fechaFactura: string | null;
@@ -54,6 +55,7 @@ export interface ViajeBitacoraUpsertRequest {
   costoChofer: number;
   estiba: number;
   anticipo: number;
+  aplicaRetencion: boolean;
   facturadoCliente: boolean;
   numeroFactura: string;
   fechaFactura: string | null;
