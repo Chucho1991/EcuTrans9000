@@ -72,6 +72,7 @@ import {
                 <th class="px-3 py-3 sm:px-4">Destino</th>
                 <th class="px-3 py-3 sm:px-4">Valor</th>
                 <th class="px-3 py-3 sm:px-4">Costo chofer</th>
+                <th class="px-3 py-3 sm:px-4">Retencion 1%</th>
                 <th class="px-3 py-3 sm:px-4">Factura</th>
                 <th class="px-3 py-3 sm:px-4">Fecha factura</th>
                 <th class="px-3 py-3 sm:px-4">Fecha pago cliente</th>
@@ -95,6 +96,15 @@ import {
                 <td class="px-3 py-3 sm:px-4">{{ viaje.destino }}</td>
                 <td class="px-3 py-3 sm:px-4">&#36;{{ viaje.valor | number: '1.2-2' }}</td>
                 <td class="px-3 py-3 sm:px-4">&#36;{{ viaje.costoChofer | number: '1.2-2' }}</td>
+                <td class="px-3 py-3 sm:px-4">
+                  <span
+                    class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold"
+                    [class]="viaje.aplicaRetencion
+                      ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-300'
+                      : 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300'">
+                    {{ viaje.aplicaRetencion ? 'SI' : 'NO' }}
+                  </span>
+                </td>
                 <td class="px-3 py-3 sm:px-4">
                   <span *ngIf="viaje.deleted" class="mb-2 inline-flex rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:border-orange-900/40 dark:bg-orange-900/20 dark:text-orange-300">
                     ELIMINADO
@@ -156,7 +166,7 @@ import {
                 </td>
               </tr>
               <tr *ngIf="viajes.length === 0">
-                <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400" colspan="13">No hay viajes registrados.</td>
+                <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400" colspan="14">No hay viajes registrados.</td>
               </tr>
             </tbody>
           </table>
@@ -205,6 +215,10 @@ import {
             <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Pago transportista</p>
             <p class="mt-1 text-sm text-gray-700 dark:text-gray-200">{{ selectedViaje.pagadoTransportista ? 'SI' : 'NO' }}</p>
           </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Aplica retencion 1%</p>
+            <p class="mt-1 text-sm text-gray-700 dark:text-gray-200">{{ selectedViaje.aplicaRetencion ? 'SI' : 'NO' }}</p>
+          </div>
         </div>
         <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
@@ -231,7 +245,7 @@ import {
           </div>
           <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
             <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Retencion 1%</p>
-            <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">&#36;{{ calculateRetencion(selectedViaje.valor) | number: '1.2-2' }}</p>
+            <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">&#36;{{ calculateRetencion(selectedViaje.valor, selectedViaje.aplicaRetencion) | number: '1.2-2' }}</p>
           </div>
           <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
             <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Comision 6%</p>
@@ -366,6 +380,13 @@ import {
             <p class="form-error" *ngIf="showError('anticipo', 'min')">
               Anticipo tiene formato invalido. Ingresa un valor igual o mayor a 0.
             </p>
+          </div>
+          <div class="min-w-0 xl:col-span-3">
+            <label class="form-label form-label-required">Aplica retencion 1%</label>
+            <label class="flex h-11 items-center gap-3 rounded-xl border border-gray-200 px-4 text-sm font-medium text-gray-700 dark:border-gray-800 dark:text-gray-200">
+              <input class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" type="checkbox" formControlName="aplicaRetencion" />
+              <span>{{ viajeForm.get('aplicaRetencion')?.value ? 'SI' : 'NO' }}</span>
+            </label>
           </div>
           <div class="min-w-0 xl:col-span-3">
             <label class="form-label form-label-required">Pagado cliente</label>
@@ -522,6 +543,7 @@ export class BitacoraListComponent {
     costoChofer: [0, [Validators.required, Validators.min(0)]],
     estiba: [0, [Validators.required, Validators.min(0)]],
     anticipo: [0, [Validators.required, Validators.min(0)]],
+    aplicaRetencion: [false, [Validators.required]],
     facturadoCliente: [false, [Validators.required]],
     numeroFactura: [''],
     fechaFactura: [''],
@@ -620,6 +642,7 @@ export class BitacoraListComponent {
       costoChofer: 0,
       estiba: 0,
       anticipo: 0,
+      aplicaRetencion: false,
       facturadoCliente: false,
       numeroFactura: '',
       fechaFactura: '',
@@ -717,6 +740,7 @@ export class BitacoraListComponent {
       costoChofer: viaje.costoChofer,
       estiba: viaje.estiba,
       anticipo: viaje.anticipo,
+      aplicaRetencion: viaje.aplicaRetencion,
       facturadoCliente: viaje.facturadoCliente,
       numeroFactura: viaje.numeroFactura || '',
       fechaFactura: viaje.fechaFactura || '',
@@ -797,6 +821,7 @@ export class BitacoraListComponent {
       costoChofer: Number(value.costoChofer ?? 0),
       estiba: Number(value.estiba ?? 0),
       anticipo: Number(value.anticipo ?? 0),
+      aplicaRetencion: !!value.aplicaRetencion,
       facturadoCliente: !!value.facturadoCliente,
       numeroFactura: value.numeroFactura ?? '',
       fechaFactura: value.fechaFactura || null,
@@ -952,8 +977,8 @@ export class BitacoraListComponent {
     };
   }
 
-  protected calculateRetencion(valor: number): number {
-    return this.roundCurrency((valor || 0) * 0.01);
+  protected calculateRetencion(valor: number, aplicaRetencion = true): number {
+    return aplicaRetencion ? this.roundCurrency((valor || 0) * 0.01) : 0;
   }
 
   protected calculateComision(valor: number): number {
@@ -963,7 +988,7 @@ export class BitacoraListComponent {
   protected calculatePagoTotal(viaje: ViajeBitacoraResponse): number {
     const valor = viaje.valor || 0;
     const anticipo = viaje.anticipo || 0;
-    return this.roundCurrency(valor - this.calculateRetencion(valor) - this.calculateComision(valor) - anticipo);
+    return this.roundCurrency(valor - this.calculateRetencion(valor, viaje.aplicaRetencion) - this.calculateComision(valor) - anticipo);
   }
 
   private roundCurrency(value: number): number {

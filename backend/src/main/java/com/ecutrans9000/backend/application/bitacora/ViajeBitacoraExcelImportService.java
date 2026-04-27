@@ -54,6 +54,7 @@ public class ViajeBitacoraExcelImportService {
       "costo chofer",
       "estiba",
       "anticipo",
+      "aplica retencion 1%",
       "pagado cliente",
       "n° factura",
       "fecha factura",
@@ -120,10 +121,11 @@ public class ViajeBitacoraExcelImportService {
         exampleRow.createCell(7).setCellValue(15.00);
         exampleRow.createCell(8).setCellValue(25.00);
         exampleRow.createCell(9).setCellValue("SI");
-        exampleRow.createCell(10).setCellValue("FAC-001");
-        exampleRow.createCell(11).setCellValue("03/03/2026");
-        exampleRow.createCell(12).setCellValue("05/03/2026");
-        exampleRow.createCell(13).setCellValue("NO");
+        exampleRow.createCell(10).setCellValue("SI");
+        exampleRow.createCell(11).setCellValue("FAC-001");
+        exampleRow.createCell(12).setCellValue("03/03/2026");
+        exampleRow.createCell(13).setCellValue("05/03/2026");
+        exampleRow.createCell(14).setCellValue("NO");
       }
       workbook.write(outputStream);
       return outputStream.toByteArray();
@@ -318,11 +320,12 @@ public class ViajeBitacoraExcelImportService {
     BigDecimal costoChofer = parseRequiredDecimalCell(row.getCell(6), "Costo chofer");
     BigDecimal estiba = parseDecimalCell(row.getCell(7), "Estiba");
     BigDecimal anticipo = parseDecimalCell(row.getCell(8), "Anticipo");
-    boolean facturadoCliente = parseBooleanCell(row.getCell(9));
-    String numeroFactura = detailOrNull(readCellAsString(row.getCell(10)));
-    LocalDate fechaFactura = parseOptionalDateCell(row.getCell(11));
-    LocalDate fechaPagoCliente = parseOptionalDateCell(row.getCell(12));
-    boolean pagadoTransportista = parseBooleanCell(row.getCell(13));
+    boolean aplicaRetencion = parseBooleanCell(row.getCell(9));
+    boolean facturadoCliente = parseBooleanCell(row.getCell(10));
+    String numeroFactura = detailOrNull(readCellAsString(row.getCell(11)));
+    LocalDate fechaFactura = parseOptionalDateCell(row.getCell(12));
+    LocalDate fechaPagoCliente = parseOptionalDateCell(row.getCell(13));
+    boolean pagadoTransportista = parseBooleanCell(row.getCell(14));
 
     VehiculoJpaEntity vehiculo = vehiculoRepository.findByPlacaNorm(normalizePlate(placa))
         .orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST, "Vehiculo no encontrado para placa: " + placa));
@@ -342,6 +345,7 @@ public class ViajeBitacoraExcelImportService {
         .costoChofer(costoChofer)
         .estiba(estiba)
         .anticipo(anticipo)
+        .aplicaRetencion(aplicaRetencion)
         .facturadoCliente(facturadoCliente)
         .numeroFactura(numeroFactura)
         .fechaFactura(fechaFactura)
@@ -491,6 +495,7 @@ public class ViajeBitacoraExcelImportService {
       case "costo chofer" -> "Costo Chofer";
       case "estiba" -> "Estiba";
       case "anticipo" -> "Anticipo";
+      case "aplica retencion 1%" -> "Aplica retencion 1%";
       case "pagado cliente" -> "Pagado cliente";
       case "n° factura" -> "N° Factura";
       case "fecha factura" -> "Fecha factura";

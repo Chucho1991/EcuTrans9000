@@ -107,6 +107,7 @@ public class ViajeBitacoraService {
         .costoChofer(zeroIfNull(request.getCostoChofer()))
         .estiba(zeroIfNull(request.getEstiba()))
         .anticipo(zeroIfNull(request.getAnticipo()))
+        .aplicaRetencion(Boolean.TRUE.equals(request.getAplicaRetencion()))
         .facturadoCliente(Boolean.TRUE.equals(request.getFacturadoCliente()))
         .numeroFactura(clean(request.getNumeroFactura()))
         .fechaFactura(request.getFechaFactura())
@@ -144,6 +145,7 @@ public class ViajeBitacoraService {
     entity.setCostoChofer(zeroIfNull(request.getCostoChofer()));
     entity.setEstiba(zeroIfNull(request.getEstiba()));
     entity.setAnticipo(zeroIfNull(request.getAnticipo()));
+    entity.setAplicaRetencion(Boolean.TRUE.equals(request.getAplicaRetencion()));
     entity.setFacturadoCliente(Boolean.TRUE.equals(request.getFacturadoCliente()));
     entity.setNumeroFactura(clean(request.getNumeroFactura()));
     entity.setFechaFactura(request.getFechaFactura());
@@ -649,6 +651,7 @@ public class ViajeBitacoraService {
         .costoChofer(entity.getCostoChofer())
         .estiba(entity.getEstiba())
         .anticipo(entity.getAnticipo())
+        .aplicaRetencion(Boolean.TRUE.equals(entity.getAplicaRetencion()))
         .facturadoCliente(entity.getFacturadoCliente())
         .numeroFactura(entity.getNumeroFactura())
         .fechaFactura(entity.getFechaFactura())

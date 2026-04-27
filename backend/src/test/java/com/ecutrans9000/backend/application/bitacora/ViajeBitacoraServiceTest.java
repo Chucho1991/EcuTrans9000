@@ -85,6 +85,7 @@ class ViajeBitacoraServiceTest {
         .costoChofer(new BigDecimal("110.00"))
         .estiba(new BigDecimal("10.00"))
         .anticipo(new BigDecimal("25.00"))
+        .aplicaRetencion(true)
         .facturadoCliente(true)
         .numeroFactura("FAC-001")
         .fechaFactura(LocalDate.of(2026, 3, 21))

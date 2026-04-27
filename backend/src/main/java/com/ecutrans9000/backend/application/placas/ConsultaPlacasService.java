@@ -83,8 +83,7 @@ public class ConsultaPlacasService {
       String codigoViaje,
       EstadoPagoChoferFiltro estadoPagoChofer,
       LocalDate fechaDesde,
-      LocalDate fechaHasta,
-      boolean aplicarRetencion) {
+      LocalDate fechaHasta) {
     validateFilters(placa, fechaDesde, fechaHasta);
 
     VehiculoJpaEntity vehiculo = resolveVehiculo(placa);
@@ -94,7 +93,7 @@ public class ConsultaPlacasService {
         estadoPagoChofer == null ? EstadoPagoChoferFiltro.TODOS : estadoPagoChofer,
         fechaDesde,
         fechaHasta);
-    return buildResponse(vehiculo, fechaDesde, fechaHasta, viajes, aplicarRetencion, List.of());
+    return buildResponse(vehiculo, fechaDesde, fechaHasta, viajes, List.of());
   }
 
   @Transactional(readOnly = true)
@@ -104,7 +103,6 @@ public class ConsultaPlacasService {
       EstadoPagoChoferFiltro estadoPagoChofer,
       LocalDate fechaDesde,
       LocalDate fechaHasta,
-      boolean aplicarRetencion,
       List<Long> descuentoIds,
       List<UUID> viajeIds) {
     validateFilters(placa, fechaDesde, fechaHasta);
@@ -117,7 +115,7 @@ public class ConsultaPlacasService {
         fechaDesde,
         fechaHasta), viajeIds);
     List<DescuentoViajeJpaEntity> descuentos = loadSelectedDescuentos(vehiculo, descuentoIds);
-    ConsultaPlacaResponse response = buildResponse(vehiculo, fechaDesde, fechaHasta, viajes, aplicarRetencion, descuentos);
+    ConsultaPlacaResponse response = buildResponse(vehiculo, fechaDesde, fechaHasta, viajes, descuentos);
 
     try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
       XSSFSheet sheet = workbook.createSheet("Consulta Placas");
@@ -195,7 +193,6 @@ public class ConsultaPlacasService {
       LocalDate fechaDesde,
       LocalDate fechaHasta,
       List<ViajeBitacoraJpaEntity> viajes,
-      boolean aplicarRetencion,
       List<DescuentoViajeJpaEntity> descuentos) {
     List<ConsultaPlacaDetalleResponse> registros = viajes.stream()
         .map(this::toDetalleResponse)
@@ -205,9 +202,10 @@ public class ConsultaPlacasService {
     BigDecimal valorBitacoraTotal = scale(sum(viajes, ViajeBitacoraJpaEntity::getValor));
     BigDecimal estibaTotal = scale(sum(viajes, ViajeBitacoraJpaEntity::getEstiba));
     BigDecimal totalDescuentos = scale(sumDescuentos(descuentos));
-    BigDecimal retencion = aplicarRetencion
-        ? scale(valorBitacoraTotal.multiply(ONE_PERCENT))
-        : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+    BigDecimal retencion = scale(viajes.stream()
+        .filter(viaje -> Boolean.TRUE.equals(viaje.getAplicaRetencion()))
+        .map(viaje -> scale(viaje.getValor()).multiply(ONE_PERCENT))
+        .reduce(BigDecimal.ZERO, BigDecimal::add));
     BigDecimal comision = scale(valorFacturaTotal.multiply(SIX_PERCENT));
     BigDecimal anticipos = scale(sum(viajes, ViajeBitacoraJpaEntity::getAnticipo));
     BigDecimal pagoTotal = scale(
@@ -219,7 +217,6 @@ public class ConsultaPlacasService {
             .subtract(retencion));
 
     return ConsultaPlacaResponse.builder()
-        .aplicaRetencion(aplicarRetencion)
         .placa(vehiculo.getPlaca())
         .chofer(vehiculo.getChoferDefault())
         .fechaDesde(fechaDesde)
@@ -247,6 +244,7 @@ public class ConsultaPlacasService {
         .factura(cleanTextOrDash(viaje.getNumeroFactura()))
         .anticipo(scale(viaje.getAnticipo()))
         .estiba(scale(viaje.getEstiba()))
+        .aplicaRetencion(Boolean.TRUE.equals(viaje.getAplicaRetencion()))
         .despacho(cleanTextOrDash(viaje.getDetalleViaje()))
         .cliente(preferredClientName(cliente))
         .origenDestino(cleanTextOrDash(viaje.getDestino()))
@@ -298,6 +296,7 @@ public class ConsultaPlacasService {
         "Factura",
         "Anticipos",
         "Estiba",
+        "Aplica retencion 1%",
         "Despacho",
         "Cliente",
         "Origen - Destino",
@@ -319,10 +318,11 @@ public class ConsultaPlacasService {
       writeTextCell(row, 4, registro.getFactura(), styles.centerCell);
       writeMoneyCell(row, 5, registro.getAnticipo(), styles.moneyCell);
       writeMoneyCell(row, 6, registro.getEstiba(), styles.moneyCell);
-      writeTextCell(row, 7, registro.getDespacho(), styles.textCell);
-      writeTextCell(row, 8, registro.getCliente(), styles.textCell);
-      writeTextCell(row, 9, registro.getOrigenDestino(), styles.textCell);
-      writeTextCell(row, 10, Boolean.TRUE.equals(registro.getPagadoTransportista()) ? "Pagado" : "Pendiente", styles.centerCell);
+      writeTextCell(row, 7, Boolean.TRUE.equals(registro.getAplicaRetencion()) ? "SI" : "NO", styles.centerCell);
+      writeTextCell(row, 8, registro.getDespacho(), styles.textCell);
+      writeTextCell(row, 9, registro.getCliente(), styles.textCell);
+      writeTextCell(row, 10, registro.getOrigenDestino(), styles.textCell);
+      writeTextCell(row, 11, Boolean.TRUE.equals(registro.getPagadoTransportista()) ? "Pagado" : "Pendiente", styles.centerCell);
     }
 
     if (registros.isEmpty()) {
@@ -490,7 +490,7 @@ public class ConsultaPlacasService {
   }
 
   private void configureColumns(XSSFSheet sheet) {
-    int[] widths = {20, 15, 15, 16, 14, 14, 14, 16, 24, 30, 16};
+    int[] widths = {20, 15, 15, 16, 14, 14, 14, 20, 16, 24, 30, 16};
     for (int i = 0; i < widths.length; i++) {
       sheet.setColumnWidth(i, widths[i] * 256);
     }

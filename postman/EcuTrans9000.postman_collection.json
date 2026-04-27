@@ -1334,7 +1334,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"numeroViaje\": 9999,\n  \"fechaViaje\": \"2026-03-02\",\n  \"vehiculoId\": \"{{targetVehiculoId}}\",\n  \"clienteId\": \"{{targetClienteId}}\",\n  \"destino\": \"UIO - GYE\",\n  \"detalleViaje\": \"ENTREGA PROGRAMADA\",\n  \"valor\": 150,\n  \"costoChofer\": 110,\n  \"estiba\": 15,\n  \"anticipo\": 25,\n  \"facturadoCliente\": true,\n  \"numeroFactura\": \"FAC-9999\",\n  \"fechaFactura\": \"2026-03-03\",\n  \"fechaPagoCliente\": \"2026-03-05\",\n  \"pagadoTransportista\": false,\n  \"observaciones\": \"Registro de prueba Postman\"\n}"
+              "raw": "{\n  \"numeroViaje\": 9999,\n  \"fechaViaje\": \"2026-03-02\",\n  \"vehiculoId\": \"{{targetVehiculoId}}\",\n  \"clienteId\": \"{{targetClienteId}}\",\n  \"destino\": \"UIO - GYE\",\n  \"detalleViaje\": \"ENTREGA PROGRAMADA\",\n  \"valor\": 150,\n  \"costoChofer\": 110,\n  \"estiba\": 15,\n  \"anticipo\": 25,\n  \"aplicaRetencion\": true,\n  \"facturadoCliente\": true,\n  \"numeroFactura\": \"FAC-9999\",\n  \"fechaFactura\": \"2026-03-03\",\n  \"fechaPagoCliente\": \"2026-03-05\",\n  \"pagadoTransportista\": false,\n  \"observaciones\": \"Registro de prueba Postman\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/bitacora/viajes",
@@ -1417,7 +1417,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"numeroViaje\": 9999,\n  \"fechaViaje\": \"2026-03-02\",\n  \"vehiculoId\": \"{{targetVehiculoId}}\",\n  \"clienteId\": \"{{targetClienteId}}\",\n  \"destino\": \"UIO - CUENCA\",\n  \"detalleViaje\": \"ACTUALIZACION POSTMAN\",\n  \"valor\": 180,\n  \"costoChofer\": 125,\n  \"estiba\": 20,\n  \"anticipo\": 30,\n  \"facturadoCliente\": false,\n  \"numeroFactura\": \"\",\n  \"fechaFactura\": null,\n  \"fechaPagoCliente\": null,\n  \"pagadoTransportista\": true,\n  \"observaciones\": \"Actualizado desde Postman\"\n}"
+              "raw": "{\n  \"numeroViaje\": 9999,\n  \"fechaViaje\": \"2026-03-02\",\n  \"vehiculoId\": \"{{targetVehiculoId}}\",\n  \"clienteId\": \"{{targetClienteId}}\",\n  \"destino\": \"UIO - CUENCA\",\n  \"detalleViaje\": \"ACTUALIZACION POSTMAN\",\n  \"valor\": 180,\n  \"costoChofer\": 125,\n  \"estiba\": 20,\n  \"anticipo\": 30,\n  \"aplicaRetencion\": false,\n  \"facturadoCliente\": false,\n  \"numeroFactura\": \"\",\n  \"fechaFactura\": null,\n  \"fechaPagoCliente\": null,\n  \"pagadoTransportista\": true,\n  \"observaciones\": \"Actualizado desde Postman\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/bitacora/viajes/{{targetBitacoraId}}",
@@ -2740,7 +2740,7 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/placas/consulta?placa=PAE4249&codigoViaje=120&estadoPagoChofer=NO_PAGADOS&fechaDesde=2026-01-01&fechaHasta=2026-12-31&aplicarRetencion=true",
+              "raw": "{{baseUrl}}/api/placas/consulta?placa=PAE4249&codigoViaje=120&estadoPagoChofer=NO_PAGADOS&fechaDesde=2026-01-01&fechaHasta=2026-12-31",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2769,10 +2769,6 @@
                 {
                   "key": "fechaHasta",
                   "value": "2026-12-31"
-                },
-                {
-                  "key": "aplicarRetencion",
-                  "value": "true"
                 }
               ]
             }
@@ -2794,7 +2790,7 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/placas/consulta/export?placa=PAE4249&codigoViaje=120&estadoPagoChofer=NO_PAGADOS&fechaDesde=2026-01-01&fechaHasta=2026-12-31&aplicarRetencion=true&descuentoIds=1&descuentoIds=2&viajeIds=11111111-1111-1111-1111-111111111111",
+              "raw": "{{baseUrl}}/api/placas/consulta/export?placa=PAE4249&codigoViaje=120&estadoPagoChofer=NO_PAGADOS&fechaDesde=2026-01-01&fechaHasta=2026-12-31&descuentoIds=1&descuentoIds=2&viajeIds=11111111-1111-1111-1111-111111111111",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2824,10 +2820,6 @@
                 {
                   "key": "fechaHasta",
                   "value": "2026-12-31"
-                },
-                {
-                  "key": "aplicarRetencion",
-                  "value": "true"
                 },
                 {
                   "key": "descuentoIds",

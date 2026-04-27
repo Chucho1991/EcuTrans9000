@@ -95,8 +95,9 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - Exportación Excel
 - Importación masiva con plantilla
 - Campo obligatorio `costoChofer` en creación, edición e importación Excel
+- Campo obligatorio `aplicaRetencion` para marcar por viaje si corresponde retención del 1% sobre el valor de bitácora
 - Si el cliente seleccionado tiene tabla de equivalencia, el formulario cambia `Destino` a selección por opciones y autocompleta `valor` y `costoChofer`
-- En la plantilla de importación, la columna `E` (`Documento cliente`) se genera con formato texto para conservar ceros a la izquierda y documentos numéricos largos
+- En la plantilla de importación, la columna `E` (`Documento cliente`) se genera con formato texto para conservar ceros a la izquierda y documentos numéricos largos, e incluye la columna `Aplica retencion 1%`
 - Formularios de creación y edición presentados en popup modal del template
 
 ### Módulo Descuentos de viajes (`/api/descuentos-viajes`)
@@ -110,12 +111,12 @@ El backend asegura un usuario `SUPERADMINISTRADOR` al iniciar:
 - El acceso operativo para roles distintos de `SUPERADMINISTRADOR` se habilita desde `settings/module-access`
 
 ### Módulo Placas (`/api/placas`)
-- Consulta financiera con placa/chofer obligatorio, fechas inicio-fin obligatorias, filtro de estado de pago al chofer y filtro para aplicar o no retención del 1%
+- Consulta financiera con placa/chofer obligatorio, fechas inicio-fin obligatorias y filtro de estado de pago al chofer
 - Soporta selección de descuentos activos por motivo para el chofer asociado a la placa
 - La exportación Excel permite incluir solo los viajes marcados y aplicar los descuentos seleccionados
-- La tabla y el Excel muestran `valor viaje`, `valor chofer` y `estiba` por cada registro seleccionado
+- La tabla y el Excel muestran `valor viaje`, `valor chofer`, `estiba` y si el viaje aplica retención del 1% por cada registro seleccionado
 - Resultados de consulta ordenados por número de bitácora (`numeroViaje`) de forma descendente
-- Fórmula vigente del resumen: `valor consulta = costoChofer`, `comision = 6% del valor consulta`, `retencion 1% = 1% del valor de bitácora cuando aplica`, `total = valor consulta + estiba - descuentos - comision - anticipos - retencion`
+- Fórmula vigente del resumen: `valor consulta = costoChofer`, `comision = 6% del valor consulta`, `retencion 1% = suma del 1% del valor de bitácora solo en viajes con aplicaRetencion=true`, `total = valor consulta + estiba - descuentos - comision - anticipos - retencion`
 - Exportación financiera por placa
 
 ## Soft delete y auditoría

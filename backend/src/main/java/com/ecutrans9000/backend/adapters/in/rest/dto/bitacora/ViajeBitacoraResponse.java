@@ -36,6 +36,7 @@ public class ViajeBitacoraResponse {
   private BigDecimal costoChofer;
   private BigDecimal estiba;
   private BigDecimal anticipo;
+  private Boolean aplicaRetencion;
   private Boolean facturadoCliente;
   private String numeroFactura;
   private LocalDate fechaFactura;

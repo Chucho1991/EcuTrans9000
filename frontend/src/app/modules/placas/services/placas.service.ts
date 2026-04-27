@@ -13,6 +13,7 @@ export interface ConsultaPlacaDetalleResponse {
   factura: string;
   anticipo: number;
   estiba: number;
+  aplicaRetencion: boolean;
   despacho: string;
   cliente: string;
   origenDestino: string;
@@ -20,7 +21,6 @@ export interface ConsultaPlacaDetalleResponse {
 }
 
 export interface ConsultaPlacaResponse {
-  aplicaRetencion: boolean;
   placa: string | null;
   chofer: string | null;
   fechaDesde: string | null;
@@ -45,13 +45,11 @@ export class PlacasService {
     estadoPagoChofer?: string;
     fechaDesde: string;
     fechaHasta: string;
-    aplicarRetencion: boolean;
   }): Observable<ConsultaPlacaResponse> {
     let httpParams = new HttpParams()
       .set('placa', params.placa)
       .set('fechaDesde', params.fechaDesde)
-      .set('fechaHasta', params.fechaHasta)
-      .set('aplicarRetencion', params.aplicarRetencion);
+      .set('fechaHasta', params.fechaHasta);
 
     if (params.codigoViaje) {
       httpParams = httpParams.set('codigoViaje', params.codigoViaje);
@@ -69,15 +67,13 @@ export class PlacasService {
     estadoPagoChofer?: string;
     fechaDesde: string;
     fechaHasta: string;
-    aplicarRetencion: boolean;
     descuentoIds?: number[];
     viajeIds?: string[];
   }): Observable<Blob> {
     let httpParams = new HttpParams()
       .set('placa', params.placa)
       .set('fechaDesde', params.fechaDesde)
-      .set('fechaHasta', params.fechaHasta)
-      .set('aplicarRetencion', params.aplicarRetencion);
+      .set('fechaHasta', params.fechaHasta);
 
     if (params.codigoViaje) {
       httpParams = httpParams.set('codigoViaje', params.codigoViaje);
